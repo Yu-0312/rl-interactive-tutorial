@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 11 · Inverse RL — Interactive RL</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="11">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#irl">What is IRL?</a>
+      <a href="#pipeline">Classic IRL</a>
+      <a href="#pref">Learning from preferences</a>
+      <a href="#rlhf">RLHF pipeline</a>
+      <a href="#pitfalls">Pitfalls</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">Week 11</div>
+      <h1>Inverse Reinforcement Learning</h1>
+      <p>
+        Forward RL: reward → optimal policy. <strong>IRL</strong>: demonstrations or preferences →
+        recover a reward that <em>explains</em> the behavior, then (optionally) optimize it.
+      </p>
+
+      <h2 id="irl">Problem statement</h2>
+      <p>Given expert trajectories τ<sub>E</sub>, find R such that expert is (near-)optimal under R.</p>
+      <ul>
+        <li>Reward is only identifiable up to shaping potentials and constants.</li>
+        <li>Many rewards rationalize the same policy — need priors / regularization.</li>
+      </ul>
+
+      <h2 id="pipeline">Classic algorithms</h2>
+      <ul>
+        <li><strong>MaxEnt IRL</strong>: match feature expectations under a soft-optimal distribution.</li>
+        <li><strong>Apprenticeship learning</strong>: match feature counts; game with RL oracle.</li>
+        <li><strong>GAIL / AIRL</strong>: adversarial imitation — discriminate expert vs agent states/actions.</li>
+      </ul>
+      <div class="callout tip">
+        <strong>Imitation vs IRL.</strong> Behavioral cloning maps states → actions and suffers
+        compounding error. IRL/IL methods use on-policy rollouts to correct distribution shift (DAgger family).
+      </div>
+
+      <h2 id="pref">Deep RL from human preferences</h2>
+      <p>
+        Instead of full demonstrations, show a human two trajectory clips and ask which is better.
+        Fit a preference model (e.g. Bradley–Terry on a learned reward $\hat{R}_\psi$):
+      </p>
+      <div class="formula">P(τ¹ ≻ τ²) = σ( Σ t̂ r<sub>ψ</sub>(s,a)<sub>t¹</sub> − Σ t̂ r<sub>ψ</sub>(s,a)<sub>t²</sub> )</div>
+      <p>Then run RL against $\hat{R}_\psi$.</p>
+
+      <h2 id="rlhf">RLHF at a glance (LLMs)</h2>
+      <ol>
+        <li><strong>SFT</strong>: supervised fine-tune on high-quality answers.</li>
+        <li><strong>Reward model</strong>: train on pairwise human/AI preference labels.</li>
+        <li><strong>RL (PPO / DPO variants)</strong>: optimize policy against RM with KL to SFT reference.</li>
+      </ol>
+
+      <h2 id="pitfalls">Pitfalls</h2>
+      <ul>
+        <li><strong>Reward hacking</strong>: agent exploits RM errors (Goodhart).</li>
+        <li><strong>Preference noise</strong>: labelers disagree; need ensembles / uncertainty.</li>
+        <li><strong>Distribution shift</strong>: RM only trained on seen policy regions.</li>
+        <li><strong>Sycophancy / over-optimization</strong>: KL and early stopping matter.</li>
+      </ul>
+
+      <div class="quiz" data-answer="1" data-ok="Correct — IRL infers reward from behavior/preferences, then (often) runs RL." data-no="IRL is the reverse direction of standard RL.">
+        <h3>Quick check</h3>
+        <div class="q">What does IRL recover?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">The exact environment transition kernel P</button>
+          <button class="quiz-opt">A reward function that explains expert behavior</button>
+          <button class="quiz-opt">A tabular value function without a policy</button>
+          <button class="quiz-opt">Only the discount factor γ</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="10-actor-critic.html"><span class="dir">← Previous</span><span class="title">Week 10 · Actor-Critic</span></a>
+        <a href="12-multi-agent.html"><span class="dir">Next</span><span class="title">Week 12 · Multi-agent</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>

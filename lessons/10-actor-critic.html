@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 10 · Actor-Critic — Interactive RL</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="10">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#ac">Actor-Critic pattern</a>
+      <a href="#ddpg">DDPG</a>
+      <a href="#td3">TD3 fixes</a>
+      <a href="#sac">SAC &amp; REDQ</a>
+      <a href="#demo">TD3 vs naive DDPG</a>
+      <a href="#select">Choosing an algorithm</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">Week 10 · Interactive</div>
+      <h1>Policy Search III: Actor-Critic</h1>
+      <p>
+        Combine a policy (actor) with a learned value function (critic). For
+        <strong>continuous control</strong>, deterministic policy gradient methods — DDPG, TD3 —
+        and maximum-entropy methods — SAC — dominate.
+      </p>
+
+      <h2 id="ac">Pattern</h2>
+      <ul>
+        <li><strong>Actor</strong> π<sub>θ</sub>(s) → action (deterministic or Gaussian).</li>
+        <li><strong>Critic</strong> Q<sub>φ</sub>(s,a) → estimate of return.</li>
+        <li>Critic trained by TD; actor trained by ∇<sub>θ</sub> Q(s, π<sub>θ</sub>(s)).</li>
+      </ul>
+
+      <h2 id="ddpg">DDPG</h2>
+      <p>Deep Deterministic Policy Gradient — “DQN for continuous actions”:</p>
+      <ul>
+        <li>Replay buffer + target networks for actor and critic.</li>
+        <li>Exploration via OU / Gaussian action noise.</li>
+        <li>Actor maximizes Q(s, μ(s)).</li>
+      </ul>
+      <div class="formula">∇<sub>θ</sub> J ≈ 𝔼[ ∇<sub>θ</sub> μ(s) ∇<sub>a</sub> Q(s,a)|<sub>a=μ(s)</sub> ]</div>
+
+      <h2 id="td3">TD3 — Twin Delayed DDPG</h2>
+      <ol>
+        <li><strong>Twin critics</strong>: take min of two Q targets (underestimation bias).</li>
+        <li><strong>Delayed policy updates</strong>: update actor less often than critic.</li>
+        <li><strong>Target policy smoothing</strong>: add clipped noise to target actions.</li>
+      </ol>
+      <div class="formula">y = r + γ min<sub>i=1,2</sub> Q<sub>φ'<sub>i</sub></sub>(s', π<sub>θ'</sub>(s') + ε)</div>
+
+      <h2 id="sac">SAC &amp; REDQ</h2>
+      <p>
+        <strong>Soft Actor-Critic</strong> maximizes reward <em>and</em> entropy:
+        $J = \mathbb{E}[ r + \alpha \mathcal{H}(\pi(\cdot|s)) ]$.
+      </p>
+      <ul>
+        <li>Stochastic Gaussian policy; automatic entropy temperature α.</li>
+        <li>Robust exploration without hand-tuned action noise.</li>
+        <li><strong>REDQ</strong>: use a large critic ensemble and a random subset min for extreme sample efficiency.</li>
+      </ul>
+
+      <h2 id="demo">Interactive: why twin critics matter</h2>
+      <p>
+        Toy landscape: the critic overestimates one region more than another. Using
+        <strong>min(Q1,Q2)</strong> yields a less optimistic (more reliable) action choice.
+      </p>
+      <div class="demo">
+        <div class="demo-head">
+          <h3><span class="badge">Interactive</span> Critic ensemble min</h3>
+          <div class="controls">
+            <label>Noise scale
+              <input type="range" id="ac-noise" min="0" max="1" step="0.05" value="0.5" />
+              <span id="ac-noise-v">0.50</span>
+            </label>
+            <button class="btn btn-primary btn-sm" id="ac-sample">Resample critics</button>
+            <label><input type="checkbox" id="ac-min" checked /> use min(Q1,Q2)</label>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="ac-canvas" width="640" height="280"></canvas>
+        </div>
+        <div class="demo-stats">
+          <div class="stat"><span class="k">argmax action</span><span class="v" id="ac-arg">—</span></div>
+          <div class="stat"><span class="k">true Q at argmax</span><span class="v" id="ac-true">—</span></div>
+          <div class="stat"><span class="k">regret vs optimal</span><span class="v" id="ac-regret">—</span></div>
+        </div>
+      </div>
+
+      <h2 id="select">Choosing an algorithm</h2>
+      <table class="cmp">
+        <thead><tr><th>Method</th><th>Action</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>PPO</td><td>Discrete / continuous</td><td>Great default, on-policy</td></tr>
+          <tr><td>TD3</td><td>Continuous</td><td>Strong off-policy baseline</td></tr>
+          <tr><td>SAC</td><td>Continuous</td><td>Stochastic, sample efficient</td></tr>
+          <tr><td>DQN/Rainbow</td><td>Discrete</td><td>Atari-style</td></tr>
+        </tbody>
+      </table>
+
+      <div class="quiz" data-answer="1" data-ok="Correct — TD3’s min of twin critics reduces Q overestimation." data-no="TD3 = Twin critics + Delayed actor + Target smoothing.">
+        <h3>Quick check</h3>
+        <div class="q">Which TD3 trick directly counters overestimation bias?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">Target policy smoothing only</button>
+          <button class="quiz-opt">Clipped double Q-learning (min of two critics)</button>
+          <button class="quiz-opt">Larger replay capacity</button>
+          <button class="quiz-opt">Higher learning rate for the actor</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="07-policy-gradient.html"><span class="dir">← Previous</span><span class="title">Week 7 · Policy gradient</span></a>
+        <a href="11-irl.html"><span class="dir">Next</span><span class="title">Week 11 · Inverse RL</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script src="../js/ac-viz.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>

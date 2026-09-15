@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 6 · Gradient-Free Policy Search — Interactive RL</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="6">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#idea">Black-box optimization</a>
+      <a href="#ga">Evolution strategies / ERL</a>
+      <a href="#cem">CEM &amp; CEM-RL</a>
+      <a href="#tradeoffs">Trade-offs</a>
+      <a href="#when">When to use</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">Week 6</div>
+      <h1>Policy Search I: Gradient-Free Optimization</h1>
+      <p>
+        Treat the policy π<sub>θ</sub> as a black box. Sample parameter perturbations, evaluate
+        returns, and update θ using only fitness — <strong>no backprop through dynamics</strong>.
+      </p>
+
+      <h2 id="idea">The generic loop</h2>
+      <ol>
+        <li>Sample population {θ<sub>i</sub>} around current θ.</li>
+        <li>Roll out each policy; record return J(θ<sub>i</sub>).</li>
+        <li>Update θ toward high-return samples (weighted average, CEM elite set, ES gradient).</li>
+        <li>Repeat.</li>
+      </ol>
+      <div class="formula">ES gradient (OpenAI ES): ∇J ≈ (1/nσ) Σᵢ J(θ+σεᵢ) εᵢ &nbsp; with εᵢ ~ 𝒩(0, I)</div>
+
+      <h2 id="ga">ERL — Evolutionary + RL hybrids</h2>
+      <p>
+        <strong>Evolutionary Reinforcement Learning</strong> typically combines a population of
+        actors with a critic (or uses evolution to discover policies that seed RL). Ideas:
+      </p>
+      <ul>
+        <li>Evolution explores globally; RL fine-tunes locally with gradients.</li>
+        <li>Population maintains diversity → better exploration than a single ε schedule.</li>
+        <li>Parallel rollouts map well to many CPU workers.</li>
+      </ul>
+
+      <h2 id="cem">CEM &amp; CEM-RL</h2>
+      <p><strong>Cross-Entropy Method</strong>:</p>
+      <ol>
+        <li>Sample θ from a Gaussian (μ, Σ).</li>
+        <li>Keep top-k elites (quantile).</li>
+        <li>Refit μ, Σ to elites; optionally inject uniform noise for diversity.</li>
+      </ol>
+      <p>
+        <strong>CEM-RL</strong> (Ma et al.) alternates CEM generations with actor-critic gradient
+        steps — e.g. half the population trained by CEM selection, half by PPO/TD3 updates.
+      </p>
+
+      <div class="callout tip">
+        <strong>Why gradients still win in many labs.</strong> ES needs many more episodes for
+        high-dimensional nets, but is massively parallel and derivative-free (robust to
+        non-differentiable envs, sparse rewards, or noisy simulators).
+      </div>
+
+      <h2 id="tradeoffs">Comparison</h2>
+      <table class="cmp">
+        <thead><tr><th></th><th>Gradient-free (ES/CEM)</th><th>Policy gradient (next weeks)</th></tr></thead>
+        <tbody>
+          <tr><td>Needs differentiable π</td><td>No</td><td>Yes</td></tr>
+          <tr><td>Sample efficiency</td><td>Often lower</td><td>Higher (with advantage / GAE)</td></tr>
+          <tr><td>Parallelism</td><td>Excellent</td><td>Good (vector envs)</td></tr>
+          <tr><td>Local optima</td><td>Population helps</td><td>Single policy, careful seeds</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="when">When to choose gradient-free</h2>
+      <ul>
+        <li>Simulators with contact discontinuities or non-diff physics.</li>
+        <li>You have huge parallel compute and moderate action dim.</li>
+        <li>Hybrid use: evolve a population, then distill into one actor for deployment.</li>
+      </ul>
+
+      <div class="quiz" data-answer="0" data-ok="Correct — ES estimates a gradient from random perturbations and their returns." data-no="Gradient-free methods still update parameters; they just never backprop through the env.">
+        <h3>Quick check</h3>
+        <div class="q">How does OpenAI-style ES update weights?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">Weighted sum of random noise vectors times their returns</button>
+          <button class="quiz-opt">Backprop of TD error through the Q-network only</button>
+          <button class="quiz-opt">Exact gradient of the environment dynamics</button>
+          <button class="quiz-opt">No parameter update — only action noise</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="05-deep-rl.html"><span class="dir">← Previous</span><span class="title">Week 5 · DQN</span></a>
+        <a href="07-policy-gradient.html"><span class="dir">Next</span><span class="title">Week 7 · REINFORCE &amp; PPO</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>

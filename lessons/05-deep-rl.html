@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 5 · DQN & Rainbow — Interactive RL</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="5">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#dqn">DQN ingredients</a>
+      <a href="#algorithm">Algorithm</a>
+      <a href="#rainbow">Rainbow components</a>
+      <a href="#demo">Target / replay intuition</a>
+      <a href="#practice">Practice checklist</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">Week 5 · Interactive</div>
+      <h1>Deep Reinforcement Learning: DQN &amp; Rainbow</h1>
+      <p>
+        Replace linear FA with a <strong>deep network</strong> $Q(s,a;\theta)$ and stabilize learning
+        with two tricks that made Atari possible: <strong>experience replay</strong> and a
+        <strong>target network</strong>.
+      </p>
+
+      <h2 id="dqn">Why naive deep Q fails</h2>
+      <ul>
+        <li>Correlated consecutive samples break SGD assumptions.</li>
+        <li>Bootstrapped targets move as θ moves → oscillation / divergence (deadly triad).</li>
+      </ul>
+
+      <h2 id="algorithm">DQN update</h2>
+      <div class="formula">y = R + γ max<sub>a'</sub> Q(S', a'; θ⁻)  &nbsp;&nbsp;(θ⁻ = frozen target weights)</div>
+      <div class="formula">Loss = ( Q(S,A; θ) − y )²</div>
+      <p>
+        Store transitions $(s,a,r,s',done)$ in a replay buffer; sample minibatches; periodically
+        copy $\theta \leftarrow \theta^-$.
+      </p>
+
+      <div class="callout tip">
+        <strong>Double DQN</strong> reduces overestimation: select $a^* = \arg\max_{a'} Q(s',a';\theta)$
+        but evaluate with $Q(s', a^*; \theta^-)$.
+      </div>
+
+      <h2 id="rainbow">Rainbow: combining improvements</h2>
+      <table class="cmp">
+        <thead><tr><th>Component</th><th>Idea</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>DQN</td><td>Replay + target net</td><td>Baseline deep Q</td></tr>
+          <tr><td>Double Q</td><td>Decouple action select/eval</td><td>Less overestimation</td></tr>
+          <tr><td>Prioritized replay</td><td>Sample high-|TD| more often</td><td>Sample efficiency</td></tr>
+          <tr><td>Dueling</td><td>Split V(s) and A(s,a)</td><td>Better value learning</td></tr>
+          <tr><td>Multi-step</td><td>n-step returns</td><td>Faster credit, less bias/true bias trade</td></tr>
+          <tr><td>Noisy nets</td><td>Learnable noise on weights</td><td>State-dependent exploration</td></tr>
+          <tr><td>C51 distributional</td><td>Model Z(s,a), not just E[Z]</td><td>Richer targets, stability</td></tr>
+        </tbody>
+      </table>
+      <p>Rainbow (Hessel et al., 2018) shows the combination beats each part alone on Atari.</p>
+
+      <h2 id="demo">Interactive: target lag vs bootstrap noise</h2>
+      <p>
+        A toy 1D chain. The agent learns $Q$ toward a distant reward. Toggle “target lag” to see
+        how frozen targets smooth the learning curve.
+      </p>
+      <div class="demo">
+        <div class="demo-head">
+          <h3><span class="badge">Interactive</span> Target network effect</h3>
+          <div class="controls">
+            <label>Target lag
+              <select id="dqn-lag">
+                <option value="1">None (every step)</option>
+                <option value="10" selected>Sync every 10 steps</option>
+                <option value="50">Sync every 50 steps</option>
+              </select>
+            </label>
+            <label>γ <input type="range" id="dqn-gamma" min="0.8" max="0.99" step="0.01" value="0.97" /> <span id="dqn-gamma-v">0.97</span></label>
+            <button class="btn btn-primary btn-sm" id="dqn-run">Train</button>
+            <button class="btn btn-ghost btn-sm" id="dqn-reset">Reset</button>
+          </div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="dqn-canvas" width="640" height="280"></canvas>
+        </div>
+        <div class="demo-stats">
+          <div class="stat"><span class="k">Steps</span><span class="v" id="dqn-steps">0</span></div>
+          <div class="stat"><span class="k">Q(s0, right)</span><span class="v" id="dqn-q0">—</span></div>
+          <div class="stat"><span class="k">TD |err| avg</span><span class="v" id="dqn-td">—</span></div>
+        </div>
+      </div>
+
+      <h2 id="practice">DQN engineering checklist</h2>
+      <ul>
+        <li>Frame stack (4) + max-pool over 2 frames for Atari.</li>
+        <li>Huber loss; gradient clip.</li>
+        <li>ε-greedy with linear decay; eval with ε=0.01.</li>
+        <li>Log return, Q-mean, buffer size, and seed.</li>
+      </ul>
+
+      <div class="quiz" data-answer="1" data-ok="Yes — the target network freezes θ⁻ so the regression target is more stationary." data-no="Replay decorrelates samples; the target net stabilizes the target.">
+        <h3>Quick check</h3>
+        <div class="q">Primary role of the target network?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">Increase exploration via noise</button>
+          <button class="quiz-opt">Stabilize bootstrap targets by freezing recent weights</button>
+          <button class="quiz-opt">Replace the need for a discount factor</button>
+          <button class="quiz-opt">Compress the replay buffer</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="04-function-approx.html"><span class="dir">← Previous</span><span class="title">Week 4 · Function Approx.</span></a>
+        <a href="06-policy-search-1.html"><span class="dir">Next</span><span class="title">Week 6 · Gradient-free search</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script src="../js/dqn-toy.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>

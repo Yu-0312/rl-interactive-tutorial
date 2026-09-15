@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 1 · Course Overview — Interactive RL</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="1">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#goals">Goals</a>
+      <a href="#setup">Environment setup</a>
+      <a href="#roadmap">Course roadmap</a>
+      <a href="#tooling">Tooling</a>
+      <a href="#checklist">First-week checklist</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">Week 1</div>
+      <h1>Course Overview &amp; Environment Settings</h1>
+      <p>
+        This interactive tutorial mirrors a full-semester Reinforcement Learning course.
+        Week 1 is about setting the mental model, the software stack, and the habits that make
+        later weeks productive.
+      </p>
+
+      <h2 id="goals">Learning goals</h2>
+      <ul>
+        <li>Explain the <strong>agent–environment loop</strong> and why RL differs from supervised learning.</li>
+        <li>Define an <strong>MDP</strong>: $(S, A, P, R, \gamma)$ and the return $G_t$.</li>
+        <li>Set up a working Python RL environment (Gymnasium + NumPy, optional PyTorch).</li>
+        <li>Know the course arc: exact DP → model-free TD → function approximation → deep RL → policy search → advanced topics.</li>
+      </ul>
+
+      <div class="callout tip">
+        <strong>Study tip.</strong> Keep a single notebook (or repo) for every week: algorithm name,
+        update equation, one-sentence intuition, and a link to your runnable script. That becomes
+        your term-project reference kit.
+      </div>
+
+      <h2 id="setup">Environment settings</h2>
+      <p>Recommended stack (Python 3.10+):</p>
+<pre><code># create venv / conda env first, then:
+pip install gymnasium numpy matplotlib
+pip install torch          # for deep RL weeks (5, 7, 10)
+pip install jupyterlab     # optional notebooks
+
+# smoke test
+python -c "import gymnasium as gym; print(gym.make('CliffWalking-v0'))"</code></pre>
+
+      <table class="cmp">
+        <thead>
+          <tr><th>Component</th><th>Why</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Gymnasium</td><td>Standard env API</td><td>Prefer <code>CliffWalking</code>, <code>FrozenLake</code>, <code>CartPole</code></td></tr>
+          <tr><td>NumPy</td><td>Tabular algorithms</td><td>Enough for Weeks 2–4</td></tr>
+          <tr><td>PyTorch</td><td>DQN / PPO / SAC</td><td>GPU optional; CPU fine for small nets</td></tr>
+          <tr><td>Seaborn/Matplotlib</td><td>Learning curves</td><td>Always plot mean ± std over seeds</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="roadmap">Course roadmap</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Exact &amp; tabular</h3>
+          <p>Weeks 2–3: you can prove things converge. Small state spaces. Best place to build intuition about bootstrapping and exploration.</p>
+        </div>
+        <div class="card">
+          <h3>Approximation &amp; deep RL</h3>
+          <p>Weeks 4–5: generalize across states with linear FA and neural nets. Replay, targets, and stability become the main engineering concerns.</p>
+        </div>
+        <div class="card">
+          <h3>Policy optimization</h3>
+          <p>Weeks 6–7, 10: black-box search, REINFORCE, PPO, and actor-critic. Dominant methods for continuous control.</p>
+        </div>
+        <div class="card">
+          <h3>Frontiers &amp; projects</h3>
+          <p>Weeks 11–14: preferences, multi-agent, model-based efficiency, experiment design. Then your term project takes center stage.</p>
+        </div>
+      </div>
+
+      <h2 id="tooling">Repo / tooling conventions</h2>
+      <ul>
+        <li><strong>One algorithm per file</strong>: <code>q_learning.py</code>, <code>ppo.py</code>, …</li>
+        <li><strong>Config as data</strong>: put α, ε, γ, network sizes in a dict or argparse — never hard-code in the loop.</li>
+        <li><strong>Seeds</strong>: expose <code>seed</code> and log it. RL results without seeds are anecdotes.</li>
+        <li><strong>Checkpoints</strong>: save best eval return, not just last weights.</li>
+      </ul>
+
+      <h2 id="checklist">First-week checklist</h2>
+      <ol>
+        <li>Install Gymnasium and run <code>FrozenLake-v1</code> for 10 random episodes.</li>
+        <li>Write the return formula $G_t = \sum_{k=0}^\infty \gamma^k R_{t+k+1}$ and explain γ in one sentence.</li>
+        <li>Skim the interactive demos in Weeks 2–3 — run Value Iteration until the policy stops changing.</li>
+        <li>Write a 5-line project idea (optional this early; refine in Weeks 8–9).</li>
+      </ol>
+
+      <div class="quiz" data-answer="1" data-ok="Exactly — RL optimizes cumulative reward under uncertainty, not a fixed supervised loss." data-no="Think sequential decision-making and delayed reward.">
+        <h3>Quick check</h3>
+        <div class="q">What is the core objective in RL?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">Minimize prediction error on a fixed i.i.d. dataset</button>
+          <button class="quiz-opt">Maximize expected discounted return from an agent’s interactions</button>
+          <button class="quiz-opt">Classify states into discrete labels</button>
+          <button class="quiz-opt">Reconstruct the environment dynamics exactly</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="../index.html"><span class="dir">← Hub</span><span class="title">Syllabus</span></a>
+        <a href="02-introduction.html"><span class="dir">Next</span><span class="title">Week 2 · DP Algorithms</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>

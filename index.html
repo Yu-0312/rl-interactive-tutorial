@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interactive Reinforcement Learning Course</title>
+  <meta name="description" content="An interactive, week-by-week Reinforcement Learning tutorial covering DP, TD, DQN, policy gradients, actor-critic, multi-agent RL, and more." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body data-lesson="0">
+  <header class="topnav" id="topnav"></header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero-kicker">Interactive Tutorial · 18 Weeks</div>
+      <h1>Reinforcement Learning, made hands-on</h1>
+      <p class="lede">
+        A detailed, interactive companion to a full RL course: from Policy Iteration and Q-learning
+        to Rainbow, PPO, MADDPG, and model-based methods. Each core lesson includes a live demo,
+        pseudocode, and a short quiz so you learn by running algorithms — not just reading them.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="lessons/02-introduction.html">Start with Dynamic Programming</a>
+        <a class="btn btn-ghost" href="#syllabus">Browse syllabus</a>
+        <a class="btn btn-ghost" href="lessons/01-overview.html">Course overview</a>
+      </div>
+    </section>
+
+    <section class="section" id="progress">
+      <div class="section-head">
+        <div>
+          <h2>Your progress</h2>
+          <p>Stored locally in this browser. No account needed.</p>
+        </div>
+        <div style="min-width:220px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;font-size:0.85rem;color:var(--ink-muted)">
+            <span>Course completion</span>
+            <strong id="overall-progress">0%</strong>
+          </div>
+          <div class="progress-bar"><span id="overall-bar" style="width:0%"></span></div>
+        </div>
+      </div>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>Core algorithms</h3>
+          <p>DP, TD, Q-learning, SARSA, function approximation, DQN &amp; Rainbow.</p>
+          <div class="meta"><span class="pill">Weeks 2–5</span></div>
+        </div>
+        <div class="card">
+          <h3>Policy search</h3>
+          <p>Gradient-free optimization, REINFORCE, PPO, actor-critic families.</p>
+          <div class="meta"><span class="pill">Weeks 6–7, 10</span></div>
+        </div>
+        <div class="card">
+          <h3>Advanced topics</h3>
+          <p>IRL, multi-agent RL, sample-efficient model-based learning, experiment design.</p>
+          <div class="meta"><span class="pill">Weeks 11–14</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="path">
+      <div class="section-head">
+        <div>
+          <h2>Suggested learning path</h2>
+          <p>If you are new to RL, follow this order before jumping to deep methods.</p>
+        </div>
+      </div>
+      <div class="card">
+        <ol>
+          <li><strong>Formalize</strong> the MDP: states, actions, transitions, rewards, discount γ.</li>
+          <li><strong>Solve small MDPs exactly</strong> with Policy / Value Iteration (Week 2).</li>
+          <li><strong>Learn without a model</strong> using TD methods: SARSA and Q-learning (Week 3).</li>
+          <li><strong>Scale up</strong> with function approximation and neural networks (Weeks 4–5).</li>
+          <li><strong>Optimize policies directly</strong> for continuous control and stability (Weeks 6–7, 10).</li>
+          <li><strong>Extend the setting</strong>: human preferences, multi-agent, model-based (Weeks 11–13).</li>
+          <li><strong>Ship research-quality experiments</strong> with rigorous evaluation (Week 14).</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="syllabus">
+      <div class="section-head">
+        <div>
+          <h2>Full syllabus</h2>
+          <p>18 weeks · project milestones included · lessons marked “interactive” have live demos.</p>
+        </div>
+      </div>
+
+      <div class="weeks" id="week-list"></div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>How to use this tutorial</h2>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>Run every demo</h3>
+          <p>Change hyperparameters (α, ε, γ), step algorithms, and watch value functions / policies update. Intuition beats memorization.</p>
+        </div>
+        <div class="card">
+          <h3>Pair with a library</h3>
+          <p>After tabular demos, implement the same algorithm with NumPy or PyTorch. Gymnasium’s <code>CliffWalking-v0</code> and <code>CartPole-v1</code> are good first targets.</p>
+        </div>
+        <div class="card">
+          <h3>Write weekly notes</h3>
+          <p>For each algorithm: objective, update rule, on-policy vs off-policy, failure modes. This becomes your term-project literature review.</p>
+        </div>
+        <div class="card">
+          <h3>Project checkpoints</h3>
+          <p>Weeks 8–9: proposal. Weeks 15–16: presentation. Weeks 17–18: report writing. Use the experiment-design checklist in Week 14.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="inner">
+      <div>Interactive Reinforcement Learning Course · open study material</div>
+      <div>Built for self-study &amp; classroom use</div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    const WEEKS = [
+      { n: 1, title: "Course Overview", topics: ["Course guidelines", "Environment settings"], lesson: "01-overview.html", kind: "lesson" },
+      { n: 2, title: "Introduction — Dynamic Programming", topics: ["Policy Iteration", "Value Iteration"], lesson: "02-introduction.html", kind: "interactive" },
+      { n: 3, title: "Model-Free Algorithms", topics: ["Q-learning", "SARSA"], lesson: "03-model-free.html", kind: "interactive" },
+      { n: 4, title: "Function Approximation", topics: ["Linear FA Q-learning", "Linear FA SARSA"], lesson: "04-function-approx.html", kind: "interactive" },
+      { n: 5, title: "Deep Reinforcement Learning", topics: ["Deep Q-Network", "Rainbow"], lesson: "05-deep-rl.html", kind: "interactive" },
+      { n: 6, title: "Policy Search I — Gradient-Free", topics: ["Evolution Strategies (ERL)", "CEM-RL"], lesson: "06-policy-search-1.html", kind: "lesson" },
+      { n: 7, title: "Policy Search II — Policy Gradient", topics: ["REINFORCE", "PPO"], lesson: "07-policy-gradient.html", kind: "interactive" },
+      { n: 8, title: "Term Project Proposal I", topics: ["Topic selection", "Baseline plan"], kind: "project" },
+      { n: 9, title: "Term Project Proposal II", topics: ["Method proposal", "Evaluation plan"], kind: "project" },
+      { n: 10, title: "Policy Search III — Actor-Critic", topics: ["DDPG & TD3", "SAC & REDQ"], lesson: "10-actor-critic.html", kind: "interactive" },
+      { n: 11, title: "Inverse Reinforcement Learning", topics: ["Deep RL from human preferences"], lesson: "11-irl.html", kind: "lesson" },
+      { n: 12, title: "Multi-agent Reinforcement Learning", topics: ["MADDPG", "MAML"], lesson: "12-multi-agent.html", kind: "lesson" },
+      { n: 13, title: "Sample Efficiency — Model-based RL", topics: ["ME-TRPO", "Dreamer"], lesson: "13-model-based.html", kind: "lesson" },
+      { n: 14, title: "Wrap-up: Working with RL", topics: ["Design of Experiments"], lesson: "14-wrap-up.html", kind: "lesson" },
+      { n: 15, title: "Term Project Presentation I", topics: [], kind: "project" },
+      { n: 16, title: "Term Project Presentation II", topics: [], kind: "project" },
+      { n: 17, title: "Self-regulated Learning", topics: ["Term project report writing"], kind: "project" },
+      { n: 18, title: "Self-regulated Learning", topics: ["Term project report writing"], kind: "project" },
+    ];
+
+    RL.renderTopNav("home");
+    RL.showWeekProgress();
+    RL.bindQuizzes();
+
+    const list = document.getElementById("week-list");
+    list.innerHTML = WEEKS.map((w) => {
+      const pct = RL.getLessonProgress(w.n);
+      const href = w.lesson ? `lessons/${w.lesson}` : null;
+      const tag =
+        w.kind === "interactive" ? '<span class="pill green">Interactive</span>' :
+        w.kind === "project" ? '<span class="pill gold">Project</span>' :
+        w.kind === "lesson" ? '<span class="pill">Lesson</span>' : "";
+      const bar = pct > 0 ? `<div class="progress-bar" style="margin-top:0.65rem"><span style="width:${pct}%"></span></div>` : "";
+      const topics = w.topics.length ? `<p class="topics">${w.topics.join(" · ")}</p>` : '<p class="topics">Milestone / writing week</p>';
+      const inner = `
+        <div class="week-num">${String(w.n).padStart(2, "0")}</div>
+        <div>
+          <h3>${w.title}</h3>
+          ${topics}
+          <div class="meta">${tag}${pct ? `<span class="pill dim">${pct}%</span>` : ""}</div>
+          ${bar}
+        </div>
+        <div class="go" style="color:var(--ink-dim);font-size:0.9rem;align-self:center">${href ? "Open →" : "—"}</div>`;
+      if (href) return `<a class="week-row ${w.kind === "project" ? "project" : ""}" href="${href}">${inner}</a>`;
+      return `<div class="week-row project">${inner}</div>`;
+    }).join("");
+  </script>
+</body>
+</html>

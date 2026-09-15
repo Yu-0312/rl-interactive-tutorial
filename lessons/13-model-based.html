@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 13 · Model-based RL — Interactive RL</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="13">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#why">Why model-based</a>
+      <a href="#metrpo">ME-TRPO</a>
+      <a href="#dreamer">Dreamer</a>
+      <a href="#errors">Model error</a>
+      <a href="#recipe">Practical recipe</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">Week 13</div>
+      <h1>Sample Efficiency: Model-based RL</h1>
+      <p>
+        Learn a dynamics model $\hat{P}$ (and reward) from experience, then plan or generate
+        <strong>imagined rollouts</strong> — cutting real environment interactions by orders of magnitude.
+      </p>
+
+      <h2 id="why">Motivation</h2>
+      <ul>
+        <li>Model-free PPO/SAC may need 10⁶–10⁷ steps.</li>
+        <li>Robots, expensive sims, or limited real-world data favor models.</li>
+        <li>Planning (MPC) gives interpretability and constraint handling.</li>
+      </ul>
+
+      <h2 id="metrpo">ME-TRPO</h2>
+      <p>
+        Model-Ensemble TRPO (Kurutach et al.): train an <strong>ensemble of dynamics networks</strong>,
+        sample short imagined trajectories, and take a TRPO/PPO step on the model-predicted objective.
+        Ensembles capture epistemic uncertainty → shorter rollouts where models disagree.
+      </p>
+      <div class="formula">maximize 𝔼[ Σ γ<sup>t</sup> r̂(ŝ,â) ] &nbsp; s.t. &nbsp; KL(π<sub>old</sub> ‖ π) ≤ δ</div>
+
+      <h2 id="dreamer">Dreamer / DreamerV3</h2>
+      <ol>
+        <li><strong>World model</strong> (RSSM): latent state + recurrent dynamics + decoder + reward head.</li>
+        <li><strong>Imagination</strong>: actor-critic trained entirely in latent rollouts.</li>
+        <li><strong>Act</strong> in the real env to collect more data; repeat.</li>
+      </ol>
+      <p>
+        DreamerV3 uses symlog predictions, return normalization, and robust defaults to train from
+        pixels across many domains with a single hyperparameter set.
+      </p>
+
+      <h2 id="errors">The model-error problem</h2>
+      <div class="callout warn">
+        <strong>Compounding error.</strong> Multi-step predictions drift; policies exploit model bugs
+        (causal confusion, adversarial states). Mitigations: short horizons, ensembles, uncertainty
+        penalties, data aggregation (Dyna / MBPO style short model rollouts).
+      </div>
+      <table class="cmp">
+        <thead><tr><th>Approach</th><th>Uses model for</th><th>Risk</th></tr></thead>
+        <tbody>
+          <tr><td>Planning / MPC</td><td>Action at each step</td><td>Myopic if horizon short</td></tr>
+          <tr><td>MBPO-style Dyna</td><td>Extra synthetic transitions</td><td>Bias in synthetic data</td></tr>
+          <tr><td>Dreamer</td><td>Full policy learning in latent imagination</td><td>World-model misspecification</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="recipe">Practical recipe for a project</h2>
+      <ol>
+        <li>Start with a strong model-free baseline (SAC/PPO).</li>
+        <li>Add a short-horizon ensemble model; only inject k-step synthetic data.</li>
+        <li>Ablate real vs imagined batch ratio; plot sample-efficiency curves.</li>
+        <li>Measure model open-loop prediction error on held-out trajectories.</li>
+      </ol>
+
+      <div class="quiz" data-answer="1" data-ok="Correct — learn dynamics/reward and train with imagined experience." data-no="Model-based RL explicitly learns a transition/reward model.">
+        <h3>Quick check</h3>
+        <div class="q">Core idea of model-based RL?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">Ignore dynamics and only use Q-tables</button>
+          <button class="quiz-opt">Learn a dynamics model and use it to plan or simulate training data</button>
+          <button class="quiz-opt">Use only Monte-Carlo returns, never bootstrapping</button>
+          <button class="quiz-opt">Train only the value function, never a policy</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="12-multi-agent.html"><span class="dir">← Previous</span><span class="title">Week 12 · Multi-agent</span></a>
+        <a href="14-wrap-up.html"><span class="dir">Next</span><span class="title">Week 14 · Experiment design</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>

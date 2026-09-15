@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Week 12 · Multi-agent RL — Interactive RL</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="12">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#marl">MARL landscape</a>
+      <a href="#maddpg">MADDPG</a>
+      <a href="#maml">MAML / meta-RL</a>
+      <a href="#coop">Cooperative vs competitive</a>
+      <a href="#eval">Evaluation tips</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">Week 12</div>
+      <h1>Multi-agent Reinforcement Learning</h1>
+      <p>
+        Multiple learners interact. The environment is <strong>non-stationary</strong> from each
+        agent’s viewpoint because others keep changing policies.
+      </p>
+
+      <h2 id="marl">Central research axes</h2>
+      <ul>
+        <li>Cooperative / competitive / mixed incentives.</li>
+        <li>Centralized training, decentralized execution (CTDE).</li>
+        <li>Communication, credit assignment, opponent modeling.</li>
+      </ul>
+
+      <h2 id="maddpg">MADDPG</h2>
+      <p>
+        Multi-Agent DDPG (Lowe et al.): each agent has an actor π<sub>i</sub>(o<sub>i</sub>) but may use a
+        <strong>centralized critic</strong> Q<sub>i</sub>(x, a<sub>1</sub>…a<sub>N</sub>) that sees global state / joint actions during training.
+      </p>
+      <div class="formula">∇<sub>θᵢ</sub> J = 𝔼[ ∇<sub>θᵢ</sub> π<sub>i</sub>(o<sub>i</sub>) ∇<sub>aᵢ</sub> Q<sub>i</sub>(x, a)|<sub>aᵢ=πᵢ(oᵢ)</sub> ]</div>
+      <p>At execution, only local observations + actor are needed.</p>
+
+      <h2 id="maml">MAML (meta-learning angle)</h2>
+      <p>
+        Model-Agnostic Meta-Learning finds initialization θ such that a few gradient steps adapt to
+        a new task / new partners. In MARL: fast adaptation to new teammates or reward structures.
+      </p>
+      <div class="formula">min<sub>θ</sub> Σ<sub>tasks</sub> ℒ<sub>τ</sub>( θ − α ∇<sub>θ</sub> ℒ<sub>τ</sub>(θ) )</div>
+
+      <h2 id="coop">Cooperative vs competitive</h2>
+      <table class="cmp">
+        <thead><tr><th></th><th>Cooperative</th><th>Competitive</th></tr></thead>
+        <tbody>
+          <tr><td>Goal</td><td>Maximize team return</td><td>Zero-sum / self-play</td></tr>
+          <tr><td>Credit assignment</td><td>Critical (who helped?)</td><td>Often easier (win/lose)</td></tr>
+          <tr><td>Methods</td><td>QMIX, MAPPO, shared critic</td><td>Self-play, PSRO, league training</td></tr>
+          <tr><td>Risk</td><td>Cheap talk, lazy agent</td><td>Cycles, exploitability</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="eval">Evaluation tips</h2>
+      <ul>
+        <li>Evaluate against <em>unseen</em> partners / seeds — not just training pool.</li>
+        <li>Report exploitability or cross-play matrices when relevant.</li>
+        <li>Ablate centralized info: does the critic actually need joint actions?</li>
+      </ul>
+
+      <div class="quiz" data-answer="0" data-ok="Yes — CTDE trains with extra info but executes decentralized." data-no="MADDPG’s core idea is centralized critics + decentralized actors.">
+        <h3>Quick check</h3>
+        <div class="q">What does CTDE mean?</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">Centralized training, decentralized execution</button>
+          <button class="quiz-opt">Competitive training, cooperative evaluation</button>
+          <button class="quiz-opt">Continuous-time differential equations</button>
+          <button class="quiz-opt">Cross-task domain embedding</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="11-irl.html"><span class="dir">← Previous</span><span class="title">Week 11 · IRL</span></a>
+        <a href="13-model-based.html"><span class="dir">Next</span><span class="title">Week 13 · Model-based</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>
