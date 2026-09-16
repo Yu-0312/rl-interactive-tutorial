@@ -1,138 +1,137 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 2 · Policy & Value Iteration — Interactive RL</title>
+  <title>第 2 週 · 策略迭代與價值迭代 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="2">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#mdp">MDP recap</a>
-      <a href="#bellman">Bellman equations</a>
-      <a href="#policy-iter">Policy Iteration</a>
-      <a href="#value-iter">Value Iteration</a>
-      <a href="#demo">Live GridWorld demo</a>
-      <a href="#compare">When to use which</a>
+      <a href="#mdp">MDP 複習</a>
+      <a href="#bellman">Bellman 方程</a>
+      <a href="#policy-iter">策略迭代</a>
+      <a href="#value-iter">價值迭代</a>
+      <a href="#demo">GridWorld 演示</a>
+      <a href="#compare">如何選擇</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 2 · Interactive</div>
-      <h1>Dynamic Programming: Policy &amp; Value Iteration</h1>
+      <div class="week-label">第 2 週 · 互動</div>
+      <h1>動態規劃：策略迭代與價值迭代</h1>
       <p>
-        With a <strong>known model</strong> $P(s'|s,a)$ and reward $R(s,a,s')$, we can compute optimal
-        values by sweeping the state space. These algorithms are the foundation for every model-free
-        method that follows.
+        在<strong>已知模型</strong> $P(s'|s,a)$ 與獎勵 $R(s,a,s')$ 下，我們可以掃過整個狀態空間
+        算出最優價值。這是後續所有無模型方法的基礎。
       </p>
 
-      <h2 id="mdp">MDP recap</h2>
+      <h2 id="mdp">MDP 複習</h2>
       <ul>
-        <li><strong>State</strong> $s \in \mathcal{S}$ — what the agent observes (fully, in DP).</li>
-        <li><strong>Action</strong> $a \in \mathcal{A}(s)$.</li>
-        <li><strong>Transition</strong> $P(s' \mid s, a)$.</li>
-        <li><strong>Reward</strong> $R(s,a,s')$.</li>
-        <li><strong>Discount</strong> $\gamma \in [0,1)$.</li>
+        <li><strong>狀態</strong> $s \in \mathcal{S}$。</li>
+        <li><strong>動作</strong> $a \in \mathcal{A}(s)$。</li>
+        <li><strong>轉移</strong> $P(s' \mid s, a)$。</li>
+        <li><strong>獎勵</strong> $R(s,a,s')$。</li>
+        <li><strong>折扣</strong> $\gamma \in [0,1)$。</li>
       </ul>
       <div class="formula">G_t = R_{t+1} + γ R_{t+2} + γ² R_{t+3} + … = Σ_{k=0}^∞ γ^k R_{t+k+1}</div>
 
-      <h2 id="bellman">Bellman equations</h2>
-      <p>State-value under policy π:</p>
+      <h2 id="bellman">Bellman 方程</h2>
+      <p>策略 π 下的狀態價值：</p>
       <div class="formula">v<sub>π</sub>(s) = Σ<sub>a</sub> π(a|s) Σ<sub>s'</sub> P(s'|s,a) [ R(s,a,s') + γ v<sub>π</sub>(s') ]</div>
-      <p>Optimal value (Bellman optimality):</p>
+      <p>最優價值（Bellman 最優性）：</p>
       <div class="formula">v*(s) = max<sub>a</sub> Σ<sub>s'</sub> P(s'|s,a) [ R(s,a,s') + γ v*(s') ]</div>
 
-      <h2 id="policy-iter">Policy Iteration</h2>
-      <p>Alternates two steps until the policy is stable:</p>
+      <h2 id="policy-iter">策略迭代</h2>
+      <p>交替兩步直到策略穩定：</p>
       <ol>
-        <li><strong>Policy Evaluation</strong>: solve linear system / iterate $v_{k+1} = T^\pi v_k$ until convergence.</li>
-        <li><strong>Policy Improvement</strong>: $\pi'(s) = \arg\max_a \sum_{s'} P(s'|s,a)[R + \gamma v(s')]$.</li>
+        <li><strong>策略評估</strong>：解線性系統 / 迭代 $v_{k+1} = T^\pi v_k$ 至收斂。</li>
+        <li><strong>策略改進</strong>：$\pi'(s) = \arg\max_a \sum_{s'} P(s'|s,a)[R + \gamma v(s')]$。</li>
       </ol>
       <div class="callout">
-        <strong>Guarantee.</strong> Policy Iteration converges to an optimal policy in finite time for finite MDPs (policy is improved strictly until stable).
+        <strong>保證。</strong> 有限 MDP 上策略迭代在有限步內收斂到最優策略（策略被嚴格改進直到穩定）。
       </div>
 
-      <h2 id="value-iter">Value Iteration</h2>
-      <p>Compress evaluation into a single sweep using the optimality operator:</p>
+      <h2 id="value-iter">價值迭代</h2>
+      <p>把評估壓進一輪掃描，直接用最優算子：</p>
       <div class="formula">v<sub>k+1</sub>(s) ← max<sub>a</sub> Σ<sub>s'</sub> P(s'|s,a) [ R(s,a,s') + γ v<sub>k</sub>(s') ]</div>
-      <p>When $v$ stops changing (within ε), extract the greedy policy. Often fewer full iterations, each cheaper.</p>
+      <p>當 $v$ 不再變化（在 ε 內），取出貪婪策略。迭代次數常更少，每步更便宜。</p>
 
-      <h2 id="demo">Live GridWorld demo</h2>
+      <h2 id="demo">即時 GridWorld 演示</h2>
       <p>
-        A classic grid with a start state, a goal (+1), a pit (−1), and small step cost.
-        Watch the value heat map fill in and the greedy arrows stabilize.
+        經典網格：起點、目標（+1）、陷阱（−1）與小步進成本。
+        觀察價值熱力圖如何填滿、貪婪箭頭如何穩定。
       </p>
 
       <div class="demo" id="dp-demo">
         <div class="demo-head">
-          <h3><span class="badge">Interactive</span> Policy / Value Iteration</h3>
+          <h3><span class="badge">互動</span> 策略 / 價值迭代</h3>
           <div class="controls">
-            <label>Algorithm
+            <label>演算法
               <select id="dp-algo">
-                <option value="vi">Value Iteration</option>
-                <option value="pi">Policy Iteration</option>
+                <option value="vi">價值迭代</option>
+                <option value="pi">策略迭代</option>
               </select>
             </label>
             <label>γ <input type="range" id="dp-gamma" min="0.5" max="0.99" step="0.01" value="0.95" /> <span id="dp-gamma-v">0.95</span></label>
-            <button class="btn btn-primary btn-sm" id="dp-step">Step</button>
-            <button class="btn btn-ghost btn-sm" id="dp-run">Run</button>
-            <button class="btn btn-ghost btn-sm" id="dp-reset">Reset</button>
+            <button class="btn btn-primary btn-sm" id="dp-step">單步</button>
+            <button class="btn btn-ghost btn-sm" id="dp-run">連續執行</button>
+            <button class="btn btn-ghost btn-sm" id="dp-reset">重置</button>
           </div>
         </div>
         <div class="canvas-wrap">
           <canvas id="dp-canvas" width="520" height="360"></canvas>
         </div>
         <div class="legend">
-          <span><i style="background:#5b8cff"></i> value (blue = low → teal = high)</span>
-          <span><i style="background:#3dd68c"></i> goal</span>
-          <span><i style="background:#ff6b7a"></i> pit</span>
-          <span><i style="background:#f0b429"></i> start</span>
+          <span><i style="background:#5b8cff"></i> 價值（藍=低 → 青=高）</span>
+          <span><i style="background:#3dd68c"></i> 目標</span>
+          <span><i style="background:#ff6b7a"></i> 陷阱</span>
+          <span><i style="background:#f0b429"></i> 起點</span>
         </div>
         <div class="demo-stats">
-          <div class="stat"><span class="k">Iterations</span><span class="v" id="dp-iter">0</span></div>
-          <div class="stat"><span class="k">Δ (max change)</span><span class="v" id="dp-delta">—</span></div>
-          <div class="stat"><span class="k">Status</span><span class="v" id="dp-status">Ready</span></div>
+          <div class="stat"><span class="k">迭代次數</span><span class="v" id="dp-iter">0</span></div>
+          <div class="stat"><span class="k">Δ（最大變化）</span><span class="v" id="dp-delta">—</span></div>
+          <div class="stat"><span class="k">狀態</span><span class="v" id="dp-status">就緒</span></div>
         </div>
       </div>
 
-      <h3>What you should notice</h3>
+      <h3>你應該觀察到</h3>
       <ul>
-        <li>Values spread backward from the goal and pit — this is <strong>backup</strong>.</li>
-        <li>Higher γ makes far rewards matter more; the agent prefers longer safe paths.</li>
-        <li>Policy Iteration: each “Step” does full evaluation (multiple inner sweeps) then one improvement.</li>
+        <li>價值從目標與陷阱<strong>反向擴散</strong>——這就是 backup。</li>
+        <li>γ 越大，遠端獎勵越重要；智能體更偏好較長的安全路徑。</li>
+        <li>策略迭代：每次「單步」做完整評估（多個內部掃描）再做一次改進。</li>
       </ul>
 
-      <h2 id="compare">When to use which</h2>
+      <h2 id="compare">如何選擇</h2>
       <table class="cmp">
-        <thead><tr><th></th><th>Policy Iteration</th><th>Value Iteration</th></tr></thead>
+        <thead><tr><th></th><th>策略迭代</th><th>價值迭代</th></tr></thead>
         <tbody>
-          <tr><td>Needs model P</td><td>Yes</td><td>Yes</td></tr>
-          <tr><td>Per outer step</td><td>Expensive (solve/eval π)</td><td>Cheap one sweep</td></tr>
-          <tr><td>Convergence</td><td>Finite policy improvements</td><td>Asymptotic / ε-optimal</td></tr>
-          <tr><td>Best when</td><td>Few actions, need exact policy</td><td>Large sweeps, streaming updates</td></tr>
+          <tr><td>需要模型 P</td><td>是</td><td>是</td></tr>
+          <tr><td>每個外層步</td><td>昂貴（解/評估 π）</td><td>便宜的一輪掃描</td></tr>
+          <tr><td>收斂</td><td>有限次策略改進</td><td>漸近 / ε-最優</td></tr>
+          <tr><td>適用</td><td>動作少、需要精確策略</td><td>大範圍掃描、串流更新</td></tr>
         </tbody>
       </table>
 
       <div class="callout warn">
-        <strong>Limitation.</strong> DP requires $P$ and full sweeps over $\mathcal{S}$. Huge or unknown
-        environments need model-free sampling — next week.
+        <strong>限制。</strong> DP 需要 $P$ 並對 $\mathcal{S}$ 做完整掃描。
+        巨大或未知環境需要無模型採樣——下一週。
       </div>
 
-      <div class="quiz" data-answer="0" data-ok="Correct — Value Iteration directly applies the Bellman optimality operator." data-no="Recall which equation has max_a outside the backup.">
-        <h3>Quick check</h3>
-        <div class="q">Which update is Value Iteration?</div>
+      <div class="quiz" data-answer="0" data-ok="正確——價值迭代直接套用 Bellman 最優算子。" data-no="回想哪個更新式外層有 max_a。">
+        <h3>快速檢核</h3>
+        <div class="q">哪一個是價值迭代的更新？</div>
         <div class="quiz-options">
           <button class="quiz-opt">v(s) ← max<sub>a</sub> Σ P [ R + γ v(s') ]</button>
           <button class="quiz-opt">v(s) ← Σ<sub>a</sub> π(a|s) Σ P [ R + γ v(s') ]</button>
-          <button class="quiz-opt">v(s) ← R only, ignore next state</button>
-          <button class="quiz-opt">v(s) ← average of all actions’ Q without max</button>
+          <button class="quiz-opt">v(s) ← 只取 R，忽略下一狀態</button>
+          <button class="quiz-opt">v(s) ← 所有動作 Q 的平均，不做 max</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="01-overview.html"><span class="dir">← Previous</span><span class="title">Week 1 · Overview</span></a>
-        <a href="03-model-free.html"><span class="dir">Next</span><span class="title">Week 3 · Q-learning &amp; SARSA</span></a>
+        <a href="01-overview.html"><span class="dir">← 上一課</span><span class="title">第 1 週 · 總覽</span></a>
+        <a href="03-model-free.html"><span class="dir">下一課</span><span class="title">第 3 週 · Q-learning 與 SARSA</span></a>
       </nav>
     </article>
   </div>

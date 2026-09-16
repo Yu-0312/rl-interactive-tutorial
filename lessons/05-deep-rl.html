@@ -1,118 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 5 · DQN & Rainbow — Interactive RL</title>
+  <title>第 5 週 · DQN 與 Rainbow — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="5">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#dqn">DQN ingredients</a>
-      <a href="#algorithm">Algorithm</a>
-      <a href="#rainbow">Rainbow components</a>
-      <a href="#demo">Target / replay intuition</a>
-      <a href="#practice">Practice checklist</a>
+      <a href="#dqn">DQN 要素</a>
+      <a href="#algorithm">演算法</a>
+      <a href="#rainbow">Rainbow 元件</a>
+      <a href="#demo">目標網路直覺</a>
+      <a href="#practice">實作清單</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 5 · Interactive</div>
-      <h1>Deep Reinforcement Learning: DQN &amp; Rainbow</h1>
+      <div class="week-label">第 5 週 · 互動</div>
+      <h1>深度強化學習：DQN 與 Rainbow</h1>
       <p>
-        Replace linear FA with a <strong>deep network</strong> $Q(s,a;\theta)$ and stabilize learning
-        with two tricks that made Atari possible: <strong>experience replay</strong> and a
-        <strong>target network</strong>.
+        用<strong>深度網路</strong> $Q(s,a;\theta)$ 取代線性 FA，並用兩大技巧穩定學習：
+        <strong>經驗回放（replay）</strong>與<strong>目標網路（target network）</strong>。
       </p>
 
-      <h2 id="dqn">Why naive deep Q fails</h2>
+      <h2 id="dqn">為何樸素深度 Q 會失敗</h2>
       <ul>
-        <li>Correlated consecutive samples break SGD assumptions.</li>
-        <li>Bootstrapped targets move as θ moves → oscillation / divergence (deadly triad).</li>
+        <li>連續樣本高度相關，破壞 SGD 假設。</li>
+        <li>bootstrap 目標隨 θ 移動 → 震盪 / 發散（致命三合組）。</li>
       </ul>
 
-      <h2 id="algorithm">DQN update</h2>
-      <div class="formula">y = R + γ max<sub>a'</sub> Q(S', a'; θ⁻)  &nbsp;&nbsp;(θ⁻ = frozen target weights)</div>
+      <h2 id="algorithm">DQN 更新</h2>
+      <div class="formula">y = R + γ max<sub>a'</sub> Q(S', a'; θ⁻)  &nbsp;&nbsp;（θ⁻ = 凍結的目標權重）</div>
       <div class="formula">Loss = ( Q(S,A; θ) − y )²</div>
       <p>
-        Store transitions $(s,a,r,s',done)$ in a replay buffer; sample minibatches; periodically
-        copy $\theta \leftarrow \theta^-$.
+        把轉移 $(s,a,r,s',done)$ 存進 replay buffer；採樣 minibatch；定期
+        複製 $\theta \leftarrow \theta^-$。
       </p>
 
       <div class="callout tip">
-        <strong>Double DQN</strong> reduces overestimation: select $a^* = \arg\max_{a'} Q(s',a';\theta)$
-        but evaluate with $Q(s', a^*; \theta^-)$.
+        <strong>Double DQN</strong> 減少高估：用 $a^* = \arg\max_{a'} Q(s',a';\theta)$ 選動作，
+        但用 $Q(s', a^*; \theta^-)$ 評估。
       </div>
 
-      <h2 id="rainbow">Rainbow: combining improvements</h2>
+      <h2 id="rainbow">Rainbow：組合式改進</h2>
       <table class="cmp">
-        <thead><tr><th>Component</th><th>Idea</th><th>Role</th></tr></thead>
+        <thead><tr><th>元件</th><th>想法</th><th>角色</th></tr></thead>
         <tbody>
-          <tr><td>DQN</td><td>Replay + target net</td><td>Baseline deep Q</td></tr>
-          <tr><td>Double Q</td><td>Decouple action select/eval</td><td>Less overestimation</td></tr>
-          <tr><td>Prioritized replay</td><td>Sample high-|TD| more often</td><td>Sample efficiency</td></tr>
-          <tr><td>Dueling</td><td>Split V(s) and A(s,a)</td><td>Better value learning</td></tr>
-          <tr><td>Multi-step</td><td>n-step returns</td><td>Faster credit, less bias/true bias trade</td></tr>
-          <tr><td>Noisy nets</td><td>Learnable noise on weights</td><td>State-dependent exploration</td></tr>
-          <tr><td>C51 distributional</td><td>Model Z(s,a), not just E[Z]</td><td>Richer targets, stability</td></tr>
+          <tr><td>DQN</td><td>Replay + 目標網路</td><td>深度 Q 基線</td></tr>
+          <tr><td>Double Q</td><td>解耦選動作/評估</td><td>減少高估</td></tr>
+          <tr><td>優先 replay</td><td>高 |TD| 更常被採樣</td><td>樣本效率</td></tr>
+          <tr><td>Dueling</td><td>拆開 V(s) 與 A(s,a)</td><td>更好的價值學習</td></tr>
+          <tr><td>多步</td><td>n-step 回報</td><td>更快信用分配</td></tr>
+          <tr><td>Noisy nets</td><td>可學習權重雜訊</td><td>狀態相關探索</td></tr>
+          <tr><td>C51 分佈式</td><td>建模 Z(s,a)，不只 E[Z]</td><td>更豐富目標、更穩</td></tr>
         </tbody>
       </table>
-      <p>Rainbow (Hessel et al., 2018) shows the combination beats each part alone on Atari.</p>
+      <p>Rainbow（Hessel et al., 2018）顯示組合後在 Atari 上優於各單項。</p>
 
-      <h2 id="demo">Interactive: target lag vs bootstrap noise</h2>
+      <h2 id="demo">互動：目標延遲 vs bootstrap 雜訊</h2>
       <p>
-        A toy 1D chain. The agent learns $Q$ toward a distant reward. Toggle “target lag” to see
-        how frozen targets smooth the learning curve.
+        玩具 1D 鏈。智能體朝遠端獎勵學 $Q$。切換「目標延遲」觀察凍結目標如何平滑學習曲線。
       </p>
       <div class="demo">
         <div class="demo-head">
-          <h3><span class="badge">Interactive</span> Target network effect</h3>
+          <h3><span class="badge">互動</span> 目標網路效果</h3>
           <div class="controls">
-            <label>Target lag
+            <label>目標延遲
               <select id="dqn-lag">
-                <option value="1">None (every step)</option>
-                <option value="10" selected>Sync every 10 steps</option>
-                <option value="50">Sync every 50 steps</option>
+                <option value="1">無（每步同步）</option>
+                <option value="10" selected>每 10 步同步</option>
+                <option value="50">每 50 步同步</option>
               </select>
             </label>
             <label>γ <input type="range" id="dqn-gamma" min="0.8" max="0.99" step="0.01" value="0.97" /> <span id="dqn-gamma-v">0.97</span></label>
-            <button class="btn btn-primary btn-sm" id="dqn-run">Train</button>
-            <button class="btn btn-ghost btn-sm" id="dqn-reset">Reset</button>
+            <button class="btn btn-primary btn-sm" id="dqn-run">訓練</button>
+            <button class="btn btn-ghost btn-sm" id="dqn-reset">重置</button>
           </div>
         </div>
         <div class="canvas-wrap">
           <canvas id="dqn-canvas" width="640" height="280"></canvas>
         </div>
         <div class="demo-stats">
-          <div class="stat"><span class="k">Steps</span><span class="v" id="dqn-steps">0</span></div>
-          <div class="stat"><span class="k">Q(s0, right)</span><span class="v" id="dqn-q0">—</span></div>
-          <div class="stat"><span class="k">TD |err| avg</span><span class="v" id="dqn-td">—</span></div>
+          <div class="stat"><span class="k">步數</span><span class="v" id="dqn-steps">0</span></div>
+          <div class="stat"><span class="k">Q(s0, 右)</span><span class="v" id="dqn-q0">—</span></div>
+          <div class="stat"><span class="k">TD |err| 平均</span><span class="v" id="dqn-td">—</span></div>
         </div>
       </div>
 
-      <h2 id="practice">DQN engineering checklist</h2>
+      <h2 id="practice">DQN 工程清單</h2>
       <ul>
-        <li>Frame stack (4) + max-pool over 2 frames for Atari.</li>
-        <li>Huber loss; gradient clip.</li>
-        <li>ε-greedy with linear decay; eval with ε=0.01.</li>
-        <li>Log return, Q-mean, buffer size, and seed.</li>
+        <li>Atari：4 幀堆疊 + 兩幀 max-pool。</li>
+        <li>Huber loss；梯度裁剪。</li>
+        <li>ε-greedy 線性衰減；評估時 ε=0.01。</li>
+        <li>記錄回報、Q 均值、buffer 大小與 seed。</li>
       </ul>
 
-      <div class="quiz" data-answer="1" data-ok="Yes — the target network freezes θ⁻ so the regression target is more stationary." data-no="Replay decorrelates samples; the target net stabilizes the target.">
-        <h3>Quick check</h3>
-        <div class="q">Primary role of the target network?</div>
+      <div class="quiz" data-answer="1" data-ok="對——目標網路凍結 θ⁻，讓回歸目標更平穩。" data=no="Replay 去相關樣本；目標網路穩定目標。">
+        <h3>快速檢核</h3>
+        <div class="q">目標網路的主要作用？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">Increase exploration via noise</button>
-          <button class="quiz-opt">Stabilize bootstrap targets by freezing recent weights</button>
-          <button class="quiz-opt">Replace the need for a discount factor</button>
-          <button class="quiz-opt">Compress the replay buffer</button>
+          <button class="quiz-opt">用雜訊增加探索</button>
+          <button class="quiz-opt">凍結近期權重以穩定 bootstrap 目標</button>
+          <button class="quiz-opt">取代折扣因子</button>
+          <button class="quiz-opt">壓縮 replay buffer</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="04-function-approx.html"><span class="dir">← Previous</span><span class="title">Week 4 · Function Approx.</span></a>
-        <a href="06-policy-search-1.html"><span class="dir">Next</span><span class="title">Week 6 · Gradient-free search</span></a>
+        <a href="04-function-approx.html"><span class="dir">← 上一課</span><span class="title">第 4 週 · 函數近似</span></a>
+        <a href="06-policy-search-1.html"><span class="dir">下一課</span><span class="title">第 6 週 · 無梯度搜尋</span></a>
       </nav>
     </article>
   </div>

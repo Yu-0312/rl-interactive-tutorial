@@ -1,66 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 3 · Q-learning & SARSA — Interactive RL</title>
+  <title>第 3 週 · Q-learning 與 SARSA — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="3">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#model-free">Model-free idea</a>
-      <a href="#td">TD learning</a>
+      <a href="#model-free">無模型想法</a>
+      <a href="#td">TD 學習</a>
       <a href="#sarsa">SARSA</a>
       <a href="#qlearn">Q-learning</a>
-      <a href="#demo">Cliff demo</a>
-      <a href="#explore">Exploration</a>
+      <a href="#demo">懸崖演示</a>
+      <a href="#explore">探索策略</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 3 · Interactive</div>
-      <h1>Model-Free Algorithms: SARSA &amp; Q-learning</h1>
+      <div class="week-label">第 3 週 · 互動</div>
+      <h1>無模型演算法：SARSA 與 Q-learning</h1>
       <p>
-        Drop the transition model. Learn action values $Q(s,a)$ directly from sampled experience
-        using <strong>temporal-difference (TD)</strong> backups.
+        拋開轉移模型。用<strong>時序差分（TD）</strong> backup，直接從採樣經驗學習動作價值 $Q(s,a)$。
       </p>
 
-      <h2 id="model-free">From DP to sampling</h2>
-      <p>DP sums over all $s'$. Model-free methods replace that expectation with a single sample:</p>
-      <div class="formula">Σ<sub>s'</sub> P(s'|s,a) f(s')  ≈  f(S')  where S' ~ P(·|s,a)</div>
-      <p>Trade-off: more data needed, but works when $P$ is unknown or huge.</p>
+      <h2 id="model-free">從 DP 到採樣</h2>
+      <p>DP 對所有 $s'$ 求和；無模型方法用單筆樣本替換該期望：</p>
+      <div class="formula">Σ<sub>s'</sub> P(s'|s,a) f(s')  ≈  f(S')  ，其中 S' ~ P(·|s,a)</div>
+      <p>取捨：需要更多資料，但 $P$ 未知或巨大時仍可用。</p>
 
-      <h2 id="td">TD target &amp; TD error</h2>
-      <div class="formula">δ = R + γ V(S') − V(S) &nbsp;&nbsp; (or with Q: R + γ Q(S',A') − Q(S,A))</div>
-      <p>You move the estimate <em>toward</em> the target by a step size α (learning rate).</p>
+      <h2 id="td">TD 目標與 TD 誤差</h2>
+      <div class="formula">δ = R + γ V(S') − V(S) &nbsp;&nbsp;（Q 版：R + γ Q(S',A') − Q(S,A)）</div>
+      <p>把估計往目標方向移動一小步 α（學習率）。</p>
 
-      <h2 id="sarsa">SARSA (on-policy)</h2>
-      <p><strong>S</strong>tate, <strong>A</strong>ction, <strong>R</strong>eward, <strong>S'</strong>, <strong>A'</strong> — uses the next action the policy actually takes.</p>
+      <h2 id="sarsa">SARSA（同政策 / on-policy）</h2>
+      <p><strong>S</strong>tate, <strong>A</strong>ction, <strong>R</strong>eward, <strong>S'</strong>, <strong>A'</strong>——使用策略實際會做的下一動作。</p>
       <div class="formula">Q(S,A) ← Q(S,A) + α [ R + γ Q(S',A') − Q(S,A) ]</div>
       <p>
-        Because the bootstrap uses $A' \sim \pi(\cdot|S')$, SARSA learns the value of the
-        <strong>behavior policy</strong> (including its exploration noise).
+        因為 bootstrap 使用 $A' \sim \pi(\cdot|S')$，SARSA 學到的是
+        <strong>行為策略</strong>的價值（包含探索雜訊）。
       </p>
 
-      <h2 id="qlearn">Q-learning (off-policy)</h2>
+      <h2 id="qlearn">Q-learning（離政策 / off-policy）</h2>
       <div class="formula">Q(S,A) ← Q(S,A) + α [ R + γ max<sub>a'</sub> Q(S',a') − Q(S,A) ]</div>
       <p>
-        Bootstraps with the <strong>greedy max</strong> while still exploring with ε-greedy behavior.
-        Learns $Q^*$ regardless of the exploratory policy (under standard conditions).
+        用<strong>貪婪 max</strong> bootstrap，同時仍以 ε-greedy 探索。
+        在標準條件下學習 $Q^*$，與探索策略無關。
       </p>
 
       <div class="callout tip">
-        <strong>Classic cliff result.</strong> On the “Cliff” grid, Q-learning’s optimal path
-        walks the cliff edge (optimal but risky under exploration). SARSA learns a safer inland
-        path because exploration falls off the cliff during learning.
+        <strong>經典懸崖結果。</strong> 在「懸崖」網格上，Q-learning 的最優路徑貼著懸崖邊（最優但探索時危險）。
+        SARSA 學到更安全的內陸路徑，因為學習過程中探索會掉下懸崖。
       </div>
 
-      <h2 id="demo">Interactive: Cliff World</h2>
+      <h2 id="demo">互動：懸崖世界</h2>
       <div class="demo">
         <div class="demo-head">
-          <h3><span class="badge">Interactive</span> SARSA vs Q-learning</h3>
+          <h3><span class="badge">互動</span> SARSA vs Q-learning</h3>
           <div class="controls">
-            <label>Algorithm
+            <label>演算法
               <select id="cliff-algo">
                 <option value="q">Q-learning</option>
                 <option value="sarsa">SARSA</option>
@@ -69,61 +67,61 @@
             <label>ε <input type="range" id="cliff-eps" min="0" max="0.5" step="0.01" value="0.1" /> <span id="cliff-eps-v">0.10</span></label>
             <label>α <input type="range" id="cliff-alpha" min="0.05" max="0.8" step="0.05" value="0.2" /> <span id="cliff-alpha-v">0.20</span></label>
             <label>γ <input type="range" id="cliff-gamma" min="0.8" max="0.99" step="0.01" value="0.95" /> <span id="cliff-gamma-v">0.95</span></label>
-            <button class="btn btn-primary btn-sm" id="cliff-ep">Run 1 episode</button>
-            <button class="btn btn-ghost btn-sm" id="cliff-50">Run 50</button>
-            <button class="btn btn-ghost btn-sm" id="cliff-reset">Reset</button>
+            <button class="btn btn-primary btn-sm" id="cliff-ep">跑 1 回合</button>
+            <button class="btn btn-ghost btn-sm" id="cliff-50">跑 50</button>
+            <button class="btn btn-ghost btn-sm" id="cliff-reset">重置</button>
           </div>
         </div>
         <div class="canvas-wrap">
           <canvas id="cliff-canvas" width="640" height="320"></canvas>
         </div>
         <div class="demo-stats">
-          <div class="stat"><span class="k">Episodes</span><span class="v" id="cliff-episodes">0</span></div>
-          <div class="stat"><span class="k">Last return</span><span class="v" id="cliff-return">—</span></div>
-          <div class="stat"><span class="k">Avg (last 20)</span><span class="v" id="cliff-avg">—</span></div>
-          <div class="stat"><span class="k">ε-greedy arrows</span><span class="v" id="cliff-note">Q(s,·)</span></div>
+          <div class="stat"><span class="k">回合數</span><span class="v" id="cliff-episodes">0</span></div>
+          <div class="stat"><span class="k">上一回報</span><span class="v" id="cliff-return">—</span></div>
+          <div class="stat"><span class="k">近 20 平均</span><span class="v" id="cliff-avg">—</span></div>
+          <div class="stat"><span class="k">ε-greedy 箭頭</span><span class="v" id="cliff-note">Q(s,·)</span></div>
         </div>
       </div>
 
       <table class="cmp">
         <thead><tr><th></th><th>SARSA</th><th>Q-learning</th></tr></thead>
         <tbody>
-          <tr><td>Bootstrap</td><td>Q(S', A') with A' ~ π</td><td>max<sub>a</sub> Q(S', a)</td></tr>
-          <tr><td>Policy type</td><td>On-policy</td><td>Off-policy</td></tr>
-          <tr><td>Learns</td><td>Value of exploratory π</td><td>Optimal Q* (target policy)</td></tr>
-          <tr><td>Safety</td><td>Often safer under ε-greedy</td><td>Can hug risky optimal edges</td></tr>
+          <tr><td>Bootstrap</td><td>Q(S', A')，A' ~ π</td><td>max<sub>a</sub> Q(S', a)</td></tr>
+          <tr><td>政策類型</td><td>同政策</td><td>離政策</td></tr>
+          <tr><td>學到什麼</td><td>探索策略的價值</td><td>最優 Q*（目標策略）</td></tr>
+          <tr><td>安全性</td><td>ε-greedy 下常更安全</td><td>可能貼著風險最優邊</td></tr>
         </tbody>
       </table>
 
-      <h2 id="explore">Exploration strategies</h2>
+      <h2 id="explore">探索策略</h2>
       <ul>
-        <li><strong>ε-greedy</strong>: random action w.p. ε; greedy otherwise. Simple, effective.</li>
-        <li><strong>Softmax / Boltzmann</strong>: sample ∝ exp(Q/τ). Temperature τ controls exploration.</li>
-        <li><strong>Optimistic init</strong>: high initial Q encourages visiting unknown actions.</li>
-        <li><strong>UCB / count-based</strong>: bonus for uncertainty — later sample-efficiency weeks.</li>
+        <li><strong>ε-greedy</strong>：以機率 ε 隨機動作；否則貪婪。簡單有效。</li>
+        <li><strong>Softmax / Boltzmann</strong>：依 exp(Q/τ) 採樣。溫度 τ 控制探索。</li>
+        <li><strong>樂觀初始化</strong>：較高的初始 Q 鼓勵造訪未知動作。</li>
+        <li><strong>UCB / 計數式</strong>：不確定性加成——後續樣本效率週。</li>
       </ul>
 
       <div class="callout">
-        <strong>Convergence note.</strong> Tabular Q-learning converges to $Q^*$ with GLIE exploration
-        and Robbins–Monro step sizes ($\sum \alpha=\infty$, $\sum \alpha^2 < \infty$). In practice we
-        use constant α and finite ε — works, but no formal guarantee.
+        <strong>收斂備註。</strong> 表格型 Q-learning 在 GLIE 探索與 Robbins–Monro 步長
+        （$\sum \alpha=\infty$，$\sum \alpha^2 < \infty$）下收斂到 $Q^*$。
+        實務上常用常數 α 與有限 ε——能用，但沒有形式保證。
       </div>
 
-      <div class="quiz" data-answer="2" data-ok="Yes — Q-learning maxes over next actions, so it is off-policy." data-no="On-policy vs off-policy hinges on what you bootstrap with.">
-        <h3>Quick check</h3>
-        <div class="q">Which algorithm is off-policy?</div>
+      <div class="quiz" data-answer="2" data-ok="對——Q-learning 對下一動作取 max，因此是離政策。" data-no="同政策 vs 離政策取決於你 bootstrap 什麼。">
+        <h3>快速檢核</h3>
+        <div class="q">哪個演算法是離政策（off-policy）？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">SARSA, because it uses the next sampled action</button>
-          <button class="quiz-opt">Expected SARSA with ε-greedy</button>
-          <button class="quiz-opt">Q-learning, because it bootstraps with max<sub>a</sub> Q(S',a)</button>
-          <button class="quiz-opt">Monte Carlo every-visit return</button>
+          <button class="quiz-opt">SARSA，因為它用下一採樣動作</button>
+          <button class="quiz-opt">Expected SARSA（ε-greedy）</button>
+          <button class="quiz-opt">Q-learning，因為它 bootstrap 用 max<sub>a</sub> Q(S',a)</button>
+          <button class="quiz-opt">Monte Carlo 每次造訪回報</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="02-introduction.html"><span class="dir">← Previous</span><span class="title">Week 2 · DP</span></a>
-        <a href="04-function-approx.html"><span class="dir">Next</span><span class="title">Week 4 · Function Approx.</span></a>
+        <a href="02-introduction.html"><span class="dir">← 上一課</span><span class="title">第 2 週 · DP</span></a>
+        <a href="04-function-approx.html"><span class="dir">下一課</span><span class="title">第 4 週 · 函數近似</span></a>
       </nav>
     </article>
   </div>

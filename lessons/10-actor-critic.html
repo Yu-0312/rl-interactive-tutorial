@@ -1,119 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 10 · Actor-Critic — Interactive RL</title>
+  <title>第 10 週 · Actor-Critic — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="10">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#ac">Actor-Critic pattern</a>
+      <a href="#ac">Actor-Critic 模式</a>
       <a href="#ddpg">DDPG</a>
-      <a href="#td3">TD3 fixes</a>
-      <a href="#sac">SAC &amp; REDQ</a>
-      <a href="#demo">TD3 vs naive DDPG</a>
-      <a href="#select">Choosing an algorithm</a>
+      <a href="#td3">TD3 修法</a>
+      <a href="#sac">SAC 與 REDQ</a>
+      <a href="#demo">雙評論家直覺</a>
+      <a href="#select">如何選擇</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 10 · Interactive</div>
-      <h1>Policy Search III: Actor-Critic</h1>
+      <div class="week-label">第 10 週 · 互動</div>
+      <h1>策略搜尋 III：Actor-Critic</h1>
       <p>
-        Combine a policy (actor) with a learned value function (critic). For
-        <strong>continuous control</strong>, deterministic policy gradient methods — DDPG, TD3 —
-        and maximum-entropy methods — SAC — dominate.
+        把策略（演員）與學到的價值函數（評論家）結合。對<strong>連續控制</strong>，
+        確定性策略梯度方法——DDPG、TD3——與最大熵方法——SAC——是主流。
       </p>
 
-      <h2 id="ac">Pattern</h2>
+      <h2 id="ac">模式</h2>
       <ul>
-        <li><strong>Actor</strong> π<sub>θ</sub>(s) → action (deterministic or Gaussian).</li>
-        <li><strong>Critic</strong> Q<sub>φ</sub>(s,a) → estimate of return.</li>
-        <li>Critic trained by TD; actor trained by ∇<sub>θ</sub> Q(s, π<sub>θ</sub>(s)).</li>
+        <li><strong>Actor</strong> π<sub>θ</sub>(s) → 動作（確定性或高斯）。</li>
+        <li><strong>Critic</strong> Q<sub>φ</sub>(s,a) → 回報估計。</li>
+        <li>Critic 用 TD 訓練；Actor 用 ∇<sub>θ</sub> Q(s, π<sub>θ</sub>(s)) 訓練。</li>
       </ul>
 
       <h2 id="ddpg">DDPG</h2>
-      <p>Deep Deterministic Policy Gradient — “DQN for continuous actions”:</p>
+      <p>Deep Deterministic Policy Gradient——「連續動作版 DQN」：</p>
       <ul>
-        <li>Replay buffer + target networks for actor and critic.</li>
-        <li>Exploration via OU / Gaussian action noise.</li>
-        <li>Actor maximizes Q(s, μ(s)).</li>
+        <li>演員與評論家都有 replay buffer + 目標網路。</li>
+        <li>用 OU / 高斯動作雜訊探索。</li>
+        <li>Actor 最大化 Q(s, μ(s))。</li>
       </ul>
       <div class="formula">∇<sub>θ</sub> J ≈ 𝔼[ ∇<sub>θ</sub> μ(s) ∇<sub>a</sub> Q(s,a)|<sub>a=μ(s)</sub> ]</div>
 
       <h2 id="td3">TD3 — Twin Delayed DDPG</h2>
       <ol>
-        <li><strong>Twin critics</strong>: take min of two Q targets (underestimation bias).</li>
-        <li><strong>Delayed policy updates</strong>: update actor less often than critic.</li>
-        <li><strong>Target policy smoothing</strong>: add clipped noise to target actions.</li>
+        <li><strong>雙評論家</strong>：對兩個 Q 目標取 min（降低高估偏差）。</li>
+        <li><strong>延遲策略更新</strong>：Actor 比 Critic 少更新。</li>
+        <li><strong>目標策略平滑</strong>：對目標動作加裁剪雜訊。</li>
       </ol>
       <div class="formula">y = r + γ min<sub>i=1,2</sub> Q<sub>φ'<sub>i</sub></sub>(s', π<sub>θ'</sub>(s') + ε)</div>
 
-      <h2 id="sac">SAC &amp; REDQ</h2>
+      <h2 id="sac">SAC 與 REDQ</h2>
       <p>
-        <strong>Soft Actor-Critic</strong> maximizes reward <em>and</em> entropy:
-        $J = \mathbb{E}[ r + \alpha \mathcal{H}(\pi(\cdot|s)) ]$.
+        <strong>Soft Actor-Critic</strong> 同時最大化獎勵<em>與</em>熵：
+        $J = \mathbb{E}[ r + \alpha \mathcal{H}(\pi(\cdot|s)) ]$。
       </p>
       <ul>
-        <li>Stochastic Gaussian policy; automatic entropy temperature α.</li>
-        <li>Robust exploration without hand-tuned action noise.</li>
-        <li><strong>REDQ</strong>: use a large critic ensemble and a random subset min for extreme sample efficiency.</li>
+        <li>隨機高斯策略；自動熵溫度 α。</li>
+        <li>不需手調動作雜訊的穩健探索。</li>
+        <li><strong>REDQ</strong>：大型評論家集成，隨機子集取 min，極端樣本高效。</li>
       </ul>
 
-      <h2 id="demo">Interactive: why twin critics matter</h2>
+      <h2 id="demo">互動：為何雙評論家重要</h2>
       <p>
-        Toy landscape: the critic overestimates one region more than another. Using
-        <strong>min(Q1,Q2)</strong> yields a less optimistic (more reliable) action choice.
+        玩具景觀：某一區域評論家高估較多。使用 <strong>min(Q1,Q2)</strong> 得到較不樂觀（更可靠）的動作選擇。
       </p>
       <div class="demo">
         <div class="demo-head">
-          <h3><span class="badge">Interactive</span> Critic ensemble min</h3>
+          <h3><span class="badge">互動</span> 評論家集成 min</h3>
           <div class="controls">
-            <label>Noise scale
+            <label>雜訊大小
               <input type="range" id="ac-noise" min="0" max="1" step="0.05" value="0.5" />
               <span id="ac-noise-v">0.50</span>
             </label>
-            <button class="btn btn-primary btn-sm" id="ac-sample">Resample critics</button>
-            <label><input type="checkbox" id="ac-min" checked /> use min(Q1,Q2)</label>
+            <button class="btn btn-primary btn-sm" id="ac-sample">重新採樣評論家</button>
+            <label><input type="checkbox" id="ac-min" checked /> 使用 min(Q1,Q2)</label>
           </div>
         </div>
         <div class="canvas-wrap">
           <canvas id="ac-canvas" width="640" height="280"></canvas>
         </div>
         <div class="demo-stats">
-          <div class="stat"><span class="k">argmax action</span><span class="v" id="ac-arg">—</span></div>
-          <div class="stat"><span class="k">true Q at argmax</span><span class="v" id="ac-true">—</span></div>
-          <div class="stat"><span class="k">regret vs optimal</span><span class="v" id="ac-regret">—</span></div>
+          <div class="stat"><span class="k">argmax 動作</span><span class="v" id="ac-arg">—</span></div>
+          <div class="stat"><span class="k">該點真實 Q</span><span class="v" id="ac-true">—</span></div>
+          <div class="stat"><span class="k">相對最優後悔</span><span class="v" id="ac-regret">—</span></div>
         </div>
       </div>
 
-      <h2 id="select">Choosing an algorithm</h2>
+      <h2 id="select">如何選擇演算法</h2>
       <table class="cmp">
-        <thead><tr><th>Method</th><th>Action</th><th>Notes</th></tr></thead>
+        <thead><tr><th>方法</th><th>動作空間</th><th>備註</th></tr></thead>
         <tbody>
-          <tr><td>PPO</td><td>Discrete / continuous</td><td>Great default, on-policy</td></tr>
-          <tr><td>TD3</td><td>Continuous</td><td>Strong off-policy baseline</td></tr>
-          <tr><td>SAC</td><td>Continuous</td><td>Stochastic, sample efficient</td></tr>
-          <tr><td>DQN/Rainbow</td><td>Discrete</td><td>Atari-style</td></tr>
+          <tr><td>PPO</td><td>離散 / 連續</td><td>很好的預設，同政策</td></tr>
+          <tr><td>TD3</td><td>連續</td><td>強離政策基線</td></tr>
+          <tr><td>SAC</td><td>連續</td><td>隨機策略，樣本高效</td></tr>
+          <tr><td>DQN/Rainbow</td><td>離散</td><td>Atari 風格</td></tr>
         </tbody>
       </table>
 
-      <div class="quiz" data-answer="1" data-ok="Correct — TD3’s min of twin critics reduces Q overestimation." data-no="TD3 = Twin critics + Delayed actor + Target smoothing.">
-        <h3>Quick check</h3>
-        <div class="q">Which TD3 trick directly counters overestimation bias?</div>
+      <div class="quiz" data-answer="1" data-ok="正確——TD3 的雙評論家 min 減少 Q 高估。" data=no="TD3 = 雙評論家 + 延遲 Actor + 目標平滑。">
+        <h3>快速檢核</h3>
+        <div class="q">TD3 哪個技巧直接對抗高估偏差？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">Target policy smoothing only</button>
-          <button class="quiz-opt">Clipped double Q-learning (min of two critics)</button>
-          <button class="quiz-opt">Larger replay capacity</button>
-          <button class="quiz-opt">Higher learning rate for the actor</button>
+          <button class="quiz-opt">只有目標策略平滑</button>
+          <button class="quiz-opt">裁剪雙 Q 學習（兩評論家取 min）</button>
+          <button class="quiz-opt">更大的 replay 容量</button>
+          <button class="quiz-opt">Actor 用更大學習率</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="07-policy-gradient.html"><span class="dir">← Previous</span><span class="title">Week 7 · Policy gradient</span></a>
-        <a href="11-irl.html"><span class="dir">Next</span><span class="title">Week 11 · Inverse RL</span></a>
+        <a href="07-policy-gradient.html"><span class="dir">← 上一課</span><span class="title">第 7 週 · 策略梯度</span></a>
+        <a href="11-irl.html"><span class="dir">下一課</span><span class="title">第 11 週 · 逆強化學習</span></a>
       </nav>
     </article>
   </div>

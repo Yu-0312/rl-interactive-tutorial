@@ -1,93 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 13 · Model-based RL — Interactive RL</title>
+  <title>第 13 週 · 模型式 RL — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="13">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#why">Why model-based</a>
+      <a href="#why">為何模型式</a>
       <a href="#metrpo">ME-TRPO</a>
       <a href="#dreamer">Dreamer</a>
-      <a href="#errors">Model error</a>
-      <a href="#recipe">Practical recipe</a>
+      <a href="#errors">模型誤差</a>
+      <a href="#recipe">實作配方</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 13</div>
-      <h1>Sample Efficiency: Model-based RL</h1>
+      <div class="week-label">第 13 週</div>
+      <h1>樣本效率：基於模型的 RL</h1>
       <p>
-        Learn a dynamics model $\hat{P}$ (and reward) from experience, then plan or generate
-        <strong>imagined rollouts</strong> — cutting real environment interactions by orders of magnitude.
+        從經驗學動力學模型 $\hat{P}$（與獎勵），再規劃或產生
+        <strong>想像中的 rollout</strong>——把真實環境互動量降一個數量級。
       </p>
 
-      <h2 id="why">Motivation</h2>
+      <h2 id="why">動機</h2>
       <ul>
-        <li>Model-free PPO/SAC may need 10⁶–10⁷ steps.</li>
-        <li>Robots, expensive sims, or limited real-world data favor models.</li>
-        <li>Planning (MPC) gives interpretability and constraint handling.</li>
+        <li>無模型 PPO/SAC 可能需要 10⁶–10⁷ 步。</li>
+        <li>機器人、昂貴模擬或有限真實資料偏好模型。</li>
+        <li>規劃（MPC）可解釋、好加約束。</li>
       </ul>
 
       <h2 id="metrpo">ME-TRPO</h2>
       <p>
-        Model-Ensemble TRPO (Kurutach et al.): train an <strong>ensemble of dynamics networks</strong>,
-        sample short imagined trajectories, and take a TRPO/PPO step on the model-predicted objective.
-        Ensembles capture epistemic uncertainty → shorter rollouts where models disagree.
+        Model-Ensemble TRPO（Kurutach et al.）：訓練<strong>動力學網路集成</strong>，
+        採樣短想像軌跡，在模型預測目標上做 TRPO/PPO 步。
+        集成捕捉認知不確定性 → 在模型分歧處縮短 rollout。
       </p>
-      <div class="formula">maximize 𝔼[ Σ γ<sup>t</sup> r̂(ŝ,â) ] &nbsp; s.t. &nbsp; KL(π<sub>old</sub> ‖ π) ≤ δ</div>
+      <div class="formula">maximize 𝔼[ Σ γ<sup>t</sup> r̂(ŝ,â) ] &nbsp; s.t. &nbsp; KL(π<sub>old</sub> ‖ π) ≤ δ</div>
 
       <h2 id="dreamer">Dreamer / DreamerV3</h2>
       <ol>
-        <li><strong>World model</strong> (RSSM): latent state + recurrent dynamics + decoder + reward head.</li>
-        <li><strong>Imagination</strong>: actor-critic trained entirely in latent rollouts.</li>
-        <li><strong>Act</strong> in the real env to collect more data; repeat.</li>
+        <li><strong>世界模型</strong>（RSSM）：潛在狀態 + 遞歸動力學 + 解碼器 + 獎勵頭。</li>
+        <li><strong>想像</strong>：Actor-Critic 完全在潛在 rollout 中訓練。</li>
+        <li><strong>行動</strong>：在真實環境收集更多資料；重複。</li>
       </ol>
       <p>
-        DreamerV3 uses symlog predictions, return normalization, and robust defaults to train from
-        pixels across many domains with a single hyperparameter set.
+        DreamerV3 使用 symlog 預測、回報正規化與穩健預設，
+        以單一超參數集合從像素跨多領域訓練。
       </p>
 
-      <h2 id="errors">The model-error problem</h2>
+      <h2 id="errors">模型誤差問題</h2>
       <div class="callout warn">
-        <strong>Compounding error.</strong> Multi-step predictions drift; policies exploit model bugs
-        (causal confusion, adversarial states). Mitigations: short horizons, ensembles, uncertainty
-        penalties, data aggregation (Dyna / MBPO style short model rollouts).
+        <strong>誤差複合。</strong> 多步預測會漂移；策略會利用模型漏洞
+        （因果混淆、對抗狀態）。緩解：短視界、集成、不確定性懲罰、
+        資料聚合（Dyna / MBPO 風格短模型 rollout）。
       </div>
       <table class="cmp">
-        <thead><tr><th>Approach</th><th>Uses model for</th><th>Risk</th></tr></thead>
+        <thead><tr><th>方法</th><th>模型用於</th><th>風險</th></tr></thead>
         <tbody>
-          <tr><td>Planning / MPC</td><td>Action at each step</td><td>Myopic if horizon short</td></tr>
-          <tr><td>MBPO-style Dyna</td><td>Extra synthetic transitions</td><td>Bias in synthetic data</td></tr>
-          <tr><td>Dreamer</td><td>Full policy learning in latent imagination</td><td>World-model misspecification</td></tr>
+          <tr><td>規劃 / MPC</td><td>每步選動作</td><td>視界太短則短視</td></tr>
+          <tr><td>MBPO 式 Dyna</td><td>額外合成轉移</td><td>合成資料偏差</td></tr>
+          <tr><td>Dreamer</td><td>在潛在想像中完整學策略</td><td>世界模型誤設</td></tr>
         </tbody>
       </table>
 
-      <h2 id="recipe">Practical recipe for a project</h2>
+      <h2 id="recipe">專題實作配方</h2>
       <ol>
-        <li>Start with a strong model-free baseline (SAC/PPO).</li>
-        <li>Add a short-horizon ensemble model; only inject k-step synthetic data.</li>
-        <li>Ablate real vs imagined batch ratio; plot sample-efficiency curves.</li>
-        <li>Measure model open-loop prediction error on held-out trajectories.</li>
+        <li>先做強無模型基線（SAC/PPO）。</li>
+        <li>加短視界集成模型；只注入 k 步合成資料。</li>
+        <li>消融真實 vs 想像批次比例；畫樣本效率曲線。</li>
+        <li>在保留軌跡上量測模型開環預測誤差。</li>
       </ol>
 
-      <div class="quiz" data-answer="1" data-ok="Correct — learn dynamics/reward and train with imagined experience." data-no="Model-based RL explicitly learns a transition/reward model.">
-        <h3>Quick check</h3>
-        <div class="q">Core idea of model-based RL?</div>
+      <div class="quiz" data-answer="1" data-ok="正確——學動力學/獎勵，並用想像經驗訓練。" data=no="模型式 RL 顯式學習轉移/獎勵模型。">
+        <h3>快速檢核</h3>
+        <div class="q">模型式 RL 的核心想法？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">Ignore dynamics and only use Q-tables</button>
-          <button class="quiz-opt">Learn a dynamics model and use it to plan or simulate training data</button>
-          <button class="quiz-opt">Use only Monte-Carlo returns, never bootstrapping</button>
-          <button class="quiz-opt">Train only the value function, never a policy</button>
+          <button class="quiz-opt">忽略動力學，只用 Q 表</button>
+          <button class="quiz-opt">學動力學模型，用於規劃或模擬訓練資料</button>
+          <button class="quiz-opt">只用 Monte-Carlo 回報，從不 bootstrap</button>
+          <button class="quiz-opt">只訓練價值函數，永遠不訓練策略</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="12-multi-agent.html"><span class="dir">← Previous</span><span class="title">Week 12 · Multi-agent</span></a>
-        <a href="14-wrap-up.html"><span class="dir">Next</span><span class="title">Week 14 · Experiment design</span></a>
+        <a href="12-multi-agent.html"><span class="dir">← 上一課</span><span class="title">第 12 週 · 多智能體</span></a>
+        <a href="14-wrap-up.html"><span class="dir">下一課</span><span class="title">第 14 週 · 實驗設計</span></a>
       </nav>
     </article>
   </div>

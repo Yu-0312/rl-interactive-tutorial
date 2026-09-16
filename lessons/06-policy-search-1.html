@@ -1,100 +1,99 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 6 · Gradient-Free Policy Search — Interactive RL</title>
+  <title>第 6 週 · 無梯度策略搜尋 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="6">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#idea">Black-box optimization</a>
-      <a href="#ga">Evolution strategies / ERL</a>
-      <a href="#cem">CEM &amp; CEM-RL</a>
-      <a href="#tradeoffs">Trade-offs</a>
-      <a href="#when">When to use</a>
+      <a href="#idea">黑盒優化</a>
+      <a href="#ga">演化策略 / ERL</a>
+      <a href="#cem">CEM 與 CEM-RL</a>
+      <a href="#tradeoffs">取捨</a>
+      <a href="#when">何時使用</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 6</div>
-      <h1>Policy Search I: Gradient-Free Optimization</h1>
+      <div class="week-label">第 6 週</div>
+      <h1>策略搜尋 I：無梯度優化</h1>
       <p>
-        Treat the policy π<sub>θ</sub> as a black box. Sample parameter perturbations, evaluate
-        returns, and update θ using only fitness — <strong>no backprop through dynamics</strong>.
+        把策略 π<sub>θ</sub> 當黑盒。採樣參數擾動、評估回報，只用適應度更新 θ——
+        <strong>不對環境動力學反向傳播</strong>。
       </p>
 
-      <h2 id="idea">The generic loop</h2>
+      <h2 id="idea">通用迴圈</h2>
       <ol>
-        <li>Sample population {θ<sub>i</sub>} around current θ.</li>
-        <li>Roll out each policy; record return J(θ<sub>i</sub>).</li>
-        <li>Update θ toward high-return samples (weighted average, CEM elite set, ES gradient).</li>
-        <li>Repeat.</li>
+        <li>在目前 θ 周圍採樣族群 {θ<sub>i</sub>}。</li>
+        <li>滾出每個策略；記錄回報 J(θ<sub>i</sub>)。</li>
+        <li>把 θ 往高回報樣本更新（加權平均、CEM 精英特集、ES 梯度）。</li>
+        <li>重複。</li>
       </ol>
-      <div class="formula">ES gradient (OpenAI ES): ∇J ≈ (1/nσ) Σᵢ J(θ+σεᵢ) εᵢ &nbsp; with εᵢ ~ 𝒩(0, I)</div>
+      <div class="formula">ES 梯度（OpenAI ES）：∇J ≈ (1/nσ) Σᵢ J(θ+σεᵢ) εᵢ &nbsp;，εᵢ ~ 𝒩(0, I)</div>
 
-      <h2 id="ga">ERL — Evolutionary + RL hybrids</h2>
+      <h2 id="ga">ERL — 演化 + RL 混合</h2>
       <p>
-        <strong>Evolutionary Reinforcement Learning</strong> typically combines a population of
-        actors with a critic (or uses evolution to discover policies that seed RL). Ideas:
+        <strong>Evolutionary Reinforcement Learning</strong> 通常把演員族群與評論家結合
+        （或用演化發現可做 RL 種子的策略）。要點：
       </p>
       <ul>
-        <li>Evolution explores globally; RL fine-tunes locally with gradients.</li>
-        <li>Population maintains diversity → better exploration than a single ε schedule.</li>
-        <li>Parallel rollouts map well to many CPU workers.</li>
+        <li>演化做全域探索；RL 用梯度做局部微調。</li>
+        <li>族群維持多樣性 → 比單一 ε 排程更好的探索。</li>
+        <li>平行 rollout 對應大量 CPU worker。</li>
       </ul>
 
-      <h2 id="cem">CEM &amp; CEM-RL</h2>
-      <p><strong>Cross-Entropy Method</strong>:</p>
+      <h2 id="cem">CEM 與 CEM-RL</h2>
+      <p><strong>交叉熵方法（Cross-Entropy Method）</strong>：</p>
       <ol>
-        <li>Sample θ from a Gaussian (μ, Σ).</li>
-        <li>Keep top-k elites (quantile).</li>
-        <li>Refit μ, Σ to elites; optionally inject uniform noise for diversity.</li>
+        <li>從高斯 (μ, Σ) 採樣 θ。</li>
+        <li>保留前 k 精英（分位數）。</li>
+        <li>用精英重擬合 μ, Σ；可注入均勻雜訊維持多樣性。</li>
       </ol>
       <p>
-        <strong>CEM-RL</strong> (Ma et al.) alternates CEM generations with actor-critic gradient
-        steps — e.g. half the population trained by CEM selection, half by PPO/TD3 updates.
+        <strong>CEM-RL</strong>（Ma et al.）交替 CEM 世代與 Actor-Critic 梯度步——
+        例如半個族群用 CEM 選擇，半個用 PPO/TD3 更新。
       </p>
 
       <div class="callout tip">
-        <strong>Why gradients still win in many labs.</strong> ES needs many more episodes for
-        high-dimensional nets, but is massively parallel and derivative-free (robust to
-        non-differentiable envs, sparse rewards, or noisy simulators).
+        <strong>為何許多實驗室仍以梯度為主。</strong> 高維網路下 ES 需要更多 episode，
+        但可高度平行、且免導數（對不可微環境、稀疏獎勵或嘈雜模擬器較穩健）。
       </div>
 
-      <h2 id="tradeoffs">Comparison</h2>
+      <h2 id="tradeoffs">比較</h2>
       <table class="cmp">
-        <thead><tr><th></th><th>Gradient-free (ES/CEM)</th><th>Policy gradient (next weeks)</th></tr></thead>
+        <thead><tr><th></th><th>無梯度（ES/CEM）</th><th>策略梯度（下週）</th></tr></thead>
         <tbody>
-          <tr><td>Needs differentiable π</td><td>No</td><td>Yes</td></tr>
-          <tr><td>Sample efficiency</td><td>Often lower</td><td>Higher (with advantage / GAE)</td></tr>
-          <tr><td>Parallelism</td><td>Excellent</td><td>Good (vector envs)</td></tr>
-          <tr><td>Local optima</td><td>Population helps</td><td>Single policy, careful seeds</td></tr>
+          <tr><td>需可微 π</td><td>否</td><td>是</td></tr>
+          <tr><td>樣本效率</td><td>常較低</td><td>較高（配 advantage / GAE）</td></tr>
+          <tr><td>平行性</td><td>極佳</td><td>佳（向量化環境）</td></tr>
+          <tr><td>局部最優</td><td>族群有幫助</td><td>單一策略，需小心種子</td></tr>
         </tbody>
       </table>
 
-      <h2 id="when">When to choose gradient-free</h2>
+      <h2 id="when">何時選無梯度</h2>
       <ul>
-        <li>Simulators with contact discontinuities or non-diff physics.</li>
-        <li>You have huge parallel compute and moderate action dim.</li>
-        <li>Hybrid use: evolve a population, then distill into one actor for deployment.</li>
+        <li>接觸不連續或不可微物理的模擬器。</li>
+        <li>有大量平行算力且動作維度中等。</li>
+        <li>混合使用：演化族群後蒸餾成單一演員部署。</li>
       </ul>
 
-      <div class="quiz" data-answer="0" data-ok="Correct — ES estimates a gradient from random perturbations and their returns." data-no="Gradient-free methods still update parameters; they just never backprop through the env.">
-        <h3>Quick check</h3>
-        <div class="q">How does OpenAI-style ES update weights?</div>
+      <div class="quiz" data-answer="0" data-ok="正確——ES 用隨機擾動與其回報估計梯度。" data=no="無梯度方法仍會更新參數，只是不對環境反向傳播。">
+        <h3>快速檢核</h3>
+        <div class="q">OpenAI 風格 ES 如何更新權重？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">Weighted sum of random noise vectors times their returns</button>
-          <button class="quiz-opt">Backprop of TD error through the Q-network only</button>
-          <button class="quiz-opt">Exact gradient of the environment dynamics</button>
-          <button class="quiz-opt">No parameter update — only action noise</button>
+          <button class="quiz-opt">隨機雜訊向量依回報加權求和</button>
+          <button class="quiz-opt">只對 Q 網路反傳 TD 誤差</button>
+          <button class="quiz-opt">環境動力學的精確梯度</button>
+          <button class="quiz-opt">不更新參數——只有動作雜訊</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="05-deep-rl.html"><span class="dir">← Previous</span><span class="title">Week 5 · DQN</span></a>
-        <a href="07-policy-gradient.html"><span class="dir">Next</span><span class="title">Week 7 · REINFORCE &amp; PPO</span></a>
+        <a href="05-deep-rl.html"><span class="dir">← 上一課</span><span class="title">第 5 週 · DQN</span></a>
+        <a href="07-policy-gradient.html"><span class="dir">下一課</span><span class="title">第 7 週 · REINFORCE 與 PPO</span></a>
       </nav>
     </article>
   </div>

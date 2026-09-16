@@ -1,84 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 12 · Multi-agent RL — Interactive RL</title>
+  <title>第 12 週 · 多智能體 RL — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="12">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#marl">MARL landscape</a>
+      <a href="#marl">MARL 地圖</a>
       <a href="#maddpg">MADDPG</a>
       <a href="#maml">MAML / meta-RL</a>
-      <a href="#coop">Cooperative vs competitive</a>
-      <a href="#eval">Evaluation tips</a>
+      <a href="#coop">合作 vs 競爭</a>
+      <a href="#eval">評估建議</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 12</div>
-      <h1>Multi-agent Reinforcement Learning</h1>
+      <div class="week-label">第 12 週</div>
+      <h1>多智能體強化學習</h1>
       <p>
-        Multiple learners interact. The environment is <strong>non-stationary</strong> from each
-        agent’s viewpoint because others keep changing policies.
+        多個學習者互動。從每個智能體的角度看環境是<strong>非平穩</strong>的，
+        因為其他智能體的策略一直在變。
       </p>
 
-      <h2 id="marl">Central research axes</h2>
+      <h2 id="marl">研究主軸</h2>
       <ul>
-        <li>Cooperative / competitive / mixed incentives.</li>
-        <li>Centralized training, decentralized execution (CTDE).</li>
-        <li>Communication, credit assignment, opponent modeling.</li>
+        <li>合作 / 競爭 / 混合激勵。</li>
+        <li>集中訓練、分散執行（CTDE）。</li>
+        <li>溝通、信用分配、對手建模。</li>
       </ul>
 
       <h2 id="maddpg">MADDPG</h2>
       <p>
-        Multi-Agent DDPG (Lowe et al.): each agent has an actor π<sub>i</sub>(o<sub>i</sub>) but may use a
-        <strong>centralized critic</strong> Q<sub>i</sub>(x, a<sub>1</sub>…a<sub>N</sub>) that sees global state / joint actions during training.
+        Multi-Agent DDPG（Lowe et al.）：每個智能體有演員 π<sub>i</sub>(o<sub>i</sub>)，
+        但訓練時可用<strong>集中式評論家</strong> Q<sub>i</sub>(x, a<sub>1</sub>…a<sub>N</sub>) 看到全域狀態 / 聯合動作。
       </p>
       <div class="formula">∇<sub>θᵢ</sub> J = 𝔼[ ∇<sub>θᵢ</sub> π<sub>i</sub>(o<sub>i</sub>) ∇<sub>aᵢ</sub> Q<sub>i</sub>(x, a)|<sub>aᵢ=πᵢ(oᵢ)</sub> ]</div>
-      <p>At execution, only local observations + actor are needed.</p>
+      <p>執行時只需局部觀測 + 演員。</p>
 
-      <h2 id="maml">MAML (meta-learning angle)</h2>
+      <h2 id="maml">MAML（元學習角度）</h2>
       <p>
-        Model-Agnostic Meta-Learning finds initialization θ such that a few gradient steps adapt to
-        a new task / new partners. In MARL: fast adaptation to new teammates or reward structures.
+        Model-Agnostic Meta-Learning 找初始化 θ，使少量梯度步就能適應新任務 / 新隊友。
+        在 MARL 中：快速適應新隊友或獎勵結構。
       </p>
       <div class="formula">min<sub>θ</sub> Σ<sub>tasks</sub> ℒ<sub>τ</sub>( θ − α ∇<sub>θ</sub> ℒ<sub>τ</sub>(θ) )</div>
 
-      <h2 id="coop">Cooperative vs competitive</h2>
+      <h2 id="coop">合作 vs 競爭</h2>
       <table class="cmp">
-        <thead><tr><th></th><th>Cooperative</th><th>Competitive</th></tr></thead>
+        <thead><tr><th></th><th>合作</th><th>競爭</th></tr></thead>
         <tbody>
-          <tr><td>Goal</td><td>Maximize team return</td><td>Zero-sum / self-play</td></tr>
-          <tr><td>Credit assignment</td><td>Critical (who helped?)</td><td>Often easier (win/lose)</td></tr>
-          <tr><td>Methods</td><td>QMIX, MAPPO, shared critic</td><td>Self-play, PSRO, league training</td></tr>
-          <tr><td>Risk</td><td>Cheap talk, lazy agent</td><td>Cycles, exploitability</td></tr>
+          <tr><td>目標</td><td>最大化隊伍回報</td><td>零和 / 自我對弈</td></tr>
+          <tr><td>信用分配</td><td>關鍵（誰有貢獻？）</td><td>常較容易（輸贏）</td></tr>
+          <tr><td>方法</td><td>QMIX、MAPPO、共享評論家</td><td>Self-play、PSRO、聯賽訓練</td></tr>
+          <tr><td>風險</td><td>廉價對話、懶惰智能體</td><td>循環、可被利用</td></tr>
         </tbody>
       </table>
 
-      <h2 id="eval">Evaluation tips</h2>
+      <h2 id="eval">評估建議</h2>
       <ul>
-        <li>Evaluate against <em>unseen</em> partners / seeds — not just training pool.</li>
-        <li>Report exploitability or cross-play matrices when relevant.</li>
-        <li>Ablate centralized info: does the critic actually need joint actions?</li>
+        <li>對<em>未見過</em>的隊友 / 種子評估——不只訓練池。</li>
+        <li>相關時報告可利用性或交叉對弈矩陣。</li>
+        <li>消融集中式資訊：評論家真的需要聯合動作嗎？</li>
       </ul>
 
-      <div class="quiz" data-answer="0" data-ok="Yes — CTDE trains with extra info but executes decentralized." data-no="MADDPG’s core idea is centralized critics + decentralized actors.">
-        <h3>Quick check</h3>
-        <div class="q">What does CTDE mean?</div>
+      <div class="quiz" data-answer="0" data-ok="對——CTDE 訓練時用額外資訊，執行時分散。" data=no="MADDPG 核心是集中式評論家 + 分散式演員。">
+        <h3>快速檢核</h3>
+        <div class="q">CTDE 是什麼意思？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">Centralized training, decentralized execution</button>
-          <button class="quiz-opt">Competitive training, cooperative evaluation</button>
-          <button class="quiz-opt">Continuous-time differential equations</button>
-          <button class="quiz-opt">Cross-task domain embedding</button>
+          <button class="quiz-opt">集中訓練、分散執行</button>
+          <button class="quiz-opt">競爭訓練、合作評估</button>
+          <button class="quiz-opt">連續時間微分方程</button>
+          <button class="quiz-opt">跨任務領域嵌入</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="11-irl.html"><span class="dir">← Previous</span><span class="title">Week 11 · IRL</span></a>
-        <a href="13-model-based.html"><span class="dir">Next</span><span class="title">Week 13 · Model-based</span></a>
+        <a href="11-irl.html"><span class="dir">← 上一課</span><span class="title">第 11 週 · IRL</span></a>
+        <a href="13-model-based.html"><span class="dir">下一課</span><span class="title">第 13 週 · 模型式 RL</span></a>
       </nav>
     </article>
   </div>

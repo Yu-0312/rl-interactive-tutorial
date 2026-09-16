@@ -1,63 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 7 · REINFORCE & PPO — Interactive RL</title>
+  <title>第 7 週 · REINFORCE 與 PPO — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="7">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#pg">Policy gradient theorem</a>
+      <a href="#pg">策略梯度定理</a>
       <a href="#reinforce">REINFORCE</a>
-      <a href="#baseline">Baselines &amp; advantage</a>
+      <a href="#baseline">基線與優勢</a>
       <a href="#ppo">PPO</a>
-      <a href="#demo">Importance-ratio demo</a>
-      <a href="#tips">PPO tips</a>
+      <a href="#demo">重要性比率演示</a>
+      <a href="#tips">PPO 實務</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 7 · Interactive</div>
-      <h1>Policy Search II: Policy Gradient (REINFORCE &amp; PPO)</h1>
+      <div class="week-label">第 7 週 · 互動</div>
+      <h1>策略搜尋 II：策略梯度（REINFORCE 與 PPO）</h1>
       <p>
-        Optimize a <strong>parameterized stochastic policy</strong> π<sub>θ</sub>(a|s) directly by
-        ascending the expected return — works with continuous actions and is the backbone of modern
-        LLM RLHF.
+        直接優化<strong>參數化隨機策略</strong> π<sub>θ</sub>(a|s)——上升期望回報。
+        可用於連續動作，也是現代 LLM RLHF 的骨幹。
       </p>
 
-      <h2 id="pg">Policy gradient theorem</h2>
+      <h2 id="pg">策略梯度定理</h2>
       <div class="formula">∇<sub>θ</sub> J(θ) = 𝔼<sub>π<sub>θ</sub></sub> [ ∇<sub>θ</sub> log π<sub>θ</sub>(A|S) · ψ ]</div>
-      <p>where ψ is a return / Q / advantage estimate. Score-function gradient: no need to differentiate through P.</p>
+      <p>其中 ψ 是回報 / Q / 優勢估計。Score-function 梯度：不必對 P 做微分。</p>
 
       <h2 id="reinforce">REINFORCE</h2>
       <div class="formula">∇J ≈ Σ<sub>t</sub> ∇ log π(A<sub>t</sub>|S<sub>t</sub>) · G<sub>t</sub></div>
-      <p>Monte-Carlo, unbiased, <strong>high variance</strong>. Fixes:</p>
+      <p>Monte-Carlo，無偏，但<strong>高變異</strong>。修法：</p>
       <ul>
-        <li>Baseline b(s): use $G_t - b(s)$ (doesn’t bias the gradient).</li>
-        <li>Discounted returns / reward scaling.</li>
-        <li>Actor-critic: learn $b \approx V(s)$ (Week 10).</li>
+        <li>基線 b(s)：用 $G_t - b(s)$（不偏置梯度）。</li>
+        <li>折扣回報 / 獎勵縮放。</li>
+        <li>Actor-critic：學習 $b \approx V(s)$（第 10 週）。</li>
       </ul>
 
-      <h2 id="baseline">Advantage &amp; GAE</h2>
-      <div class="formula">A<sup>λ</sup><sub>t</sub> = Σ<sub>l=0</sub><sup>∞</sup> (γλ)<sup>l</sup> δ<sub>t+l</sub>, &nbsp; δ<sub>t</sub> = r<sub>t</sub> + γV(s<sub>t+1</sub>) − V(s<sub>t</sub>)</div>
-      <p>GAE (λ) trades bias vs variance. PPO implementations almost always use it.</p>
+      <h2 id="baseline">優勢與 GAE</h2>
+      <div class="formula">A<sup>λ</sup><sub>t</sub> = Σ<sub>l=0</sub><sup>∞</sup> (γλ)<sup>l</sup> δ<sub>t+l</sub>，&nbsp; δ<sub>t</sub> = r<sub>t</sub> + γV(s<sub>t+1</sub>) − V(s<sub>t</sub>)</div>
+      <p>GAE (λ) 在偏差與變異間取捨。PPO 實作幾乎都用它。</p>
 
       <h2 id="ppo">PPO-Clip</h2>
-      <p>Trust-region style updates without a KL constraint on the optimizer:</p>
+      <p>信任區域風格更新，但不對優化器加 KL 約束：</p>
       <div class="formula">r<sub>t</sub>(θ) = π<sub>θ</sub>(a|s) / π<sub>θ_old</sub>(a|s)</div>
       <div class="formula">L = 𝔼[ min( r·A , clip(r, 1−ε, 1+ε)·A ) ]</div>
       <p>
-        If the new policy moves too far from the data-collection policy, the objective flattens —
-        preventing destructive steps while allowing multiple epochs per batch.
+        若新策略離資料收集策略太遠，目標函數變平——防止毀滅性大步，同時允許每批多個 epoch。
       </p>
 
-      <h2 id="demo">Interactive: trust region / clip intuition</h2>
+      <h2 id="demo">互動：信任區域 / clip 直覺</h2>
       <div class="demo">
         <div class="demo-head">
-          <h3><span class="badge">Interactive</span> PPO ratio objective</h3>
+          <h3><span class="badge">互動</span> PPO 比率目標</h3>
           <div class="controls">
-            <label>Advantage A
+            <label>優勢 A
               <input type="range" id="ppo-a" min="-3" max="3" step="0.1" value="1.5" />
               <span id="ppo-a-v">1.50</span>
             </label>
@@ -65,7 +63,7 @@
               <input type="range" id="ppo-eps" min="0.05" max="0.4" step="0.01" value="0.2" />
               <span id="ppo-eps-v">0.20</span>
             </label>
-            <label>ratio r
+            <label>比率 r
               <input type="range" id="ppo-r" min="0.4" max="1.8" step="0.01" value="1.3" />
               <span id="ppo-r-v">1.30</span>
             </label>
@@ -75,41 +73,40 @@
           <canvas id="ppo-canvas" width="640" height="300"></canvas>
         </div>
         <div class="demo-stats">
-          <div class="stat"><span class="k">unclipped r·A</span><span class="v" id="ppo-raw">—</span></div>
+          <div class="stat"><span class="k">未裁剪 r·A</span><span class="v" id="ppo-raw">—</span></div>
           <div class="stat"><span class="k">PPO min(clip)</span><span class="v" id="ppo-obj">—</span></div>
-          <div class="stat"><span class="k">clip active?</span><span class="v" id="ppo-active">—</span></div>
+          <div class="stat"><span class="k">clip 是否生效</span><span class="v" id="ppo-active">—</span></div>
         </div>
       </div>
 
-      <h2 id="tips">PPO engineering tips</h2>
+      <h2 id="tips">PPO 工程建議</h2>
       <ul>
-        <li>Normalize advantages per batch.</li>
-        <li>Entropy bonus early in training; anneal it.</li>
-        <li>Value loss coefficient ~0.5; clip value loss separately.</li>
-        <li>Mini-batch epochs 3–10; watch approximate KL.</li>
-        <li>Vectorized envs (16–64) for stable batch stats.</li>
+        <li>每批正規化優勢。</li>
+        <li>訓練早期加熵獎勵；之後退火。</li>
+        <li>價值損失係數 ~0.5；價值損失可分開 clip。</li>
+        <li>Mini-batch epoch 3–10；監控近似 KL。</li>
+        <li>向量化環境（16–64）以穩定批次統計。</li>
       </ul>
 
       <div class="callout">
-        <strong>RLHF connection.</strong> PPO with a KL penalty to a reference policy is the classic
-        fine-tuning recipe for language models from human/AI preference scores.
+        <strong>與 RLHF 的連結。</strong> 以參考策略 KL 懲罰的 PPO，是從偏好分數微調語言模型的經典配方。
       </div>
 
-      <div class="quiz" data-answer="2" data-ok="Correct — the surrogate is min of raw and clipped terms." data-no="PPO maximizes a clipped surrogate, not KL alone.">
-        <h3>Quick check</h3>
-        <div class="q">What does PPO-Clip optimize?</div>
+      <div class="quiz" data-answer="2" data-ok="正確——代理目標取原始與裁剪兩者之 min。" data=no="PPO 最大化的是裁剪後的代理目標，不只是 KL。">
+        <h3>快速檢核</h3>
+        <div class="q">PPO-Clip 優化的是什麼？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">Only the value function MSE</button>
-          <button class="quiz-opt">Exact TRPO quadratic KL constraint</button>
+          <button class="quiz-opt">只有價值函數 MSE</button>
+          <button class="quiz-opt">精確 TRPO 二次 KL 約束</button>
           <button class="quiz-opt">min( r·A , clip(r,1±ε)·A )</button>
-          <button class="quiz-opt">max over a discrete action table (like DQN)</button>
+          <button class="quiz-opt">對離散動作表取 max（像 DQN）</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="06-policy-search-1.html"><span class="dir">← Previous</span><span class="title">Week 6 · Gradient-free</span></a>
-        <a href="10-actor-critic.html"><span class="dir">Next</span><span class="title">Week 10 · Actor-Critic</span></a>
+        <a href="06-policy-search-1.html"><span class="dir">← 上一課</span><span class="title">第 6 週 · 無梯度</span></a>
+        <a href="10-actor-critic.html"><span class="dir">下一課</span><span class="title">第 10 週 · Actor-Critic</span></a>
       </nav>
     </article>
   </div>

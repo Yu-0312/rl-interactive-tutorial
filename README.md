@@ -1,57 +1,53 @@
-# Interactive Reinforcement Learning Tutorial
+# 強化學習互動教學
 
-A hands-on, week-by-week interactive course companion covering a full RL syllabus —
-from dynamic programming and tabular TD methods to DQN/Rainbow, PPO, actor-critic,
-inverse RL, multi-agent RL, and model-based methods.
+一份可互動、可動手跑的強化學習（Reinforcement Learning, RL）課程教材，涵蓋完整 18 週課綱：
+從動態規劃與表格型 TD 方法，到 DQN/Rainbow、PPO、Actor-Critic、逆強化學習、多智能體與基於模型的 RL。
 
-**Live locally:** open `index.html` in a browser (or serve the folder).
+**在 GitHub Pages 上瀏覽：** 啟用 Pages 後開啟專案首頁。
+
+**在本機開啟：**
 
 ```bash
 cd rl-interactive-tutorial
 python3 -m http.server 8080
-# visit http://localhost:8080
+# 瀏覽器開啟 http://localhost:8080
 ```
 
-## What's inside
+## 課程內容
 
-| Week | Topic | Interactive |
-|------|--------|-------------|
-| 1 | Course overview & environment setup | Checklist |
-| 2 | Policy Iteration & Value Iteration | **GridWorld DP demo** |
-| 3 | SARSA & Q-learning | **Cliff World demo** |
-| 4 | Function approximation (linear FA) | **Tile-coding TD demo** |
-| 5 | DQN & Rainbow | **Target-network toy** |
-| 6 | Gradient-free policy search (ERL, CEM-RL) | — |
-| 7 | REINFORCE & PPO | **PPO clip objective** |
-| 8–9 | Term project proposals | Planning |
-| 10 | Actor-critic (DDPG, TD3, SAC, REDQ) | **Twin-critic min demo** |
-| 11 | Inverse RL & human preferences | — |
-| 12 | Multi-agent RL (MADDPG, MAML) | — |
-| 13 | Model-based RL (ME-TRPO, Dreamer) | — |
-| 14 | Design of experiments | Checklist |
-| 15–18 | Presentations & report writing | — |
+| 週次 | 主題 | 互動 |
+|------|------|------|
+| 1 | 課程導覽與環境設定 | 清單 |
+| 2 | 策略迭代與價值迭代 | **GridWorld DP 演示** |
+| 3 | SARSA 與 Q-learning | **懸崖世界演示** |
+| 4 | 函數近似（線性 FA） | **Tile coding TD** |
+| 5 | DQN 與 Rainbow | **目標網路示範** |
+| 6 | 無梯度策略搜尋（ERL、CEM-RL） | — |
+| 7 | REINFORCE 與 PPO | **PPO clip 目標** |
+| 8–9 | 學期專題提案 | 規劃 |
+| 10 | Actor-Critic（DDPG、TD3、SAC、REDQ） | **雙 Q 取最小演示** |
+| 11 | 逆強化學習與人類偏好 | — |
+| 12 | 多智能體強化學習（MADDPG、MAML） | — |
+| 13 | 基於模型的 RL（ME-TRPO、Dreamer） | — |
+| 14 | 實驗設計 | 清單 |
+| 15–18 | 專題報告與寫作 | — |
 
-Each lesson includes:
+每課包含：公式說明、可逐步執行的 Canvas 演示、比較表、工程實務建議，以及小測驗（進度存在瀏覽器 `localStorage`）。
 
-- Clear math (Bellman, TD targets, policy gradient, PPO-clip, …)
-- Live canvas demos you can step / train
-- Comparison tables and engineering tips
-- A short quiz (progress saved in `localStorage`)
+## 技術
 
-## Stack
+- 純 HTML / CSS / JS，無需建置
+- Canvas 視覺化位於 `js/`
+- 可離線使用，適合 GitHub Pages
 
-- Vanilla HTML / CSS / JS — no build step
-- Canvas visualizations in `js/`
-- Works offline; safe to host on GitHub Pages
+## 建議學習路徑
 
-## Suggested path
+1. 安裝 `gymnasium`、`numpy`，可選 `torch`
+2. 讀第 1 週，把第 2–3 週演示跑到策略穩定
+3. 自行在 `CliffWalking-v0` 實作 Q-learning
+4. 續學策略梯度 / Actor-Critic
+5. 用第 14 週的實驗清單做學期專題
 
-1. Install `gymnasium`, `numpy`, and optionally `torch`.
-2. Read Week 1, run the Week 2–3 demos until policies stabilize.
-3. Implement Q-learning on `CliffWalking-v0` yourself.
-4. Continue through policy gradient / actor-critic weeks.
-5. Use Week 14’s experiment checklist for your term project.
+## 授權
 
-## License
-
-Free to use for study and teaching. Contributions welcome.
+自由使用於學習與教學。

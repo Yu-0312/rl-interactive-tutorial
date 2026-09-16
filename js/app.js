@@ -40,13 +40,13 @@
       <div class="inner">
         <a class="brand" href="${relRoot()}index.html">
           <span class="brand-mark">RL</span>
-          <span>Interactive RL Course</span>
+          <span>強化學習互動教學</span>
         </a>
         <nav class="nav-links">
-          <a href="${relRoot()}index.html#syllabus" class="${active === "home" ? "active" : ""}">Syllabus</a>
-          <a href="${relRoot()}index.html#path" class="hide-sm">Learning Path</a>
-          <a href="${relRoot()}lessons/02-introduction.html">Start Week 2</a>
-          <a href="${relRoot()}index.html#progress">Progress <span id="nav-progress">0%</span></a>
+          <a href="${relRoot()}index.html#syllabus" class="${active === "home" ? "active" : ""}">課綱</a>
+          <a href="${relRoot()}index.html#path" class="hide-sm">學習路徑</a>
+          <a href="${relRoot()}lessons/02-introduction.html">開始第 2 週</a>
+          <a href="${relRoot()}index.html#progress">進度 <span id="nav-progress">0%</span></a>
         </nav>
       </div>`;
     const p = document.getElementById("nav-progress");
@@ -71,7 +71,7 @@
           if (idx === answer) {
             btn.classList.add("correct");
             if (feedback) {
-              feedback.textContent = quiz.dataset.ok || "Correct. Nice work.";
+              feedback.textContent = quiz.dataset.ok || "答對了！";
               feedback.className = "quiz-feedback ok";
             }
             const lesson = document.body.dataset.lesson;
@@ -83,7 +83,7 @@
             btn.classList.add("wrong");
             buttons[answer]?.classList.add("correct");
             if (feedback) {
-              feedback.textContent = quiz.dataset.no || "Not quite — the correct option is highlighted.";
+              feedback.textContent = quiz.dataset.no || "再想想——正確選項已標示。";
               feedback.className = "quiz-feedback no";
             }
           }

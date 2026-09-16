@@ -1,117 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 14 · Design of Experiments — Interactive RL</title>
+  <title>第 14 週 · 實驗設計 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="14">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#doe">Why DoE in RL</a>
-      <a href="#baselines">Baselines</a>
-      <a href="#stats">Statistics</a>
-      <a href="#logging">Logging</a>
-      <a href="#report">Report structure</a>
-      <a href="#checklist">Project checklist</a>
+      <a href="#doe">為何 DoE</a>
+      <a href="#baselines">基線</a>
+      <a href="#stats">統計</a>
+      <a href="#logging">記錄</a>
+      <a href="#report">報告結構</a>
+      <a href="#checklist">專題清單</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 14</div>
-      <h1>Wrap-up: Working with RL (Design of Experiments)</h1>
+      <div class="week-label">第 14 週</div>
+      <h1>總結：如何做好 RL（實驗設計）</h1>
       <p>
-        Most RL project failures are not “wrong equation” failures — they are
-        <strong>uncontrolled variance</strong>, weak baselines, and missing ablations.
+        多數 RL 專題失敗不是「公式寫錯」，而是
+        <strong>變異不受控</strong>、基線太弱、缺少消融。
       </p>
 
-      <h2 id="doe">Design before you train</h2>
+      <h2 id="doe">先設計，再訓練</h2>
       <ul>
-        <li><strong>Question</strong>: one sentence on the hypothesis (“X improves sample efficiency on Y”).</li>
-        <li><strong>Factors</strong>: algorithm, seeds, env suite, hyperparameters you will sweep.</li>
-        <li><strong>Metrics</strong>: final return, AUC of learning curve, wall-clock, env steps.</li>
-        <li><strong>Budget</strong>: how many runs you can afford; prioritize seeds over shiny variants.</li>
+        <li><strong>問題</strong>：一句話假設（「X 在 Y 上提升樣本效率」）。</li>
+        <li><strong>因子</strong>：演算法、種子、環境套件、要掃的超參數。</li>
+        <li><strong>指標</strong>：最終回報、學習曲線 AUC、牆鐘時間、環境步數。</li>
+        <li><strong>預算</strong>：能負擔多少 run；寧可多種子也不要華麗變體。</li>
       </ul>
 
-      <h2 id="baselines">Baselines that matter</h2>
+      <h2 id="baselines">重要的基線</h2>
       <ol>
-        <li>Random policy / scripted heuristic.</li>
-        <li>Canonical model-free baseline (PPO or SAC) with published defaults.</li>
-        <li>Ablation of <em>your</em> contribution (remove one component).</li>
-        <li>Optional: a recent paper’s numbers — only if envs/metrics match.</li>
+        <li>隨機策略 / 腳本啟發式。</li>
+        <li>經典無模型基線（PPO 或 SAC）+ 論文預設。</li>
+        <li><em>你的</em>貢獻的消融（拿掉一個元件）。</li>
+        <li>可選：近期論文數字——僅當環境/指標一致。</li>
       </ol>
 
-      <h2 id="stats">Statistics without self-deception</h2>
+      <h2 id="stats">統計，但不要自欺</h2>
       <ul>
-        <li><strong>≥5 seeds</strong> for main claims (10+ if cheap).</li>
-        <li>Plot mean ± shaded std/sem; never a single cherry-picked run.</li>
-        <li>Report IQM / median when outliers dominate (rliable-style).</li>
-        <li>Pre-register which comparisons are confirmatory vs exploratory.</li>
+        <li><strong>≥5 個種子</strong>支撐主結論（便宜則 10+）。</li>
+        <li>畫 mean ± std/sem 陰影；絕不只秀一條挑過的 run。</li>
+        <li>離群值多時報告 IQM / 中位數（rliable 風格）。</li>
+        <li>先聲明哪些比較是驗證性、哪些是探索性。</li>
       </ul>
-      <div class="formula">AUC = Σ<sub>t</sub> return(t) &nbsp;→&nbsp; rewards learning speed, not only the endpoint</div>
+      <div class="formula">AUC = Σ<sub>t</sub> return(t) &nbsp;→&nbsp; 衡量學習速度，不只終點</div>
 
-      <h2 id="logging">Logging hygiene</h2>
+      <h2 id="logging">記錄衛生</h2>
       <table class="cmp">
-        <thead><tr><th>Log</th><th>Why</th></tr></thead>
+        <thead><tr><th>記錄</th><th>原因</th></tr></thead>
         <tbody>
-          <tr><td>seed, git SHA, config</td><td>Reproducibility</td></tr>
-          <tr><td>env steps &amp; wall time</td><td>Sample vs compute efficiency</td></tr>
-          <tr><td>losses, entropy, KL, Q-mean</td><td>Diagnose divergence / collapse</td></tr>
-          <tr><td>eval returns (ε=0)</td><td>Decouple exploration noise from skill</td></tr>
+          <tr><td>seed、git SHA、config</td><td>可重現</td></tr>
+          <tr><td>環境步 &amp; 牆鐘</td><td>樣本 vs 算力效率</td></tr>
+          <tr><td>損失、熵、KL、Q 均值</td><td>診斷發散 / 崩潰</td></tr>
+          <tr><td>評估回報（ε=0）</td><td>把探索雜訊與技巧解耦</td></tr>
         </tbody>
       </table>
 
-      <h2 id="report">Report / paper skeleton</h2>
+      <h2 id="report">報告 / 論文骨架</h2>
       <ol>
-        <li>Problem &amp; claim</li>
-        <li>Related work (3–5 lines)</li>
-        <li>Method (equations + one figure)</li>
-        <li>Experimental setup (envs, budget, seeds)</li>
-        <li>Results + ablations</li>
-        <li>Limitations (be specific)</li>
+        <li>問題與主張</li>
+        <li>相關工作（3–5 行）</li>
+        <li>方法（公式 + 一張圖）</li>
+        <li>實驗設定（環境、預算、種子）</li>
+        <li>結果 + 消融</li>
+        <li>限制（要具體）</li>
       </ol>
 
-      <h2 id="checklist">Term project checklist</h2>
+      <h2 id="checklist">學期專題清單</h2>
       <div class="grid grid-2">
         <div class="card">
-          <h3>Proposal (Weeks 8–9)</h3>
-          <p>Topic, baseline, success metric, compute plan, risk list.</p>
+          <h3>提案（第 8–9 週）</h3>
+          <p>主題、基線、成功指標、算力計畫、風險清單。</p>
         </div>
         <div class="card">
-          <h3>Presentation (Weeks 15–16)</h3>
-          <p>8–12 slides: problem, method, curves, one surprising failure, next step.</p>
+          <h3>發表（第 15–16 週）</h3>
+          <p>8–12 頁投影片：問題、方法、曲線、一個意外失敗、下一步。</p>
         </div>
         <div class="card">
-          <h3>Report (Weeks 17–18)</h3>
-          <p>Repro appendix: command lines, hyperparameters, seeds, hardware.</p>
+          <h3>報告（第 17–18 週）</h3>
+          <p>可重現附錄：指令、超參數、種子、硬體。</p>
         </div>
         <div class="card">
-          <h3>Code release</h3>
-          <p>README with install, one-click train, and expected runtime on a laptop GPU/CPU.</p>
+          <h3>程式釋出</h3>
+          <p>README：安裝、一鍵訓練、筆電 GPU/CPU 預估時間。</p>
         </div>
       </div>
 
       <div class="callout tip">
-        <strong>Self-regulated learning.</strong> In the final writing weeks, timebox experiments:
-        morning — run jobs; afternoon — write what you already know; evening — one small figure.
-        Never write only after “all experiments finish.”
+        <strong>自主學習。</strong> 最後寫作週要給實驗設時間盒：
+        早上跑 jobs；下午寫已知內容；晚上做一張小圖。
+        不要等「所有實驗結束」才開始寫。
       </div>
 
-      <div class="quiz" data-answer="0" data-ok="Yes — single-seed RL curves are often luck, not skill." data-no="Variance across seeds is huge in RL.">
-        <h3>Quick check</h3>
-        <div class="q">Why run multiple random seeds?</div>
+      <div class="quiz" data-answer="0" data-ok="對——單種子 RL 曲線常是運氣，不是實力。" data=no="RL 跨種子變異非常大。">
+        <h3>快速檢核</h3>
+        <div class="q">為何要跑多個隨機種子？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">RL training is high-variance; one run can mislead</button>
-          <button class="quiz-opt">More seeds always reduce wall-clock time</button>
-          <button class="quiz-opt">Seeds change the algorithm class</button>
-          <button class="quiz-opt">It is required only for supervised learning</button>
+          <button class="quiz-opt">RL 訓練變異大，單次 run 可能誤導</button>
+          <button class="quiz-opt">多種子一定縮短牆鐘時間</button>
+          <button class="quiz-opt">種子會改變演算法類別</button>
+          <button class="quiz-opt">只有監督式學習才需要</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="13-model-based.html"><span class="dir">← Previous</span><span class="title">Week 13 · Model-based</span></a>
-        <a href="../index.html"><span class="dir">Hub</span><span class="title">Back to syllabus</span></a>
+        <a href="13-model-based.html"><span class="dir">← 上一課</span><span class="title">第 13 週 · 模型式</span></a>
+        <a href="../index.html"><span class="dir">首頁</span><span class="title">回到課綱</span></a>
       </nav>
     </article>
   </div>

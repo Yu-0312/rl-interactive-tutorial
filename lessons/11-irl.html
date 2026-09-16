@@ -1,85 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 11 · Inverse RL — Interactive RL</title>
+  <title>第 11 週 · 逆強化學習 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="11">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#irl">What is IRL?</a>
-      <a href="#pipeline">Classic IRL</a>
-      <a href="#pref">Learning from preferences</a>
-      <a href="#rlhf">RLHF pipeline</a>
-      <a href="#pitfalls">Pitfalls</a>
+      <a href="#irl">什麼是 IRL</a>
+      <a href="#pipeline">經典 IRL</a>
+      <a href="#pref">從偏好學習</a>
+      <a href="#rlhf">RLHF 流程</a>
+      <a href="#pitfalls">常見陷阱</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 11</div>
-      <h1>Inverse Reinforcement Learning</h1>
+      <div class="week-label">第 11 週</div>
+      <h1>逆強化學習（Inverse RL）</h1>
       <p>
-        Forward RL: reward → optimal policy. <strong>IRL</strong>: demonstrations or preferences →
-        recover a reward that <em>explains</em> the behavior, then (optionally) optimize it.
+        正向 RL：獎勵 → 最優策略。<strong>IRL</strong>：示範或偏好 →
+        恢復一個能<em>解釋</em>該行為的獎勵，然後（可選）對其優化。
       </p>
 
-      <h2 id="irl">Problem statement</h2>
-      <p>Given expert trajectories τ<sub>E</sub>, find R such that expert is (near-)optimal under R.</p>
+      <h2 id="irl">問題定義</h2>
+      <p>給定專家軌跡 τ<sub>E</sub>，找出 R 使專家在 R 下（近似）最優。</p>
       <ul>
-        <li>Reward is only identifiable up to shaping potentials and constants.</li>
-        <li>Many rewards rationalize the same policy — need priors / regularization.</li>
+        <li>獎勵只在塑形勢函數與常數意義下可辨識。</li>
+        <li>許多獎勵可合理化同一策略——需要先驗 / 正則化。</li>
       </ul>
 
-      <h2 id="pipeline">Classic algorithms</h2>
+      <h2 id="pipeline">經典演算法</h2>
       <ul>
-        <li><strong>MaxEnt IRL</strong>: match feature expectations under a soft-optimal distribution.</li>
-        <li><strong>Apprenticeship learning</strong>: match feature counts; game with RL oracle.</li>
-        <li><strong>GAIL / AIRL</strong>: adversarial imitation — discriminate expert vs agent states/actions.</li>
+        <li><strong>MaxEnt IRL</strong>：在軟最優分佈下匹配特徵期望。</li>
+        <li><strong>Apprenticeship learning</strong>：匹配特徵計數；與 RL oracle 對弈。</li>
+        <li><strong>GAIL / AIRL</strong>：對抗式模仿——區分專家與智能體的狀態/動作。</li>
       </ul>
       <div class="callout tip">
-        <strong>Imitation vs IRL.</strong> Behavioral cloning maps states → actions and suffers
-        compounding error. IRL/IL methods use on-policy rollouts to correct distribution shift (DAgger family).
+        <strong>模仿 vs IRL。</strong> 行為克隆（BC）做狀態→動作映射，會有誤差複合。
+        IRL/IL 方法用 on-policy rollout 修正分佈偏移（DAgger 家族）。
       </div>
 
-      <h2 id="pref">Deep RL from human preferences</h2>
+      <h2 id="pref">從人類偏好做深度 RL</h2>
       <p>
-        Instead of full demonstrations, show a human two trajectory clips and ask which is better.
-        Fit a preference model (e.g. Bradley–Terry on a learned reward $\hat{R}_\psi$):
+        不必給完整示範，給人類兩段軌跡片段問哪個更好。
+        用 Bradley–Terry 擬合偏好模型（在學到的 $\hat{R}_\psi$ 上）：
       </p>
       <div class="formula">P(τ¹ ≻ τ²) = σ( Σ t̂ r<sub>ψ</sub>(s,a)<sub>t¹</sub> − Σ t̂ r<sub>ψ</sub>(s,a)<sub>t²</sub> )</div>
-      <p>Then run RL against $\hat{R}_\psi$.</p>
+      <p>然後對 $\hat{R}_\psi$ 跑 RL。</p>
 
-      <h2 id="rlhf">RLHF at a glance (LLMs)</h2>
+      <h2 id="rlhf">RLHF 概覽（LLM）</h2>
       <ol>
-        <li><strong>SFT</strong>: supervised fine-tune on high-quality answers.</li>
-        <li><strong>Reward model</strong>: train on pairwise human/AI preference labels.</li>
-        <li><strong>RL (PPO / DPO variants)</strong>: optimize policy against RM with KL to SFT reference.</li>
+        <li><strong>SFT</strong>：在高品質答案上監督微調。</li>
+        <li><strong>獎勵模型</strong>：用人類/AI 成對偏好標籤訓練。</li>
+        <li><strong>RL（PPO / DPO 變體）</strong>：對 RM 優化策略，並對 SFT 參考加 KL。</li>
       </ol>
 
-      <h2 id="pitfalls">Pitfalls</h2>
+      <h2 id="pitfalls">陷阱</h2>
       <ul>
-        <li><strong>Reward hacking</strong>: agent exploits RM errors (Goodhart).</li>
-        <li><strong>Preference noise</strong>: labelers disagree; need ensembles / uncertainty.</li>
-        <li><strong>Distribution shift</strong>: RM only trained on seen policy regions.</li>
-        <li><strong>Sycophancy / over-optimization</strong>: KL and early stopping matter.</li>
+        <li><strong>獎勵駭入</strong>：智能體利用 RM 錯誤（Goodhart）。</li>
+        <li><strong>偏好雜訊</strong>：標註者不一致；需要集成 / 不確定性。</li>
+        <li><strong>分佈偏移</strong>：RM 只在見過的策略區域訓練。</li>
+        <li><strong>過度優化</strong>：KL 與 early stopping 很重要。</li>
       </ul>
 
-      <div class="quiz" data-answer="1" data-ok="Correct — IRL infers reward from behavior/preferences, then (often) runs RL." data-no="IRL is the reverse direction of standard RL.">
-        <h3>Quick check</h3>
-        <div class="q">What does IRL recover?</div>
+      <div class="quiz" data-answer="1" data-ok="正確——IRL 從行為/偏好推斷獎勵，之後常再跑 RL。" data-no="IRL 是標準 RL 的反方向。">
+        <h3>快速檢核</h3>
+        <div class="q">IRL 要恢復什麼？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">The exact environment transition kernel P</button>
-          <button class="quiz-opt">A reward function that explains expert behavior</button>
-          <button class="quiz-opt">A tabular value function without a policy</button>
-          <button class="quiz-opt">Only the discount factor γ</button>
+          <button class="quiz-opt">精確的環境轉移核 P</button>
+          <button class="quiz-opt">能解釋專家行為的獎勵函數</button>
+          <button class="quiz-opt">沒有策略的表格型價值函數</button>
+          <button class="quiz-opt">只有折扣因子 γ</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="10-actor-critic.html"><span class="dir">← Previous</span><span class="title">Week 10 · Actor-Critic</span></a>
-        <a href="12-multi-agent.html"><span class="dir">Next</span><span class="title">Week 12 · Multi-agent</span></a>
+        <a href="10-actor-critic.html"><span class="dir">← 上一課</span><span class="title">第 10 週 · Actor-Critic</span></a>
+        <a href="12-multi-agent.html"><span class="dir">下一課</span><span class="title">第 12 週 · 多智能體</span></a>
       </nav>
     </article>
   </div>

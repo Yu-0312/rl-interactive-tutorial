@@ -1,115 +1,114 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Week 4 · Function Approximation — Interactive RL</title>
+  <title>第 4 週 · 函數近似 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="4">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#why">Why approximate</a>
-      <a href="#linear">Linear FA</a>
-      <a href="#update">Semi-gradient updates</a>
-      <a href="#demo">Tile coding demo</a>
-      <a href="#danger">Divergence risks</a>
+      <a href="#why">為何近似</a>
+      <a href="#linear">線性 FA</a>
+      <a href="#update">半梯度更新</a>
+      <a href="#demo">Tile coding 演示</a>
+      <a href="#danger">發散風險</a>
     </aside>
     <article class="prose">
-      <div class="week-label">Week 4 · Interactive</div>
-      <h1>Function Approximation</h1>
+      <div class="week-label">第 4 週 · 互動</div>
+      <h1>函數近似（Function Approximation）</h1>
       <p>
-        Tabular methods store a number per state(-action). Real problems have astronomical
-        state spaces — we instead <strong>parameterize</strong> $Q(s,a;\theta)$ or $V(s;\theta)$
-        and update θ from samples.
+        表格型方法為每個狀態（-動作）存一個數。真實問題狀態空間天文數字——我們改為
+        <strong>參數化</strong> $Q(s,a;\theta)$ 或 $V(s;\theta)$，從樣本更新 θ。
       </p>
 
-      <h2 id="why">Why approximate?</h2>
+      <h2 id="why">為何要近似？</h2>
       <ul>
-        <li>Generalize: nearby states share information.</li>
-        <li>Memory: store weights, not a table.</li>
-        <li>Continuous states: positions, velocities, pixels.</li>
+        <li>泛化：相近狀態共享資訊。</li>
+        <li>記憶：存權重，而不是整張表。</li>
+        <li>連續狀態：位置、速度、像素。</li>
       </ul>
 
-      <h2 id="linear">Linear function approximation</h2>
+      <h2 id="linear">線性函數近似</h2>
       <div class="formula">v̂(s, w) = φ(s)ᵀ w = Σᵢ φᵢ(s) wᵢ</div>
       <p>
-        Features φ can be <strong>polynomials</strong>, <strong>RBFs</strong>, or
-        <strong>tile coding</strong> (multiple overlapping tilings). Linear FA is convex in w for
-        prediction — nice theory — but control with bootstrapping can still diverge.
+        特徵 φ 可以是<strong>多項式</strong>、<strong>RBF</strong>，或
+        <strong>tile coding</strong>（多層重疊分塊）。預測問題上線性 FA 對 w 是凸的——理論漂亮——
+        但用 bootstrap 做控制仍可能發散。
       </p>
 
-      <h2 id="update">Semi-gradient TD / Q-learning</h2>
-      <p>TD(0) for V:</p>
+      <h2 id="update">半梯度 TD / Q-learning</h2>
+      <p>V 的 TD(0)：</p>
       <div class="formula">w ← w + α [ R + γ v̂(S', w) − v̂(S, w) ] ∇<sub>w</sub> v̂(S, w)</div>
-      <p>Linear FA Q-learning (state-action features φ(s,a)):</p>
+      <p>線性 FA Q-learning（狀態-動作特徵 φ(s,a)）：</p>
       <div class="formula">w ← w + α [ R + γ max<sub>a'</sub> q̂(S', a'; w) − q̂(S, a; w) ] φ(S, a)</div>
       <div class="callout tip">
-        <strong>Semi-gradient</strong> means we do not backprop through the target network/value.
-        That’s intentional (stability, like later DQN targets) but weaker than true gradient TD.
+        <strong>半梯度</strong>表示我們不對目標網路/價值做反向傳播。
+        這是刻意的（穩定性，類似之後 DQN 的目標），但弱於真正的梯度 TD。
       </div>
 
-      <h2 id="demo">Interactive: tile-coded value learning</h2>
+      <h2 id="demo">互動：tile-coded 價值學習</h2>
       <p>
-        1D “track” environment. Agent starts at a random position, takes velocity actions,
-        and aims for the right goal. We learn $V(s)$ with overlapping tilings.
+        一維「軌道」環境。智能體從隨機位置出發，施加速度動作，目標是右端。
+        我們用重疊 tiling 學 $V(s)$。
       </p>
 
       <div class="demo">
         <div class="demo-head">
-          <h3><span class="badge">Interactive</span> Linear FA TD(0)</h3>
+          <h3><span class="badge">互動</span> 線性 FA TD(0)</h3>
           <div class="controls">
             <label>Tilings <input type="range" id="fa-tilings" min="1" max="8" step="1" value="4" /> <span id="fa-tilings-v">4</span></label>
             <label>α <input type="range" id="fa-alpha" min="0.01" max="0.4" step="0.01" value="0.1" /> <span id="fa-alpha-v">0.10</span></label>
             <label>γ <input type="range" id="fa-gamma" min="0.7" max="0.99" step="0.01" value="0.9" /> <span id="fa-gamma-v">0.90</span></label>
-            <button class="btn btn-primary btn-sm" id="fa-ep">Train 1 episode</button>
-            <button class="btn btn-ghost btn-sm" id="fa-200">Train 200</button>
-            <button class="btn btn-ghost btn-sm" id="fa-reset">Reset</button>
+            <button class="btn btn-primary btn-sm" id="fa-ep">訓練 1 回合</button>
+            <button class="btn btn-ghost btn-sm" id="fa-200">訓練 200</button>
+            <button class="btn btn-ghost btn-sm" id="fa-reset">重置</button>
           </div>
         </div>
         <div class="canvas-wrap">
           <canvas id="fa-canvas" width="640" height="300"></canvas>
         </div>
         <div class="demo-stats">
-          <div class="stat"><span class="k">Episodes</span><span class="v" id="fa-episodes">0</span></div>
-          <div class="stat"><span class="k">Last steps</span><span class="v" id="fa-steps">—</span></div>
+          <div class="stat"><span class="k">回合數</span><span class="v" id="fa-episodes">0</span></div>
+          <div class="stat"><span class="k">上一回合步數</span><span class="v" id="fa-steps">—</span></div>
           <div class="stat"><span class="k">‖w‖</span><span class="v" id="fa-norm">0.00</span></div>
         </div>
       </div>
 
-      <h2 id="danger">Deadly triad (preview)</h2>
-      <p>Bootstrapping + function approximation + off-policy can diverge. DQN’s fixes (target networks, replay) attack this — Week 5.</p>
+      <h2 id="danger">致命三合組（預告）</h2>
+      <p>Bootstrapping + 函數近似 + 離政策可能發散。DQN 的修法（目標網路、replay）正是針對此——第 5 週。</p>
       <ul>
-        <li><strong>Bootstrapping</strong>: targets use current estimates.</li>
-        <li><strong>FA</strong>: generalization couples updates.</li>
-        <li><strong>Off-policy</strong>: distribution mismatch.</li>
+        <li><strong>Bootstrapping</strong>：目標使用當前估計。</li>
+        <li><strong>FA</strong>：泛化讓更新互相耦合。</li>
+        <li><strong>離政策</strong>：分佈不匹配。</li>
       </ul>
 
       <table class="cmp">
-        <thead><tr><th>Method</th><th>Update</th><th>Notes</th></tr></thead>
+        <thead><tr><th>方法</th><th>更新</th><th>備註</th></tr></thead>
         <tbody>
-          <tr><td>Linear FA Q-learning</td><td>φ(s,a) × TD error with max</td><td>Simple, can diverge</td></tr>
-          <tr><td>Linear FA SARSA</td><td>φ(s,a) × TD error with next action</td><td>On-policy, often stabler</td></tr>
-          <tr><td>Gradient TD</td><td>True gradient of projected Bellman error</td><td>More theory, less used in deep RL</td></tr>
+          <tr><td>線性 FA Q-learning</td><td>φ(s,a) × 帶 max 的 TD 誤差</td><td>簡單，可能發散</td></tr>
+          <tr><td>線性 FA SARSA</td><td>φ(s,a) × 下一動作的 TD 誤差</td><td>同政策，常更穩</td></tr>
+          <tr><td>梯度 TD</td><td>投影 Bellman 誤差的真梯度</td><td>理論多，深度 RL 較少用</td></tr>
         </tbody>
       </table>
 
-      <div class="quiz" data-answer="1" data-ok="Right — features let nearby states share parameters." data-no="Think generalization and memory.">
-        <h3>Quick check</h3>
-        <div class="q">Main benefit of function approximation over tables?</div>
+      <div class="quiz" data-answer="1" data-ok="沒錯——特徵讓相近狀態共享參數。" data=no="想想泛化與記憶。">
+        <h3>快速檢核</h3>
+        <div class="q">函數近似相對表格的主要好處？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">It removes the need for exploration</button>
-          <button class="quiz-opt">Generalization across similar states with fewer parameters</button>
-          <button class="quiz-opt">It always converges faster in wall-clock time</button>
-          <button class="quiz-opt">It eliminates the need for a discount factor</button>
+          <button class="quiz-opt">不需要探索</button>
+          <button class="quiz-opt">以更少參數在相似狀態間泛化</button>
+          <button class="quiz-opt">牆鐘時間一定更快收斂</button>
+          <button class="quiz-opt">可以不用折扣因子</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="03-model-free.html"><span class="dir">← Previous</span><span class="title">Week 3 · TD methods</span></a>
-        <a href="05-deep-rl.html"><span class="dir">Next</span><span class="title">Week 5 · DQN &amp; Rainbow</span></a>
+        <a href="03-model-free.html"><span class="dir">← 上一課</span><span class="title">第 3 週 · TD 方法</span></a>
+        <a href="05-deep-rl.html"><span class="dir">下一課</span><span class="title">第 5 週 · DQN 與 Rainbow</span></a>
       </nav>
     </article>
   </div>
