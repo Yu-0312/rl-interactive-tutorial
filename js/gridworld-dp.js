@@ -209,7 +209,7 @@
     function refreshUI() {
       iterEl.textContent = String(grid.iter);
       deltaEl.textContent = grid.delta === Infinity ? "—" : RL.formatNum(grid.delta, 4);
-      statusEl.textContent = grid.done ? "Converged" : timer ? "Running…" : "Ready";
+      statusEl.textContent = grid.done ? "已收斂" : timer ? "執行中…" : "就緒";
       draw(grid, gamma());
     }
 
@@ -231,7 +231,7 @@
       if (timer) {
         clearInterval(timer);
         timer = null;
-        statusEl.textContent = grid.done ? "Converged" : "Paused";
+        statusEl.textContent = grid.done ? "已收斂" : "已暫停";
         return;
       }
       timer = setInterval(() => {

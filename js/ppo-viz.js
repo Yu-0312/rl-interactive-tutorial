@@ -23,7 +23,7 @@
     const active = Math.abs(rSel - 1) > eps - 1e-9 && Math.abs(raw - obj) > 1e-9;
     document.getElementById("ppo-raw").textContent = raw.toFixed(3);
     document.getElementById("ppo-obj").textContent = obj.toFixed(3);
-    document.getElementById("ppo-active").textContent = active ? "YES" : "no";
+    document.getElementById("ppo-active").textContent = active ? "是" : "否";
 
     const W = 640, H = 300;
     const ctx = RL.fitCanvas(canvas, W, H);
