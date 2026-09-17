@@ -1,17 +1,24 @@
 # 強化學習互動教學
 
-一份可互動、可動手跑的強化學習（Reinforcement Learning, RL）課程教材，涵蓋完整 18 週課綱：
-從動態規劃與表格型 TD 方法，到 DQN/Rainbow、PPO、Actor-Critic、逆強化學習、多智能體與基於模型的 RL。
+一份可互動、可動手跑的強化學習（Reinforcement Learning, RL）課程教材，涵蓋完整 18 週課綱：從動態規劃與表格型 TD 方法，到 DQN/Rainbow、PPO、Actor-Critic、逆強化學習、多智能體與基於模型的 RL。
+
+[![Lessons](https://img.shields.io/badge/lessons-18%20weeks-4ADE80)](lessons/)
+[![Stack](https://img.shields.io/badge/HTML%20·%20CSS%20·%20JS-零建置-38BDF8)]()
+[![License](https://img.shields.io/badge/License-free%20for%20learning-A78BFA)]()
 
 **在 GitHub Pages 上瀏覽：** 啟用 Pages 後開啟專案首頁。
-
-**在本機開啟：**
 
 ```bash
 cd rl-interactive-tutorial
 python3 -m http.server 8080
 # 瀏覽器開啟 http://localhost:8080
 ```
+
+<p align="center">
+  <img src="assets/course-map.svg" alt="強化學習互動教學課程地圖：從表格型基礎到深度 RL、進階方法與專題" width="100%">
+</p>
+
+---
 
 ## 課程內容
 
@@ -34,11 +41,7 @@ python3 -m http.server 8080
 
 每課包含：公式說明、可逐步執行的 Canvas 演示、比較表、工程實務建議，以及小測驗（進度存在瀏覽器 `localStorage`）。
 
-## 技術
-
-- 純 HTML / CSS / JS，無需建置
-- Canvas 視覺化位於 `js/`
-- 可離線使用，適合 GitHub Pages
+---
 
 ## 建議學習路徑
 
@@ -47,6 +50,16 @@ python3 -m http.server 8080
 3. 自行在 `CliffWalking-v0` 實作 Q-learning
 4. 續學策略梯度 / Actor-Critic
 5. 用第 14 週的實驗清單做學期專題
+
+---
+
+## 技術
+
+- 純 HTML / CSS / JS，無需建置
+- Canvas 視覺化位於 `js/`
+- 可離線使用，適合 GitHub Pages
+
+---
 
 ## 授權
 
