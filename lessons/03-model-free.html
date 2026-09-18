@@ -37,19 +37,22 @@
         <span class="hi">探索</span> → 得到經驗 → <span class="hi">更新 Q</span> → 利用 → 再探索 → 再更新……
       </div>
 
-      <div class="think">
-        <div class="think-label">小挑戰</div>
+      <div class="quiz challenge" data-answer="1" data-ok="對——只試一次就鎖死，可能永遠不知道其實有更好的路。這就是 Exploration vs Exploitation。" data=no="第一次走 B 拿 +1 不代表 B 最好；往 C 最後可能 +100。所以要探索。">
+        <div class="think-label">小挑戰 · 點選答案</div>
         <div class="mini-map">A → B → 🏆
       ↘ 💀</div>
-        <p class="q">
-          如果 Agent 只允許「試過一次就永遠不再走那條」，會有什麼問題？
-        </p>
+        <p class="q">若 Agent「試過一次就永遠不再走那條」，會怎樣？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">一定更快學會最優路線</button>
+          <button class="quiz-opt">可能找不到真正最好的路，因為早期經驗會鎖死選擇</button>
+          <button class="quiz-opt">完全沒影響，Q 表還是會自動正確</button>
+          <button class="quiz-opt">環境會崩潰，無法再 step</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>它可能找不到真正最好的路。</p>
             <p>例如第一次走 B 拿到 +1，就認定「B 很好」；但其實往 C 最後能拿 +100。</p>
-            <p>所以 RL 有一對核心概念：</p>
             <ul>
               <li><strong>Exploration（探索）</strong>：「我再試試其他選擇，說不定有更好的。」</li>
               <li><strong>Exploitation（利用）</strong>：「我已經知道右邊不錯，那就一直走右邊。」</li>
@@ -90,21 +93,28 @@
         它可以從一次次經驗裡<strong>自己建立出這套策略</strong>。
       </p>
 
-      <div class="think">
-        <div class="think-label">🔥 小挑戰</div>
+      <div class="quiz challenge" data-answer="2" data-ok="正確：純 Exploitation 選右，因為 8 &gt; 3。Q 是長期價值估計，不是立刻獲利。" data-no="比較 Q(A,左)=3 與 Q(A,右)=8。純利用時選 Q 較大的動作=右。">
+        <div class="think-label">🔥 小挑戰 · 點選答案</div>
         <div class="mini-map">Q(A, 左) = 3
 Q(A, 右) = 8</div>
         <p class="q">
           Agent 現在在 A。如果完全不做 Exploration，只做純粹的 Exploitation，
-          它會選哪個？為什麼？
+          它會選哪個？
         </p>
+        <div class="quiz-options">
+          <button class="quiz-opt">左，因為比較安全</button>
+          <button class="quiz-opt">隨機，因為兩個差不多</button>
+          <button class="quiz-opt">右，因為 Q=8 大於 Q=3（長期價值較高）</button>
+          <button class="quiz-opt">兩個都走一半</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
             <p><span class="ok">選右。</span>因為 8 &gt; 3。</p>
             <p>
               這裡有個細節：Q-value 代表「從現在這個狀態採取這個 Action，
-              <em>預期能的長期回報</em>」，不是單純的立刻獲利。
+              <em>預期能得到的長期回報</em>」，不是單純的立刻獲利。
               所以純 exploitation：選目前估計長期價值較高的那個。
             </p>
             <p>
@@ -132,21 +142,34 @@ Q(A, 右) = 8</div>
         </tbody>
       </table>
       <div class="calc">這一回合 Return ≈ −1 −1 −1 −1 +10 = +6</div>
-      <div class="think">
-        <div class="think-label">你想一下</div>
+      <div class="quiz challenge" data-answer="0" data-ok="對——RL 不只學「到終點」，還學「怎麼用更好的方式到終點」。" data=no="比較 +6 與 +7：成功了但走得蠢。Agent 要學的是更好的路徑，不只是到達。">
+        <div class="think-label">你想一下 · 點選答案</div>
         <p class="q">
-          雖然成功了，但 Agent 走得有點蠢。若另一條路是「下→下→右→右」，
-          Return = −1 −1 −1 +10 = +7。<br/>
+          這回合 Return = −1−1−1−1+10 = +6，但走得有點蠢。<br/>
+          另一條「下下右右」= −1−1−1+10 = +7。<br/>
           這告訴我們 RL 不只在學什麼？
         </p>
+        <div class="quiz-options">
+          <button class="quiz-opt">不只「怎麼到終點」，而是「怎麼用更好的方式到終點」</button>
+          <button class="quiz-opt">只要能到終點，路徑完全不重要</button>
+          <button class="quiz-opt">只學「如何永遠不拿 −1」，可以不到終點</button>
+          <button class="quiz-opt">只學環境的物理公式</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>
-              不只是「怎麼到終點？」而是
-              <span class="ok">「怎麼用更好的方式到終點？」</span>
-            </p>
             <p>Agent 每次走完都會更新：「在這個 State 做這個 Action，到底有多好？」</p>
+            <table class="cmp exp-table">
+              <thead><tr><th>Step</th><th>State</th><th>Action</th><th>Reward</th><th>Next</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>S</td><td>上</td><td>−1</td><td>S</td></tr>
+                <tr><td>2</td><td>S</td><td>下</td><td>−1</td><td>下方</td></tr>
+                <tr><td>3</td><td>下方</td><td>下</td><td>−1</td><td>底部</td></tr>
+                <tr><td>4</td><td>底部</td><td>下</td><td>−1</td><td>底部</td></tr>
+                <tr><td>5</td><td>底部</td><td>右</td><td>+10</td><td>🏆</td></tr>
+              </tbody>
+            </table>
           </div>
         </details>
       </div>
@@ -162,19 +185,27 @@ Q(A, 右) = 8</div>
         新的估計目標 = <span class="hi">2 + 0.9 × 10 = 11</span>
       </div>
 
-      <div class="think">
-        <div class="think-label">關鍵釐清</div>
-        <p class="q">Q(A, 右) 是「A 往右的平均獲利」嗎？</p>
+      <div class="quiz challenge" data-answer="1" data-ok="精確說法：Q(A,右) ≈「在 A 選右之後，預期未來能拿多少累積回報」——不是單純平均獲利。" data-no="「平均獲利」不完整。Q 是包含未來的長期價值估計（預期累積回報）。">
+        <div class="think-label">關鍵釐清 · 點選答案</div>
+        <p class="q">Q(A, 右) 比較接近哪一種說法？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">「A 往右」這個動作在資料裡的平均獲利</button>
+          <button class="quiz-opt">「如果現在在 A 且選右，從這個選擇開始預期能得到多少累積回報」</button>
+          <button class="quiz-opt">A 到右邊格子的直線距離</button>
+          <button class="quiz-opt">右邊格子目前顯示的 V 值本身</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看精確說法</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p class="no">不完全是。「平均獲利」的說法容易誤導。</p>
+            <div class="story-chain">
+              某次：Q(右)=5，r=+2，下一狀態最佳 Q=10，γ=0.9<br/>
+              新估計目標 = <span class="hi">2 + 0.9 × 10 = 11</span>
+            </div>
+            <div class="formula">Q(s,a) ← Q(s,a) + α [ r + γ · max<sub>a′</sub> Q(s′,a′) − Q(s,a) ]</div>
             <p>
-              Q(A, 右) 比較接近：
-              <span class="ok">「如果我現在在 A，選擇『右』這個 Action，
-              那麼從這個選擇開始，我預期未來可以得到多少累積回報？」</span>
+              白話：新的 Q = 舊的 Q + 學習率 ×（這次看到的目標 − 舊的 Q）
             </p>
-            <p>所以它不是單純「往右平均拿多少錢」，而是<strong>往右這個決策的長期價值估計</strong>。</p>
           </div>
         </details>
       </div>
@@ -316,17 +347,27 @@ print("狀態編號:", obs)   # 4×12 網格被攤平成 0..47</code></pre>
         </p>
       </div>
 
-      <div class="think">
-        <div class="think-label">理解題</div>
+      <div class="quiz challenge" data-answer="1" data-ok="對——Q-learning 更新用 max Q(s′,a)，所以是離政策（off-policy）。" data-no="看 bootstrap 用的是「實際走的 A′」（SARSA）還是 max Q（Q-learning）。">
+        <div class="think-label">理解題 · 點選答案</div>
         <p class="q">哪一個是離政策（off-policy）方法？為什麼？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">SARSA，因為它會用到下一狀態</button>
+          <button class="quiz-opt">Q-learning，因為它 bootstrap 時取下一格最大的 Q</button>
+          <button class="quiz-opt">ε-greedy，因為它會隨機</button>
+          <button class="quiz-opt">價值迭代，因為它掃描所有狀態</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>
-              <span class="ok">Q-learning</span>，因為它更新時對下一格取
-              <code>max Q(s′,a)</code>，而不是「實際走的 A′」。
-            </p>
             <p>同政策 vs 離政策，取決於你 bootstrap 的是「誰的下一步」。</p>
+            <table class="cmp">
+              <thead><tr><th></th><th>SARSA</th><th>Q-learning</th></tr></thead>
+              <tbody>
+                <tr><td>下一動作</td><td>實際 A′</td><td>max Q(s′,a)</td></tr>
+                <tr><td>類型</td><td>on-policy</td><td>off-policy</td></tr>
+              </tbody>
+            </table>
           </div>
         </details>
       </div>

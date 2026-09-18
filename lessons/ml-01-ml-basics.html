@@ -55,22 +55,19 @@
         <li>重複幾千、幾百萬次。</li>
       </ol>
 
-      <div class="think">
-        <div class="think-label">先想一想</div>
-        <p class="q">
-          下面哪一個比較像監督式學習？為什麼？
-        </p>
-        <ol>
-          <li>A：給 1000 張標好「有病 / 沒病」的 X 光，訓練模型判斷。</li>
-          <li>B：小狗坐下給零食，亂跳沒零食，讓它自己學會坐下。</li>
-        </ol>
+      <div class="quiz challenge" data-answer="0" data-ok="正確：A 是監督式學習（有標籤）；B 是強化學習（靠獎勵試誤）。" data-no="有沒有「標準答案」？A 有有病/沒病標籤 → 監督式；B 只有零食回饋 → RL。">
+        <div class="think-label">先想一想 · 點選答案</div>
+        <p class="q">下面哪一個比較像監督式學習？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">A：1000 張標好「有病/沒病」的 X 光，訓練模型判斷</button>
+          <button class="quiz-opt">B：小狗坐下給零食，亂跳沒零食，讓它自己學</button>
+          <button class="quiz-opt">兩個都是監督式學習</button>
+          <button class="quiz-opt">兩個都不是，因為都用了電腦</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p><span class="ok">A 比較像監督式學習</span>——每一筆資料都有標準答案。</p>
-            <p>
-              B 是<strong>強化學習</strong>：沒有「每一步該做什麼」的答案，只有結果好壞的回饋。
-            </p>
             <table class="cmp">
               <thead><tr><th></th><th>監督式學習</th><th>強化學習</th></tr></thead>
               <tbody>
@@ -100,18 +97,21 @@
         → 預測就愈來愈接近標準答案
       </div>
 
-      <div class="think">
-        <div class="think-label">小挑戰</div>
-        <div class="mini-map">x = 2（輸入）
-模型：ŷ = w · x
-目前 w = 3
-標準答案 y = 10</div>
-        <p class="q">現在的預測 ŷ 是多少？若損失用 (ŷ − y)²，loss 是多少？w 要調大還是調小？</p>
+      <div class="quiz challenge" data-answer="1" data-ok="正確：ŷ=6、loss=16；預測比答案小，w 應調大。" data-no="ŷ = w×x = 3×2 = 6；loss = (6−10)² = 16；要更接近 10 → w 調大。">
+        <div class="think-label">小挑戰 · 點選答案</div>
+        <div class="mini-map">x = 2,  ŷ = w·x,  w = 3,  y = 10</div>
+        <p class="q">ŷ、loss 分別是多少？w 要調大還是調小？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">ŷ=6、loss=4；w 要調小</button>
+          <button class="quiz-opt">ŷ=6、loss=16；w 要調大（因為 6 比 10 小）</button>
+          <button class="quiz-opt">ŷ=10、loss=0；w 不用動</button>
+          <button class="quiz-opt">ŷ=3、loss=49；w 要調小</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
             <div class="calc">ŷ = 3 × 2 = 6<br/>loss = (6 − 10)² = 16</div>
-            <p>預測 6 比答案 10 <strong>太小</strong>，所以 w 應該<strong>調大</strong>一點。</p>
             <p>至於「要調多少」——下一課的<strong>梯度下降</strong>就是在回答這件事。</p>
           </div>
         </details>

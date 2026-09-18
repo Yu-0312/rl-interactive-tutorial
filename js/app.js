@@ -65,10 +65,15 @@
       const answer = Number(quiz.dataset.answer);
       const feedback = quiz.querySelector(".quiz-feedback");
       const buttons = quiz.querySelectorAll(".quiz-opt");
+      const extra = quiz.querySelector(".reveal");
+      if (Number.isNaN(answer) || !buttons.length) return;
       buttons.forEach((btn, idx) => {
         btn.addEventListener("click", () => {
           if (quiz.dataset.done === "1") return;
           quiz.dataset.done = "1";
+          buttons.forEach((b) => {
+            b.disabled = true;
+          });
           if (idx === answer) {
             btn.classList.add("correct");
             if (feedback) {
@@ -76,7 +81,7 @@
               feedback.className = "quiz-feedback ok";
             }
             const lesson = document.body.dataset.lesson;
-            if (lesson) {
+            if (lesson && !String(lesson).startsWith("9")) {
               const cur = getLessonProgress(Number(lesson));
               markLessonDone(Number(lesson), Math.max(cur, 90));
             }
@@ -87,6 +92,10 @@
               feedback.textContent = quiz.dataset.no || "再想想——正確選項已標示。";
               feedback.className = "quiz-feedback no";
             }
+          }
+          if (extra) {
+            extra.hidden = false;
+            extra.classList.add("ready");
           }
         });
       });

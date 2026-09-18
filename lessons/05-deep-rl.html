@@ -53,16 +53,21 @@
         <li><strong>資料太黏</strong>：連續幾步幾乎長一樣，網路容易只記得最近這一小段。</li>
         <li><strong>目標一直在動</strong>：你用網路自己算「下一格價值」，而權重每步都在改——像追一個一直跑走的靶子。</li>
       </ul>
-      <div class="think">
-        <div class="think-label">先想一想</div>
-        <p class="q">
-          若老師改考卷時，「標準答案」每秒都在變（因為它來自學生自己的草稿），會怎樣？
-        </p>
+      <div class="quiz challenge" data-answer="1" data-ok="對——答案一直變，學生會愈學愈亂；DQN 用目標網路把學習目標暫時凍結。" data=no="目標若來自自己且不斷變動 → 不穩。解法不是換信仰，而是凍結目標網路。">
+        <div class="think-label">先想一想 · 點選答案</div>
+        <p class="q">若老師改考卷的「標準答案」每秒都在變（來自學生自己的草稿），會怎樣？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">學生會學得更好，因為目標一直在進步</button>
+          <button class="quiz-opt">學生會愈學愈亂；DQN 因此用目標網路暫時凍結目標</button>
+          <button class="quiz-opt">完全沒影響，loss 還是會穩定下降</button>
+          <button class="quiz-opt">只要學習率夠大就沒問題</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>學生會愈學愈亂，甚至集體把錯誤答案越推越離譜。</p>
-            <p>這就是「用自己當目標」的危險。DQN 的解法不是改數學信仰，而是：<strong>目標暫時凍結</strong>。</p>
+            <p>這就是「用自己當目標」的危險。配合經驗回放：別只用最近的黏答答資料。</p>
+            <div class="formula">y = r + γ max Q(s′,a′; θ⁻)　← 用較舊的 θ⁻ 算目標</div>
           </div>
         </details>
       </div>

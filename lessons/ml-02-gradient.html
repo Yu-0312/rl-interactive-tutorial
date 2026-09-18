@@ -39,16 +39,22 @@
         訓練的全部目的，就是讓這個數字變小。
       </p>
 
-      <div class="think">
-        <div class="think-label">先想一想</div>
+      <div class="quiz challenge" data-answer="0" data-ok="正確：A 較好；A loss≈1、B loss≈64。平方會放大大錯。" data-no="|error|：A=1、B=8。平方後 A≈1、B≈64 → A 比較好。">
+        <div class="think-label">先想一想 · 點選答案</div>
         <div class="mini-map">y = 10
-模型 A 預測 9   → |error| = 1
-模型 B 預測 2   → |error| = 8</div>
-        <p class="q">哪一個模型目前比較好？如果用 (ŷ−y)²，它們的 loss 分別約是多少？</p>
+A 預測 9 → error 1
+B 預測 2 → error 8</div>
+        <p class="q">哪個模型較好？用 (ŷ−y)² 時 loss 約是多少？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">A 較好；A loss≈1，B loss≈64</button>
+          <button class="quiz-opt">B 較好；B 的 error 絕對值比較大</button>
+          <button class="quiz-opt">一樣好；loss 只看有沒有答案</button>
+          <button class="quiz-opt">A loss=64，B loss=1</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>A 比較好。</p>
             <div class="calc">A loss ≈ (9−10)² = 1<br/>B loss ≈ (2−10)² = 64</div>
             <p>用平方會<strong>放大</strong>大錯——B 的 loss 是 A 的 64 倍，訓練時會被狠狠修正。</p>
           </div>
@@ -132,15 +138,21 @@ print("收斂 w →", round(w, 3))   # 應接近 5.0</code></pre>
 lr = 1.5      # 危險：可能震盪 / 爆炸
 # lr = 0.0001  # 太保守</code></pre>
 
-      <div class="think">
-        <div class="think-label">小挑戰</div>
+      <div class="quiz challenge" data-answer="2" data-ok="正確：w ← 3 − 0.1×(−16) = 4.6，loss 會變小。" data-no="θ ← θ − α·grad：3 − 0.1×(−16) = 3+1.6 = 4.6。負梯度 → w 變大 → 更接近目標。">
+        <div class="think-label">小挑戰 · 點選答案</div>
         <div class="mini-map">w = 3, grad = −16, lr = 0.1</div>
-        <p class="q">新的 w 是多少？這個更新是讓 loss 變大還是變小？</p>
+        <p class="q">新的 w 是多少？loss 變大還是變小？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">w = 1.4；loss 變大</button>
+          <button class="quiz-opt">w = −16；loss 變小</button>
+          <button class="quiz-opt">w = 4.6；loss 變小（3 − 0.1×(−16)）</button>
+          <button class="quiz-opt">w = 3；完全不更新</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
             <div class="calc">w ← 3 − 0.1 × (−16) = 3 + 1.6 = 4.6</div>
-            <p class="ok">往「預測變大、更接近 10」的方向走，loss 會變小。</p>
             <p>若有人寫成 w ← w + α·grad（亂改正負號），就會愈學愈爛——符號很重要。</p>
           </div>
         </details>

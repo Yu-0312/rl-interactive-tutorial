@@ -56,17 +56,21 @@
         → 分數低：機率調低
       </div>
       <div class="formula">∇J ≈ Σ<sub>t</sub> ∇ log π(A<sub>t</sub>|S<sub>t</sub>) · G<sub>t</sub></div>
-      <div class="think">
-        <div class="think-label">先想一想</div>
+      <div class="quiz challenge" data-answer="0" data-ok="對——整局好壞會算到每一步頭上，變異很大；所以要基線 / 優勢 / Actor-Critic。" data=no="REINFORCE 用整局回報 G 調每一步，後面運氣好會誤獎前面的動作 → 很吵。">
+        <div class="think-label">先想一想 · 點選答案</div>
         <p class="q">為什麼 REINFORCE 很「吵」？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">一整局的好壞會算到前面每一步，無關動作也可能被鼓勵</button>
+          <button class="quiz-opt">因為它不能用神經網路</button>
+          <button class="quiz-opt">因為它沒有獎勵，只靠隨機</button>
+          <button class="quiz-opt">因為它一定是離政策方法</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>
-              一整局的好壞會<strong>算到前面每一步頭上</strong>。
-              有時只是後面運氣好，前面無關的動作也被一起鼓勵了——變異很大。
-            </p>
-            <p>修法：減掉基線、用優勢、以及之後 Actor-Critic 學一個價值當評審。</p>
+            <div class="formula">∇J ≈ Σ<sub>t</sub> ∇ log π(A<sub>t</sub>|S<sub>t</sub>) · G<sub>t</sub></div>
+            <p>修法：減掉基線 b、用優勢 A、之後 Actor-Critic 學價值當評審。</p>
           </div>
         </details>
       </div>

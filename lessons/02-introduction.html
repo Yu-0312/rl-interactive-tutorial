@@ -40,23 +40,28 @@
         因為從這裡出發，未來可以接到 +10。
       </p>
 
-      <div class="think">
-        <div class="think-label">小挑戰</div>
+      <div class="quiz challenge" data-answer="1" data-ok="對——只看總和會選乙，但若乙要 1000 步才拿 +10，就不一定比較好。這才需要折扣 γ。" data-no="總和：乙=16 &gt; 甲=11。但「步數很久才拿到」的獎勵要打折——這就是 γ 的用途。">
+        <div class="think-label">小挑戰 · 點選答案</div>
         <p class="q">
-          兩條路，如果你只看「最後總共拿多少」，會選哪條？<br/>
-          路線甲：A → B → 🏆，+1 +10，總共 11<br/>
-          路線乙：A → C → D → E → 🏆，+2 +2 +2 +10，總共 16
+          路線甲：A→B→🏆，+1 +10，總共 11<br/>
+          路線乙：A→C→D→E→🏆，+2+2+2+10，總共 16<br/>
+          下列哪個說法最正確？
         </p>
+        <div class="quiz-options">
+          <button class="quiz-opt">乙永遠比較好，因為 16 &gt; 11</button>
+          <button class="quiz-opt">只看總和會選乙；但若乙要走極久才拿 +10，就不一定——所以要折扣 γ</button>
+          <button class="quiz-opt">甲永遠比較好，因為步數少</button>
+          <button class="quiz-opt">兩條一樣好，因為都拿到 +10</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>先想再看</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>只看總和，乙比較高。<span class="no">但這樣夠嗎？</span></p>
             <p>
-              若乙要走 1000 步才拿到 +10，甲只要 2 步就拿到 +10，
-              「16 一定比 11 好」就不成立了。
-              這就是為什麼 RL 需要 <strong>Discount Factor γ（折扣因子）</strong>：
-              <em>未來的獎勵，我要打幾折？</em>
+              Discount Factor γ：<em>未來的獎勵，我要打幾折？</em>
+              例如 γ=0.9：現在 +10 就是 10；一步後的 +10 變 9；兩步後變 8.1……
             </p>
+            <div class="calc">甲（步數少）與乙（總和大但很遠）要一起看：<br/>Value = 現在 Reward + 打折後的未來</div>
           </div>
         </details>
       </div>
@@ -71,34 +76,35 @@
         <span class="hi">2 + 0.9 × 10 = 11</span>
       </div>
 
-      <div class="think">
-        <div class="think-label">再進一步</div>
+      <div class="quiz challenge" data-answer="0" data-ok="正確：Q(A,B)=2+0.9×10=11；Q(A,C)=5+0.9×5=9.5 → 應選 B。Q 是包含未來的長期估計。" data=no="別只看立刻的 +5。用 r + γV(next) 算：B=11、C=9.5，所以要選 B。">
+        <div class="think-label">再進一步 · 點選答案</div>
         <p class="q">
-          A 有兩個選擇：<br/>
-          往 B：馬上 Reward = +2，且 V(B) = 10<br/>
-          往 C：馬上 Reward = +5，且 V(C) = 5<br/>
-          γ = 0.9<br/>
-          選 B 的價值？選 C 的價值？Agent 應該選哪個？
+          A 往 B：r=+2，V(B)=10<br/>
+          A 往 C：r=+5，V(C)=5<br/>
+          γ=0.9<br/>
+          Agent 應選哪個？對應 Q 值是？
         </p>
+        <div class="quiz-options">
+          <button class="quiz-opt">選 B：Q(A,B)=11 &gt; Q(A,C)=9.5</button>
+          <button class="quiz-opt">選 C：因為馬上就有 +5，C 比較好</button>
+          <button class="quiz-opt">兩個一樣，因為 γ 沒作用</button>
+          <button class="quiz-opt">選 C：Q(A,C)=5+0.9×10=14</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
             <div class="calc">
               Q(A, B) = 2 + 0.9 × 10 = 11<br/>
               Q(A, C) = 5 + 0.9 × 5 = 9.5
             </div>
-            <p class="ok">所以 Agent 在 A 應該選 B。</p>
-            <p>
-              你剛剛算的東西，正式名字就是 <strong>Q-value</strong>：
-              「在這個 State 做這個 Action，預期未來大概值多少」。
-            </p>
             <ul>
               <li><strong>V(s)</strong> →「我在這個狀態，這個狀態有多好？」</li>
               <li><strong>Q(s,a)</strong> →「我在這個狀態做這個動作，這個選擇有多好？」</li>
             </ul>
             <p>
-              注意：Q 不是「立刻賺多少」，而是<strong>包含未來回報的長期估計</strong>。
-              所以剛剛若你直覺「C 馬上 +5 比較好」，會被 0.9×10 的未來價值翻盤。
+              Q 不是「立刻賺多少」，而是<strong>包含未來回報的長期估計</strong>。
+              「C 馬上 +5」會被 0.9×10 的未來價值翻盤。
             </p>
           </div>
         </details>
@@ -197,20 +203,19 @@ print("Agent 應該選:", best)   # 期望輸出 A→B = 11.0</code></pre>
         </p>
       </div>
 
-      <div class="think">
-        <div class="think-label">本週理解題</div>
-        <p class="q">
-          如果有人告訴你「State A 的 Value = 20」，你覺得這個 20 大概在描述什麼？
-          （不用術語，用自己的話）
-        </p>
+      <div class="quiz challenge" data-answer="1" data-ok="接近了：Value ≈「從 A 出發，之後大概還能累積拿多少（未來回報的期望）」。" data-no="不是「A 目前的座標」也不是「上一步的 reward」。Value 描述的是從這裡出發的未來。">
+        <div class="think-label">理解題 · 點選答案</div>
+        <p class="q">「State A 的 Value = 20」這個 20 大概在描述什麼？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">A 在地圖上的座標編號是 20</button>
+          <button class="quiz-opt">從 A 出發，按某策略行動後，預期能得到的未來累積回報約 20</button>
+          <button class="quiz-opt">走到 A 這一步立刻拿到 20</button>
+          <button class="quiz-opt">A 附近一共有 20 個格子</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看標準說法</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>
-              接近「從 A 出發，之後大概還能累積拿多少」。
-              更精確一點：
-              <strong>Value（價值）= 從某個 State 出發，按照某個策略行動後，預期能得到的未來累積回報</strong>。
-            </p>
             <ul>
               <li>Reward：這一步拿多少</li>
               <li>Return：這一連串最後累積多少</li>

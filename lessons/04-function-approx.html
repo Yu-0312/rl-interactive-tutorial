@@ -39,19 +39,22 @@
       </div>
 
       <h2 id="why">先感受一下「表格會怎樣爆」</h2>
-      <div class="think">
-        <div class="think-label">先想一想</div>
-        <div class="mini-map">小迷宮：10×10 = 100 狀態 → 表沒問題
-CartPole：位置與角度是連續數值 → 狀態無限
-遊戲畫面：84×84 像素 → 表根本存不下</div>
-        <p class="q">連續狀態為什麼讓表格方法失敗？還有另一個隱藏問題是什麼？</p>
+      <div class="quiz challenge" data-answer="1" data-ok="正確：連續狀態開不了表，而且表格沒有泛化——相近狀態無法共享經驗。" data-no="兩個問題：①狀態太多/無限 ②沒有泛化。正確選項同時講到這兩點。">
+        <div class="think-label">先想一想 · 點選答案</div>
+        <div class="mini-map">小迷宮 10×10 → 表 OK
+CartPole 連續狀態 → 狀態無限
+遊戲像素 84×84 → 表存不下</div>
+        <p class="q">連續狀態為什麼讓表格方法失敗？還有另一個隱藏問題？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">只是因為電腦太慢，換快一點的 GPU 就沒事</button>
+          <button class="quiz-opt">①狀態無限/太多開不了表　②沒有泛化，相近狀態學不到彼此</button>
+          <button class="quiz-opt">連續狀態不能給 Reward</button>
+          <button class="quiz-opt">表格方法只適用於有圖片的環境</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <ol>
-              <li><strong>記憶體</strong>：狀態無限 / 太多，表開不起來。</li>
-              <li><strong>沒有泛化</strong>：在 A 格學到的經驗，對很像的 A′ 完全沒幫助——每個狀態都要重新摔一次。</li>
-            </ol>
             <p>近似方法兩件事一起解：參數比較少，而且「像的狀態」會互相支援。</p>
           </div>
         </details>
@@ -80,14 +83,20 @@ CartPole：位置與角度是連續數值 → 狀態無限
         調這格時，附近的狀態也一起被調整了。
       </div>
 
-      <div class="think">
-        <div class="think-label">小挑戰</div>
-        <div class="mini-map">φ(s) = [1, 0, 1]   （兩個特徵亮）
-w   = [0.5, 2.0, -0.2]
-γ 與 r 先不管</div>
-        <p class="q">V̂(s) = φ·w 大約是多少？（加權和）</p>
+      <div class="quiz challenge" data-answer="0" data-ok="正確：V̂ = 0.5×1 + 2.0×0 + (−0.2)×1 = 0.3" data-no="只加「亮起來的特徵」對應權重：0.5 + 0 + (−0.2) = 0.3">
+        <div class="think-label">小挑戰 · 點選答案</div>
+        <div class="mini-map">φ(s) = [1, 0, 1]
+w   = [0.5, 2.0, -0.2]</div>
+        <p class="q">V̂(s) = φ·w 大約是多少？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">0.3（= 0.5×1 + 2.0×0 + (−0.2)×1）</button>
+          <button class="quiz-opt">2.3（把三個權重直接相加）</button>
+          <button class="quiz-opt">1.0（因為有兩個特徵亮著）</button>
+          <button class="quiz-opt">0（因為第二個特徵是 0）</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
             <div class="calc">V̂ = 0.5×1 + 2.0×0 + (−0.2)×1 = 0.3</div>
             <p>就是「亮起來的特徵 × 對應權重」加總。狀態長得像時，亮的特徵重疊 → 估計值也會接近。</p>
@@ -194,13 +203,20 @@ print("參數大小 ‖w‖ ≈", round(sum(x*x for x in w) ** 0.5, 3))</code></
         <p>第 5 週的 replay + 目標網路，就是在拆這組炸彈。</p>
       </div>
 
-      <div class="think">
-        <div class="think-label">理解題</div>
-        <p class="q">函數近似相對「表格」最大的好處？</p>
+      <div class="quiz challenge" data-answer="0" data-ok="正確：0.3 是加權和；函數近似的好處是泛化，不是「比較快」或「不用探索」。" data=no="再想一次 φ·w=0.3；近似的核心好處是「少參數 + 相近狀態共享」。">
+        <div class="think-label">理解題 · 點選答案</div>
+        <p class="q">關於函數近似，下列哪句最正確？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">用較少參數在相似狀態間泛化；且 φ=[1,0,1]·w=[0.5,2,-0.2] 時 V̂=0.3</button>
+          <button class="quiz-opt">保證比表格快，而且完全不用探索</button>
+          <button class="quiz-opt">可以取消 γ，因為參數會自動學</button>
+          <button class="quiz-opt">每個狀態仍要存一個數，只是名稱不同</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p class="ok">用較少參數，在相似狀態之間共享、泛化。</p>
+            <div class="calc">V̂ = 0.5×1 + 2.0×0 + (−0.2)×1 = 0.3</div>
             <p>不是「比較快收斂」，也沒有「不用探索」——那些都是誤解。</p>
           </div>
         </details>

@@ -35,21 +35,25 @@
         <li>隊友臨時換人，還能配合嗎？</li>
       </ul>
 
-      <div class="think">
-        <div class="think-label">生活比喻 · CTDE</div>
+      <div class="quiz challenge" data-answer="0" data-ok="正確：訓練時 Critic 可看全局打更準的分；執行時每個人只看自己的觀察 = CTDE。" data=no="CTDE = 集中訓練、分散執行。訓練用全局資訊，上場只用局部觀察。">
+        <div class="think-label">生活比喻 · 點選答案</div>
         <div class="story-chain">
-          比賽時：球員只看眼前局勢（<span class="hi">分散執行</span>）<br/>
-          練球時：教練看整場錄影（<span class="hi">集中訓練</span>）
+          比賽時球員只看眼前（分散執行）<br/>
+          練球時教練看整場錄影（集中訓練）
         </div>
-        <p class="q">為什麼訓練時可以「偷看全局」，執行時卻要只看自己？</p>
+        <p class="q">為什麼訓練可以「偷看全局」，執行卻只看自己？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">訓練時全局資訊讓 Critic 打分更準；執行時可能沒有中央控制器，只能用自己的觀察</button>
+          <button class="quiz-opt">因為訓練時沒有環境，只能看資料</button>
+          <button class="quiz-opt">執行時一定要看全局，訓練時反而不用</button>
+          <button class="quiz-opt">只是實作偷懶，沒有理論原因</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>
-              訓練時全局資訊幫 Critic 打分更準；
-              執行時可能沒有中央控制器，每個 agent 只能用自己的觀察。
-              所以：<strong>集中訓練、分散執行（CTDE）</strong>。
-            </p>
+            <div class="formula">演員 πᵢ：自己的觀察 → 動作</div>
+            <div class="formula">評論家 Qᵢ：(全局資訊, 所有人動作) → 這段好不好</div>
           </div>
         </details>
       </div>

@@ -50,21 +50,21 @@
         輸出 ŷ（例如：每一個動作的 Q 值）
       </div>
       <div class="formula">一層的白話：輸出 = 活化函數( 權重 × 上一層輸出 + 偏置 )</div>
-      <div class="think">
-        <div class="think-label">先想一想</div>
-        <p class="q">
-          如果只有「加權和」沒有非線性（ReLU 等），疊 100 層網路，本質上等於什麼？
-        </p>
+      <div class="quiz challenge" data-answer="1" data-ok="正確：線性接線性仍是線性；所以需要 ReLU 等非線性活化。" data=no="100 層「純加權和」= 還是一條直線。非線性才能擬合複雜關係。">
+        <div class="think-label">先想一想 · 點選答案</div>
+        <p class="q">若只有加權和、沒有非線性，疊 100 層網路本質等於？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">超強，層愈多愈能擬合任何彎曲函數</button>
+          <button class="quiz-opt">還是一條直線（線性函數）——線性接線性仍是線性</button>
+          <button class="quiz-opt">會自動變成決策樹</button>
+          <button class="quiz-opt">等於 Q 表</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>
-              等於<strong>還是一條直線（線性函數）</strong>——線性接線性仍是線性。
-            </p>
-            <p>
-              所以非線性活化函數不能省：它讓網路有資格擬合彎彎曲曲的複雜關係，
-              例如「像素 → 玩遊戲的分數」。
-            </p>
+            <div class="formula">輸出 = 活化函數( 權重 × 上一層輸出 + 偏置 )</div>
+            <p>非線性活化不能省：它讓網路有資格擬合「像素 → 遊戲分數」這類彎曲關係。</p>
           </div>
         </details>
       </div>

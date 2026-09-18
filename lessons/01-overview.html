@@ -69,24 +69,26 @@
         你就算完全不知道術語也沒關係，<strong>直接用自己的話回答</strong>：
       </p>
 
-      <div class="think">
-        <div class="think-label">先想一想</div>
-        <p class="q">下面四個東西，你會怎麼稱呼它們？</p>
-        <ol>
-          <li>機器人本身叫什麼？</li>
-          <li>「它現在站在地圖中央」這個資訊叫什麼？</li>
-          <li>「左、右」叫什麼？</li>
-          <li>「走到終點得到 +10、掉進陷阱 −10」這個叫什麼？</li>
-        </ol>
+      <div class="quiz challenge" data-answer="1" data-ok="很好——「機器人本身」= Agent；「現在在哪」= State；「左/右」= Action；「+10/−10」= Reward。" data-no="先對照：機器人=Agent、位置=State、方向=Action、加減分=Reward。正確選項已標示。">
+        <div class="think-label">先想一想 · 點選答案</div>
+        <p class="q">下面四個東西，哪一組「你的說法 ↔ RL 術語」對應最完整？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">機器人=Reward、位置=Action、方向=State、加減分=Agent</button>
+          <button class="quiz-opt">機器人=Agent、位置=State、方向=Action、加減分=Reward</button>
+          <button class="quiz-opt">機器人=Policy、位置=Q-value、方向=Return、加減分=Value</button>
+          <button class="quiz-opt">四個東西其實都叫 State</button>
+        </div>
+        <div class="quiz-feedback"></div>
+        <div class="hint">原題：①機器人本身 ②「站在地圖中央」 ③「左/右」 ④「終點+10/陷阱−10」</div>
         <details class="reveal">
-          <summary>看對照（想完再點）</summary>
+          <summary>完整說明</summary>
           <div class="body">
             <table class="cmp exp-table">
               <thead><tr><th>你的說法</th><th>RL 正式概念</th><th>例子</th></tr></thead>
               <tbody>
                 <tr><td>訓練目標 / 機器人</td><td><strong>Agent</strong>（智能體）</td><td>機器人本身</td></tr>
                 <tr><td>定位 / 現在在哪</td><td><strong>State</strong>（狀態）</td><td>站在地圖中央</td></tr>
-                <tr><td>方向 / 可以做什麼</td><td><strong>Action</strong>（動作）</td><td>往左、往右、往上、往下</td></tr>
+                <tr><td>方向 / 可以做什麼</td><td><strong>Action</strong>（動作）</td><td>往左、往右</td></tr>
                 <tr><td>獎勵機制 / 加減分</td><td><strong>Reward</strong>（獎勵）</td><td>終點 +10、陷阱 −10</td></tr>
               </tbody>
             </table>
@@ -105,30 +107,30 @@
         → 得到 <span class="hi">Reward</span> + 下一個 <span class="hi">State</span> → Agent 再決定下一步
       </div>
 
-      <div class="think">
-        <div class="think-label">小挑戰</div>
+      <div class="quiz challenge" data-answer="2" data-ok="正確：撞牆後 State 仍是 A、Next State 仍是 A、Reward=−1、Action=上。" data-no="撞牆=沒有移動。所以狀態與下一狀態都還是 A，但仍有回饋 −1。">
+        <div class="think-label">小挑戰 · 點選答案</div>
         <p class="q">
-          機器人在 A。它選「上」，結果撞牆：
-          沒有移動，而且 Reward = −1。<br/>
-          那麼這一步的 State / Action / Next State / Reward 分別是什麼？
+          機器人在 A，選「上」撞牆：沒移動，Reward = −1。<br/>
+          哪一組 State / Action / Next State / Reward 是對的？
         </p>
+        <div class="quiz-options">
+          <button class="quiz-opt">State=B、Action=上、Next=B、Reward=0</button>
+          <button class="quiz-opt">State=A、Action=上、Next=上、Reward=+1</button>
+          <button class="quiz-opt">State=A、Action=上、Next=A、Reward=−1</button>
+          <button class="quiz-opt">State=A、Action=撞牆、Next=A、Reward=+10</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <ul>
-              <li>State：還在 <strong>A</strong></li>
-              <li>Action：<strong>上</strong></li>
-              <li>Next State：還是 <strong>A</strong>（原地不動）</li>
-              <li>Reward：<strong>−1</strong></li>
-            </ul>
             <p>
               這就是一次完整的 RL interaction：
               <span class="ok">State → Action → Environment → Reward + Next State</span>。
             </p>
             <p>
-              你可能會問：「撞牆有沒有回饋？」——有，而且很重要。
+              「撞牆有沒有回饋？」——有，而且很重要。
               Reward 怎麼設計，會直接影響 Agent 最後學到什麼行為。
-              例如撞牆可以是 0、−1 或 −5；三種設定，學到的路線可能都不一樣。
+              撞牆可以是 0、−1 或 −5；三種設定，學到的路線可能都不一樣。
             </p>
           </div>
         </details>

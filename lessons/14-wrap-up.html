@@ -40,14 +40,20 @@
         <li><strong>預算</strong>：與其 10 個變體各跑 1 次，不如 2 個方法各跑 5 種子。</li>
       </ul>
 
-      <div class="think">
-        <div class="think-label">小挑戰</div>
-        <p class="q">你的新方法只跑 1 個 seed，贏過基線 20%。可以直接寫進結論嗎？</p>
+      <div class="quiz challenge" data-answer="2" data-ok="正確：不行。RL 跨種子變異很大，單次 run 很可能是運氣；主結論至少 5 種子。" data=no="只跑 1 個 seed 贏 20% 不能當結論——很可能是運氣。">
+        <div class="think-label">小挑戰 · 點選答案</div>
+        <p class="q">新方法只跑 1 個 seed，贏過基線 20%。可以直接寫進結論嗎？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">可以，贏 20% 已經很明顯</button>
+          <button class="quiz-opt">可以，只要把曲線畫漂亮一點</button>
+          <button class="quiz-opt">不行；RL 變異大，主結論至少要多個種子（建議 ≥5）</button>
+          <button class="quiz-opt">可以，但要把 seed 寫進標題</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p class="no">不行。</p>
-            <p>RL 跨種子變異非常大。單次 run 很可能是運氣。主結論至少 5 個種子，便宜則 10+。</p>
+            <p>建議：mean ± std 陰影、多種子、合理基線、拆解實驗。單條精選曲線是自欺欺人。</p>
           </div>
         </details>
       </div>

@@ -35,17 +35,21 @@
         → 重複
       </div>
       <div class="formula">∇J ≈ (1/nσ) Σᵢ J(θ+σεᵢ) · εᵢ　（εᵢ 是隨機雜訊向量）</div>
-      <div class="think">
-        <div class="think-label">先想一想</div>
-        <p class="q">這和 ML 補課 2 的梯度下降有什麼相同與不同？</p>
+      <div class="quiz challenge" data-answer="2" data-ok="正確：都要更新參數；差別在梯度下降要對 loss 微分，無梯度只用回報估方向。" data=no="相同：都在調參數求改進。不同：要不要對目標函數做微分 / 反向傳播。">
+        <div class="think-label">先想一想 · 點選答案</div>
+        <p class="q">無梯度搜尋和 ML 的梯度下降，哪個比較對？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">完全相同，只是名字不同</button>
+          <button class="quiz-opt">完全無關，一個更新參數一個不更新</button>
+          <button class="quiz-opt">都要更新參數；但梯度下降要微分，無梯度只用「試出來的分數」估方向</button>
+          <button class="quiz-opt">無梯度更準，因為它算出精確梯度</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p><strong>相同：</strong>都要更新參數，都希望「某個分數 / loss 變好」。</p>
-            <p><strong>不同：</strong>
-              梯度下降需要對 loss 微分（要模型可微）；
-              無梯度方法只用「試出來的回報」估方向，<span class="ok">不需要對環境反向傳播</span>。
-            </p>
+            <div class="formula">∇J ≈ (1/nσ) Σᵢ J(θ+σεᵢ) · εᵢ</div>
+            <p>環境可以不可微、有噪聲；只要能「跑一局看分數」就能估方向。</p>
           </div>
         </details>
       </div>

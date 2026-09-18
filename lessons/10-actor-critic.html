@@ -36,14 +36,21 @@
         Critic 用 TD 學打分（像第 5 週）<br/>
         Actor 調整自己，<span class="hi">讓 Critic 對「我輸出的動作」打更高分</span>
       </div>
-      <div class="think">
-        <div class="think-label">生活比喻</div>
-        <p class="q">演員在台上即興；評論家在台下打分。兩邊如何一起進步？</p>
+      <div class="quiz challenge" data-answer="0" data-ok="對——Actor 依 Critic 分數調整；Critic 靠經驗打準。比純 REINFORCE 每步都有回饋。" data=no="不是演員自己猜、也不是評論家直接下場做動作；是打分 ↔ 調策略。">
+        <div class="think-label">生活比喻 · 點選答案</div>
+        <p class="q">Actor-Critic 比較接近哪一種合作方式？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">演員看評論家的分數調整演出；評論家看多了愈打愈準</button>
+          <button class="quiz-opt">評論家直接代替演員上台做動作</button>
+          <button class="quiz-opt">演員和評論家完全無關，各練各的</button>
+          <button class="quiz-opt">只有演員存在，評論家只是裝飾</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看展開</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>演員看「上次這樣演分數高」就繼續；評論家看多了戲，分數愈打愈準。</p>
             <p>若只有 REINFORCE：要整局結束才知道好壞，訊號很吵。Critic 提供每步的「現在幾分」。</p>
+            <div class="formula">Critic：TD 學 Q　　Actor：最大化 Critic 對自己動作的分數</div>
           </div>
         </details>
       </div>

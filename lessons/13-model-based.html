@@ -37,17 +37,20 @@
         <li>真實機器人：每一步耗時、耗錢、有風險。</li>
       </ul>
 
-      <div class="think">
-        <div class="think-label">先想一想</div>
+      <div class="quiz challenge" data-answer="1" data-ok="正確——模型會騙人：想像愈長愈歪，策略會鑽模型漏洞。要短視界、集成、混真實資料。" data=no="最大風險不是「算太慢」，而是世界模型有誤差且會被策略利用。">
+        <div class="think-label">先想一想 · 點選答案</div>
         <p class="q">在想像中練太多，最大的風險是什麼？</p>
+        <div class="quiz-options">
+          <button class="quiz-opt">記憶體不足，模型存不下</button>
+          <button class="quiz-opt">模型會騙人：想像步數愈長愈歪，策略會鑽模型漏洞</button>
+          <button class="quiz-opt">環境會拒絕繼續互動</button>
+          <button class="quiz-opt">獎勵會自動變 0</button>
+        </div>
+        <div class="quiz-feedback"></div>
         <details class="reveal">
-          <summary>看答案</summary>
+          <summary>完整說明</summary>
           <div class="body">
-            <p>
-              模型會<strong>騙人</strong>：想像步數愈長愈歪；
-              策略很會找到「模型裡很好、現實中不存在」的捷徑。
-              所以要短視界、集成、真實與想像混著練。
-            </p>
+            <p>緩解：短視界、動力學集成、不確定處提早砍軌跡、真實與想像混著練。</p>
           </div>
         </details>
       </div>
