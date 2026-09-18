@@ -3,84 +3,130 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 13 週 · 模型式 RL — 強化學習互動教學</title>
+  <title>第 13 週 · 先學世界規則再想像 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="13">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#why">為何模型式</a>
-      <a href="#metrpo">ME-TRPO</a>
-      <a href="#dreamer">Dreamer</a>
-      <a href="#errors">模型誤差</a>
-      <a href="#recipe">實作配方</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#why">為何要模型</a>
+      <a href="#metrpo">ME-TRPO 思路</a>
+      <a href="#dreamer">Dreamer 思路</a>
+      <a href="#code">世界模型 I/O</a>
+      <a href="#errors">模型會騙人</a>
     </aside>
     <article class="prose">
       <div class="week-label">第 13 週</div>
-      <h1>樣本效率：基於模型的 RL</h1>
-      <p>
-        從經驗學動力學模型 $\hat{P}$（與獎勵），再規劃或產生
-        <strong>想像中的 rollout</strong>——把真實環境互動量降一個數量級。
-      </p>
+      <h1>先學世界規則，再在想像中訓練</h1>
 
-      <h2 id="why">動機</h2>
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        真實互動很貴。<strong>模型式 RL</strong>：先從經驗學一個「世界預測器」，
+        再在<strong>腦內模擬</strong>訓練或規劃，省下大量真實互動。
+      </div>
+
+      <h2 id="why">生活比喻</h2>
+      <div class="story-chain">
+        國手不只靠實戰——也打譜、在腦中推演<br/>
+        模型式 RL = <span class="hi">先學棋理（世界模型），再在腦中練</span>
+      </div>
       <ul>
-        <li>無模型 PPO/SAC 可能需要 10⁶–10⁷ 步。</li>
-        <li>機器人、昂貴模擬或有限真實資料偏好模型。</li>
-        <li>規劃（MPC）可解釋、好加約束。</li>
+        <li>無模型 PPO/SAC 可能要上百萬步環境互動。</li>
+        <li>真實機器人：每一步耗時、耗錢、有風險。</li>
       </ul>
 
-      <h2 id="metrpo">ME-TRPO</h2>
-      <p>
-        Model-Ensemble TRPO（Kurutach et al.）：訓練<strong>動力學網路集成</strong>，
-        採樣短想像軌跡，在模型預測目標上做 TRPO/PPO 步。
-        集成捕捉認知不確定性 → 在模型分歧處縮短 rollout。
-      </p>
-      <div class="formula">maximize 𝔼[ Σ γ<sup>t</sup> r̂(ŝ,â) ] &nbsp; s.t. &nbsp; KL(π<sub>old</sub> ‖ π) ≤ δ</div>
-
-      <h2 id="dreamer">Dreamer / DreamerV3</h2>
-      <ol>
-        <li><strong>世界模型</strong>（RSSM）：潛在狀態 + 遞歸動力學 + 解碼器 + 獎勵頭。</li>
-        <li><strong>想像</strong>：Actor-Critic 完全在潛在 rollout 中訓練。</li>
-        <li><strong>行動</strong>：在真實環境收集更多資料；重複。</li>
-      </ol>
-      <p>
-        DreamerV3 使用 symlog 預測、回報正規化與穩健預設，
-        以單一超參數集合從像素跨多領域訓練。
-      </p>
-
-      <h2 id="errors">模型誤差問題</h2>
-      <div class="callout warn">
-        <strong>誤差複合。</strong> 多步預測會漂移；策略會利用模型漏洞
-        （因果混淆、對抗狀態）。緩解：短視界、集成、不確定性懲罰、
-        資料聚合（Dyna / MBPO 風格短模型 rollout）。
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <p class="q">在想像中練太多，最大的風險是什麼？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>
+              模型會<strong>騙人</strong>：想像步數愈長愈歪；
+              策略很會找到「模型裡很好、現實中不存在」的捷徑。
+              所以要短視界、集成、真實與想像混著練。
+            </p>
+          </div>
+        </details>
       </div>
-      <table class="cmp">
-        <thead><tr><th>方法</th><th>模型用於</th><th>風險</th></tr></thead>
-        <tbody>
-          <tr><td>規劃 / MPC</td><td>每步選動作</td><td>視界太短則短視</td></tr>
-          <tr><td>MBPO 式 Dyna</td><td>額外合成轉移</td><td>合成資料偏差</td></tr>
-          <tr><td>Dreamer</td><td>在潛在想像中完整學策略</td><td>世界模型誤設</td></tr>
-        </tbody>
-      </table>
 
-      <h2 id="recipe">專題實作配方</h2>
+      <h2 id="metrpo">路線一：短想像 + 策略優化（ME-TRPO 思路）</h2>
       <ol>
-        <li>先做強無模型基線（SAC/PPO）。</li>
-        <li>加短視界集成模型；只注入 k 步合成資料。</li>
-        <li>消融真實 vs 想像批次比例；畫樣本效率曲線。</li>
-        <li>在保留軌跡上量測模型開環預測誤差。</li>
+        <li>用真實經驗訓練<strong>好幾個</strong>動力學模型（集成）。</li>
+        <li>目前策略在模型裡假裝玩幾步，產生<strong>短</strong>軌跡。</li>
+        <li>用這些想像資料做 PPO/TRPO 更新。</li>
+        <li>回真實環境收新資料，再更新模型。</li>
+      </ol>
+      <div class="callout tip">
+        <strong>為什麼要集成？</strong>
+        多個模型意見不合 → 此處不確定 → 別在想像中走太遠。
+      </div>
+
+      <h2 id="dreamer">路線二：Dreamer——在潛在狀態裡完整練</h2>
+      <ol>
+        <li><strong>世界模型</strong>：把觀察壓成內部狀態，學「做這動作後會怎樣 + 大概多少獎勵」。</li>
+        <li><strong>想像中練習</strong>：Actor-Critic 完全在內部狀態序列裡訓練。</li>
+        <li><strong>真實互動</strong>：只用來收資料、修世界模型。</li>
       </ol>
 
-      <div class="quiz" data-answer="1" data-ok="正確——學動力學/獎勵，並用想像經驗訓練。" data=no="模型式 RL 顯式學習轉移/獎勵模型。">
+      <h2 id="code">世界模型的 I/O 長什麼樣</h2>
+      <pre><code>import torch
+import torch.nn as nn
+
+class WorldModel(nn.Module):
+    """極簡：預測下一狀態與獎勵（不是 RSSM，只抓 I/O 形狀）"""
+    def __init__(self, n_obs, n_act):
+        super().__init__()
+        self.next = nn.Sequential(
+            nn.Linear(n_obs + n_act, 64), nn.ReLU(),
+            nn.Linear(64, n_obs),
+        )
+        self.reward = nn.Sequential(
+            nn.Linear(n_obs + n_act, 64), nn.ReLU(),
+            nn.Linear(64, 1),
+        )
+    def forward(self, s, a):
+        x = torch.cat([s, a], dim=-1)
+        return self.next(x), self.reward(x).squeeze(-1)
+
+model = WorldModel(4, 2)
+
+# 想像 rollout（示意）
+def imagine(s, actor, horizon=5):
+    traj = []
+    for _ in range(horizon):
+        a = actor(s)                 # 假設 actor 存在
+        s_hat, r_hat = model(s, a)
+        traj.append((s_hat, r_hat))
+        s = s_hat
+        # 真實方法會在集成不確定處提早砍掉
+    return traj
+
+print("真實互動用來訓練 model；策略更新可用想像資料")</code></pre>
+
+      <div class="depth">
+        <div class="depth-label">更深一點 · 誤差與配方</div>
+        <table class="cmp">
+          <thead><tr><th>路線</th><th>模型用於</th><th>風險</th></tr></thead>
+          <tbody>
+            <tr><td>規劃 / MPC</td><td>每步選動作</td><td>視界太短會短視</td></tr>
+            <tr><td>Dyna / MBPO</td><td>額外合成轉移</td><td>合成資料偏差</td></tr>
+            <tr><td>Dreamer</td><td>整套策略在想像裡練</td><td>世界模型誤設</td></tr>
+          </tbody>
+        </table>
+        <p>專題建議：先跑穩無模型基線 → 再加短視界模型 → 畫「環境步數 vs 分數」曲線。</p>
+      </div>
+
+      <div class="quiz" data-answer="1" data-ok="正確——先學動力學/獎勵，再用規劃或想像經驗訓練。" data=no="模型式 RL 的「模型」是世界預測器。">
         <h3>快速檢核</h3>
         <div class="q">模型式 RL 的核心想法？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">忽略動力學，只用 Q 表</button>
-          <button class="quiz-opt">學動力學模型，用於規劃或模擬訓練資料</button>
-          <button class="quiz-opt">只用 Monte-Carlo 回報，從不 bootstrap</button>
-          <button class="quiz-opt">只訓練價值函數，永遠不訓練策略</button>
+          <button class="quiz-opt">完全不管世界怎麼運作，只記 Q 表</button>
+          <button class="quiz-opt">先學世界會怎樣變，再用它規劃或產生訓練資料</button>
+          <button class="quiz-opt">只用整局總分，中間不做估計</button>
+          <button class="quiz-opt">永遠只訓練價值，不訓練策略</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>

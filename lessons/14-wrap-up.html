@@ -3,108 +3,137 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 14 週 · 實驗設計 — 強化學習互動教學</title>
+  <title>第 14 週 · 怎麼把實驗做好 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="14">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#doe">為何 DoE</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#doe">先設計再訓練</a>
       <a href="#baselines">基線</a>
-      <a href="#stats">統計</a>
-      <a href="#logging">記錄</a>
-      <a href="#report">報告結構</a>
-      <a href="#checklist">專題清單</a>
+      <a href="#stats">多種子</a>
+      <a href="#code">多種子模板</a>
+      <a href="#report">報告骨架</a>
     </aside>
     <article class="prose">
-      <div class="week-label">第 14 週</div>
-      <h1>總結：如何做好 RL（實驗設計）</h1>
-      <p>
-        多數 RL 專題失敗不是「公式寫錯」，而是
-        <strong>變異不受控</strong>、基線太弱、缺少消融。
-      </p>
+      <div class="week-label">第 14 週 · 專題向</div>
+      <h1>怎麼把 RL 實驗做好</h1>
+
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        RL 專題失敗常不是公式抄錯，而是：
+        <strong>只跑一次就下結論、對照組太弱、沒有拆解實驗</strong>。
+        先設計，再開跑。
+      </div>
+
+      <div class="callout">
+        <strong>自學者怎麼用本週。</strong>
+        當成「看論文 / 評估別人結果」的檢查表：他跑幾個種子？有沒有合理基線？
+      </div>
 
       <h2 id="doe">先設計，再訓練</h2>
       <ul>
-        <li><strong>問題</strong>：一句話假設（「X 在 Y 上提升樣本效率」）。</li>
-        <li><strong>因子</strong>：演算法、種子、環境套件、要掃的超參數。</li>
-        <li><strong>指標</strong>：最終回報、學習曲線 AUC、牆鐘時間、環境步數。</li>
-        <li><strong>預算</strong>：能負擔多少 run；寧可多種子也不要華麗變體。</li>
+        <li><strong>一句話假設</strong>：例如「方法 A 在 X 上比 PPO 更省樣本」。</li>
+        <li><strong>看什麼數字</strong>：最終分數、曲線下面積（AUC）、時間、環境步。</li>
+        <li><strong>預算</strong>：與其 10 個變體各跑 1 次，不如 2 個方法各跑 5 種子。</li>
       </ul>
 
-      <h2 id="baselines">重要的基線</h2>
+      <div class="think">
+        <div class="think-label">小挑戰</div>
+        <p class="q">你的新方法只跑 1 個 seed，贏過基線 20%。可以直接寫進結論嗎？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p class="no">不行。</p>
+            <p>RL 跨種子變異非常大。單次 run 很可能是運氣。主結論至少 5 個種子，便宜則 10+。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="baselines">至少要有哪些對照</h2>
       <ol>
-        <li>隨機策略 / 腳本啟發式。</li>
-        <li>經典無模型基線（PPO 或 SAC）+ 論文預設。</li>
-        <li><em>你的</em>貢獻的消融（拿掉一個元件）。</li>
-        <li>可選：近期論文數字——僅當環境/指標一致。</li>
+        <li><strong>隨機策略</strong>：證明有學到東西。</li>
+        <li><strong>公認基線</strong>：PPO / SAC + 論文預設（別故意調爛）。</li>
+        <li><strong>拆掉你貢獻的那一塊</strong>：證明不是錯覺。</li>
+        <li>（可選）別人論文數字——環境與指標必須完全一致。</li>
       </ol>
 
       <h2 id="stats">統計，但不要自欺</h2>
       <ul>
-        <li><strong>≥5 個種子</strong>支撐主結論（便宜則 10+）。</li>
-        <li>畫 mean ± std/sem 陰影；絕不只秀一條挑過的 run。</li>
-        <li>離群值多時報告 IQM / 中位數（rliable 風格）。</li>
-        <li>先聲明哪些比較是驗證性、哪些是探索性。</li>
+        <li>畫 mean ± std/sem 陰影；不要只秀精選的一條。</li>
+        <li>離群多時可報中位數 / IQM。</li>
+        <li>AUC 衡量「學得多快」，不只看最後一點。</li>
       </ul>
-      <div class="formula">AUC = Σ<sub>t</sub> return(t) &nbsp;→&nbsp; 衡量學習速度，不只終點</div>
+      <div class="formula">AUC ≈ Σ<sub>t</sub> return(t)　→ 學習速度</div>
 
-      <h2 id="logging">記錄衛生</h2>
-      <table class="cmp">
-        <thead><tr><th>記錄</th><th>原因</th></tr></thead>
-        <tbody>
-          <tr><td>seed、git SHA、config</td><td>可重現</td></tr>
-          <tr><td>環境步 &amp; 牆鐘</td><td>樣本 vs 算力效率</td></tr>
-          <tr><td>損失、熵、KL、Q 均值</td><td>診斷發散 / 崩潰</td></tr>
-          <tr><td>評估回報（ε=0）</td><td>把探索雜訊與技巧解耦</td></tr>
-        </tbody>
-      </table>
+      <h2 id="code">多種子實驗模板</h2>
+      <pre><code>import json
+import statistics
 
-      <h2 id="report">報告 / 論文骨架</h2>
+def train_one(seed, algo="ppo"):
+    """回傳最終平均回報。這裡先用假資料示意。"""
+    # set_seed(seed); env = gym.make(...); ...
+    fake_returns = {0: 210.0, 1: 95.0, 2: 240.0, 3: 180.0, 4: 205.0}
+    return fake_returns[seed]
+
+results = {s: train_one(s) for s in range(5)}
+vals = list(results.values())
+print("每個 seed:", results)
+print("mean =", statistics.mean(vals))
+print("std  =", statistics.pstdev(vals))
+
+# 記錄檔至少要有：
+meta = {
+    "algo": "ppo",
+    "env": "CartPole-v1",
+    "seeds": list(range(5)),
+    "git_sha": "fill-me",
+    "note": "不要只記最好看的那條",
+}
+print(json.dumps(meta, ensure_ascii=False))</code></pre>
+
+      <h2 id="report">報告骨架</h2>
       <ol>
-        <li>問題與主張</li>
+        <li>問題與主張（一句話）</li>
         <li>相關工作（3–5 行）</li>
-        <li>方法（公式 + 一張圖）</li>
+        <li>方法（直覺 + 一張圖）</li>
         <li>實驗設定（環境、預算、種子）</li>
-        <li>結果 + 消融</li>
-        <li>限制（要具體）</li>
+        <li>結果 + 拆解</li>
+        <li>限制（具體）</li>
       </ol>
 
-      <h2 id="checklist">學期專題清單</h2>
-      <div class="grid grid-2">
-        <div class="card">
-          <h3>提案（第 8–9 週）</h3>
-          <p>主題、基線、成功指標、算力計畫、風險清單。</p>
-        </div>
-        <div class="card">
-          <h3>發表（第 15–16 週）</h3>
-          <p>8–12 頁投影片：問題、方法、曲線、一個意外失敗、下一步。</p>
-        </div>
-        <div class="card">
-          <h3>報告（第 17–18 週）</h3>
-          <p>可重現附錄：指令、超參數、種子、硬體。</p>
-        </div>
-        <div class="card">
-          <h3>程式釋出</h3>
-          <p>README：安裝、一鍵訓練、筆電 GPU/CPU 預估時間。</p>
+      <div class="depth">
+        <div class="depth-label">更深一點 · 專題清單</div>
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>提案（8–9 週）</h3>
+            <p>主題、基線、成功標準、算力、風險。</p>
+          </div>
+          <div class="card">
+            <h3>發表（15–16 週）</h3>
+            <p>8–12 頁：問題、方法、曲線、一個失敗、下一步。</p>
+          </div>
+          <div class="card">
+            <h3>報告（17–18 週）</h3>
+            <p>可重現附錄：指令、超參數、種子、硬體。</p>
+          </div>
+          <div class="card">
+            <h3>寫作週節奏</h3>
+            <p>早上丟實驗；下午寫已知；晚上只做一張小圖。</p>
+          </div>
         </div>
       </div>
 
-      <div class="callout tip">
-        <strong>自主學習。</strong> 最後寫作週要給實驗設時間盒：
-        早上跑 jobs；下午寫已知內容；晚上做一張小圖。
-        不要等「所有實驗結束」才開始寫。
-      </div>
-
-      <div class="quiz" data-answer="0" data-ok="對——單種子 RL 曲線常是運氣，不是實力。" data=no="RL 跨種子變異非常大。">
+      <div class="quiz" data-answer="0" data-ok="對——單種子 RL 曲線常是運氣，不是實力。" data=no="RL 對隨機種子非常敏感。">
         <h3>快速檢核</h3>
-        <div class="q">為何要跑多個隨機種子？</div>
+        <div class="q">為什麼要跑多個隨機種子？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">RL 訓練變異大，單次 run 可能誤導</button>
-          <button class="quiz-opt">多種子一定縮短牆鐘時間</button>
-          <button class="quiz-opt">種子會改變演算法類別</button>
-          <button class="quiz-opt">只有監督式學習才需要</button>
+          <button class="quiz-opt">RL 訓練變異很大，只跑一次很可能被運氣騙</button>
+          <button class="quiz-opt">多種子一定讓訓練更快</button>
+          <button class="quiz-opt">種子會改變演算法類型</button>
+          <button class="quiz-opt">只有影像分類才需要</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>

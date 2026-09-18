@@ -102,21 +102,23 @@
     const ch = (H - pad * 2) / ROWS;
 
     ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#f3efe4";
+    ctx.fillRect(0, 0, W, H);
     const pathSet = new Set(agent.lastPath.map(([r, c]) => idx(r, c)));
 
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         const x = pad + c * cw;
         const y = pad + r * ch;
-        let fill = "#152038";
-        if (isCliff(r, c)) fill = "#4a1520";
-        if (r === GOAL[0] && c === GOAL[1]) fill = "#1a5c3a";
-        if (r === START[0] && c === START[1]) fill = "#5c4a12";
+        let fill = "#e8e2d4";
+        if (isCliff(r, c)) fill = "#d4a0a0";
+        if (r === GOAL[0] && c === GOAL[1]) fill = "#8fb892";
+        if (r === START[0] && c === START[1]) fill = "#e0c090";
         if (pathSet.has(idx(r, c)) && !isCliff(r, c) && !(r === GOAL[0] && c === GOAL[1])) {
-          fill = "#243556";
+          fill = "#c5d5c8";
         }
         ctx.fillStyle = fill;
-        ctx.strokeStyle = "rgba(255,255,255,0.06)";
+        ctx.strokeStyle = "rgba(63,58,50,0.08)";
         ctx.beginPath();
         ctx.roundRect(x + 1.5, y + 1.5, cw - 3, ch - 3, 6);
         ctx.fill();
@@ -126,7 +128,7 @@
         let qmax = -Infinity;
         for (let a = 0; a < 4; a++) qmax = Math.max(qmax, agent.qAt(r, c, a));
         if (!isCliff(r, c) && agent.episodes > 0) {
-          ctx.fillStyle = "rgba(255,255,255,0.35)";
+          ctx.fillStyle = "rgba(63,58,50,0.45)";
           ctx.font = "500 9px SF Mono, ui-monospace, monospace";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
@@ -134,7 +136,7 @@
         }
 
         if (!isCliff(r, c) && agent.episodes > 0 && !(r === GOAL[0] && c === GOAL[1])) {
-          ctx.fillStyle = "#ffffff";
+          ctx.fillStyle = "#3f3a32";
           ctx.font = "700 16px system-ui, sans-serif";
           ctx.textAlign = "center";
           ctx.textBaseline = "middle";
@@ -145,7 +147,7 @@
 
     // draw last path
     if (agent.lastPath.length > 1) {
-      ctx.strokeStyle = "rgba(91,140,255,0.7)";
+      ctx.strokeStyle = "rgba(122,158,126,0.75)";
       ctx.lineWidth = 2;
       ctx.beginPath();
       agent.lastPath.forEach(([r, c], i) => {
@@ -157,7 +159,7 @@
       ctx.stroke();
     }
 
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
+    ctx.fillStyle = "rgba(63,58,50,0.55)";
     ctx.font = "600 11px system-ui, sans-serif";
     ctx.textAlign = "left";
     ctx.fillText("S", pad + 6, pad + 14);

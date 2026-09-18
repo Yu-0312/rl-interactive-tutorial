@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ML 補課 2 · 損失與梯度下降 — 強化學習互動教學</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="92">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#tldr">一句話總結</a>
+      <a href="#loss">Loss 在量什麼</a>
+      <a href="#grad">梯度是什麼</a>
+      <a href="#gd">梯度下降一步</a>
+      <a href="#code">手寫梯度下降</a>
+      <a href="#lr">學習率踩雷</a>
+      <a href="#rl">接回 RL</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">ML 補課 2</div>
+      <h1>損失與梯度下降：參數怎麼「被調」？</h1>
+
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        <strong>Loss</strong> 告訴你現在猜得多糟；
+        <strong>梯度</strong> 告訴你「每個參數往哪邊動一點，loss 會變小」；
+        <strong>梯度下降</strong> 就是沿著那個方向，小步小步一直走。
+      </div>
+
+      <h2 id="loss">Loss 在量什麼？</h2>
+      <div class="story-chain">
+        預測 ŷ vs 標準答案 y<br/>
+        常見：MSE = (ŷ − y)² &nbsp;&nbsp;｜&nbsp;&nbsp; MAE = |ŷ − y|
+      </div>
+      <p>
+        白話：<strong>把「錯多遠」變成一個數字</strong>。
+        訓練的全部目的，就是讓這個數字變小。
+      </p>
+
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <div class="mini-map">y = 10
+模型 A 預測 9   → |error| = 1
+模型 B 預測 2   → |error| = 8</div>
+        <p class="q">哪一個模型目前比較好？如果用 (ŷ−y)²，它們的 loss 分別約是多少？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>A 比較好。</p>
+            <div class="calc">A loss ≈ (9−10)² = 1<br/>B loss ≈ (2−10)² = 64</div>
+            <p>用平方會<strong>放大</strong>大錯——B 的 loss 是 A 的 64 倍，訓練時會被狠狠修正。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="grad">梯度：「往哪邊調一點比較好」</h2>
+      <p>不必怕這個詞。你可以把參數想成山上的位置，loss 是海拔高度：</p>
+      <div class="story-chain">
+        梯度 ≈ <span class="hi">「往哪個方向，山會變高」</span><br/>
+        梯度下降 ≈ <span class="hi">往反方向下山（讓 loss 變小）</span>
+      </div>
+      <div class="formula">參數 ← 參數 − 學習率 × 梯度</div>
+      <div class="formula">θ ← θ − α · ∇L(θ)</div>
+      <p>
+        白話：<strong>往「讓 loss 變小」的方向，挪一小步</strong>。
+        α（學習率）就是這一步有多大。
+      </p>
+
+      <h2 id="gd">算給你看：一個參數的梯度下降</h2>
+      <div class="mini-map">模型：ŷ = w · x
+x = 2,  y = 10,  w = 3
+loss = (w·x − y)²</div>
+      <div class="calc">
+        ŷ = 3×2 = 6<br/>
+        error = 6 − 10 = −4<br/>
+        ∂loss/∂w = 2 × error × x = 2 × (−4) × 2 = −16<br/>
+        若 α = 0.05：w ← 3 − 0.05×(−16) = 3 + 0.8 = 3.8
+      </div>
+      <p>
+        梯度是<strong>負的</strong>，所以減掉負梯度 = <strong>w 變大</strong>。
+        這和上一課「預測太小要調大 w」一致。
+      </p>
+
+      <h2 id="code">自己寫一次，並觀察 loss</h2>
+      <pre><code>x, y = 2.0, 10.0
+w = 3.0
+lr = 0.05
+history = []
+
+for step in range(30):
+    y_hat = w * x
+    loss = (y_hat - y) ** 2
+    grad = 2 * (y_hat - y) * x
+    w = w - lr * grad
+    history.append((step, w, y_hat, loss))
+
+for step, w, y_hat, loss in history[::5]:
+    print(f"step={step:02d}  w={w:.3f}  y_hat={y_hat:.3f}  loss={loss:.4f}")
+
+print("收斂 w →", round(w, 3))   # 應接近 5.0</code></pre>
+
+      <div class="depth">
+        <div class="depth-label">更深一點 · 多個參數與向量</div>
+        <p>
+          真實模型有很多參數 θ = (w₁, w₂, …, wₙ)。
+          梯度 ∇L 也是一個向量：每個分量表示「對應參數稍微變大時，loss 變多快」。
+          更新仍然是同一條式子：θ ← θ − α ∇L。
+        </p>
+        <div class="formula">ŷ = w₁x₁ + w₂x₂ + … + b</div>
+        <p>
+          神經網路只是把很多這樣的線性式用「非線性函數」串起來，
+          再用<strong>反向傳播（backprop）</strong>有效率地算出每個權重的梯度。
+          你不需要一開始就手推 backprop；只要知道：<em>它就是「算梯度的演算法」</em>。
+        </p>
+      </div>
+
+      <h2 id="lr">學習率 α：太大太小都會出事</h2>
+      <table class="cmp">
+        <thead><tr><th>α 太小</th><th>剛好</th><th>α 太大</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>學超慢，像在爬</td>
+            <td>穩定往下走</td>
+            <td>一步跨過谷底，loss 飛起來甚至爆炸</td>
+          </tr>
+        </tbody>
+      </table>
+      <pre><code># 把 lr 改成 1.5 跑一次上一段程式，觀察 loss
+# 再改 0.0001 感受「太慢」
+lr = 1.5      # 危險：可能震盪 / 爆炸
+# lr = 0.0001  # 太保守</code></pre>
+
+      <div class="think">
+        <div class="think-label">小挑戰</div>
+        <div class="mini-map">w = 3, grad = −16, lr = 0.1</div>
+        <p class="q">新的 w 是多少？這個更新是讓 loss 變大還是變小？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <div class="calc">w ← 3 − 0.1 × (−16) = 3 + 1.6 = 4.6</div>
+            <p class="ok">往「預測變大、更接近 10」的方向走，loss 會變小。</p>
+            <p>若有人寫成 w ← w + α·grad（亂改正負號），就會愈學愈爛——符號很重要。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="rl">接回 RL：DQN 的 loss 長什麼樣</h2>
+      <div class="story-chain">
+        目標 y_target = r + γ · max Q(s′, a′; 目標網路)<br/>
+        目前網路輸出 Q(s, a; θ)<br/>
+        <span class="hi">Loss = ( Q(s,a;θ) − y_target )²</span><br/>
+        → 對 θ 做梯度下降
+      </div>
+      <p>
+        看出來了嗎？<strong>和監督式學習同一套「loss + 梯度下降」</strong>，
+        只是標籤 y 換成了「會變動的 RL 目標」。
+        這就是為什麼第 5 週之前一定要懂梯度。
+      </p>
+
+      <div class="callout tip">
+        <strong>和第 3 週 Q 表更新的對照。</strong>
+        Q 表：Q[s,a] ← Q[s,a] + α（目標 − Q[s,a]）　　<span style="color:var(--ink-dim)">（表格，直接改一格）</span><br/>
+        網路：θ ← θ − α ∇(Q(s,a;θ) − 目標)²　　　<span style="color:var(--ink-dim)">（參數，經由梯度間接改）</span>
+      </div>
+
+      <div class="quiz" data-answer="0" data-ok="正確——θ ← θ − α·∇L，往 loss 變小的方向走。" data=no="梯度指向 loss 上升最快的方向，所以要減掉它。">
+        <h3>快速檢核</h3>
+        <div class="q">梯度下降的參數更新是？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">θ ← θ − α × 梯度（往 loss 變小走）</button>
+          <button class="quiz-opt">θ ← θ + α × 梯度（盡量讓 loss 變大）</button>
+          <button class="quiz-opt">θ 完全不變，只改輸入</button>
+          <button class="quiz-opt">隨機重抽參數，直到 loss 變小</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="ml-01-ml-basics.html"><span class="dir">← 上一課</span><span class="title">ML 補課 1 · ML 是什麼</span></a>
+        <a href="ml-03-neural-nets.html"><span class="dir">下一課</span><span class="title">ML 補課 3 · 神經網路</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>

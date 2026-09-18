@@ -3,75 +3,127 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 11 週 · 逆強化學習 — 強化學習互動教學</title>
+  <title>第 11 週 · 從示範反推獎勵 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="11">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#irl">什麼是 IRL</a>
-      <a href="#pipeline">經典 IRL</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#flip">正向 vs 反向</a>
+      <a href="#irl">IRL 在問什麼</a>
       <a href="#pref">從偏好學習</a>
-      <a href="#rlhf">RLHF 流程</a>
-      <a href="#pitfalls">常見陷阱</a>
+      <a href="#rlhf">RLHF 三步</a>
+      <a href="#code">偏好損失直覺</a>
+      <a href="#pitfalls">常見坑</a>
     </aside>
     <article class="prose">
       <div class="week-label">第 11 週</div>
-      <h1>逆強化學習（Inverse RL）</h1>
-      <p>
-        正向 RL：獎勵 → 最優策略。<strong>IRL</strong>：示範或偏好 →
-        恢復一個能<em>解釋</em>該行為的獎勵，然後（可選）對其優化。
-      </p>
+      <h1>從示範 / 偏好反推獎勵</h1>
 
-      <h2 id="irl">問題定義</h2>
-      <p>給定專家軌跡 τ<sub>E</sub>，找出 R 使專家在 R 下（近似）最優。</p>
-      <ul>
-        <li>獎勵只在塑形勢函數與常數意義下可辨識。</li>
-        <li>許多獎勵可合理化同一策略——需要先驗 / 正則化。</li>
-      </ul>
-
-      <h2 id="pipeline">經典演算法</h2>
-      <ul>
-        <li><strong>MaxEnt IRL</strong>：在軟最優分佈下匹配特徵期望。</li>
-        <li><strong>Apprenticeship learning</strong>：匹配特徵計數；與 RL oracle 對弈。</li>
-        <li><strong>GAIL / AIRL</strong>：對抗式模仿——區分專家與智能體的狀態/動作。</li>
-      </ul>
-      <div class="callout tip">
-        <strong>模仿 vs IRL。</strong> 行為克隆（BC）做狀態→動作映射，會有誤差複合。
-        IRL/IL 方法用 on-policy rollout 修正分佈偏移（DAgger 家族）。
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        一般 RL：有獎勵 → 學策略。
+        <strong>IRL</strong> 倒過來：有行為 / 偏好 → 反推「他在優化什麼獎勵」→ 可再跑 RL。
+        聊天模型的 RLHF 就是這條思路的現代版。
       </div>
 
-      <h2 id="pref">從人類偏好做深度 RL</h2>
-      <p>
-        不必給完整示範，給人類兩段軌跡片段問哪個更好。
-        用 Bradley–Terry 擬合偏好模型（在學到的 $\hat{R}_\psi$ 上）：
-      </p>
-      <div class="formula">P(τ¹ ≻ τ²) = σ( Σ t̂ r<sub>ψ</sub>(s,a)<sub>t¹</sub> − Σ t̂ r<sub>ψ</sub>(s,a)<sub>t²</sub> )</div>
-      <p>然後對 $\hat{R}_\psi$ 跑 RL。</p>
+      <h2 id="flip">把問題倒過來</h2>
+      <table class="cmp">
+        <thead><tr><th></th><th>正向 RL</th><th>逆向 IRL</th></tr></thead>
+        <tbody>
+          <tr><td>已知</td><td>獎勵規則</td><td>專家行為 / 偏好</td></tr>
+          <tr><td>想得到</td><td>好策略</td><td>合理的獎勵（可再學策略）</td></tr>
+          <tr><td>像什麼</td><td>給零食，教會狗坐下</td><td>看狗乖乖坐，猜主人想鼓勵什麼</td></tr>
+        </tbody>
+      </table>
 
-      <h2 id="rlhf">RLHF 概覽（LLM）</h2>
-      <ol>
-        <li><strong>SFT</strong>：在高品質答案上監督微調。</li>
-        <li><strong>獎勵模型</strong>：用人類/AI 成對偏好標籤訓練。</li>
-        <li><strong>RL（PPO / DPO 變體）</strong>：對 RM 優化策略，並對 SFT 參考加 KL。</li>
-      </ol>
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <p class="q">為什麼「從行為反推獎勵」天生不唯一？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>
+              很多不同的獎勵都能合理化同一套行為。
+              所以 IRL 必須額外偏好（先驗 / 正則化）。
+              白話：<em>單看行為，動機往往猜不準</em>。
+            </p>
+          </div>
+        </details>
+      </div>
 
-      <h2 id="pitfalls">陷阱</h2>
+      <h2 id="irl">模仿 vs IRL</h2>
       <ul>
-        <li><strong>獎勵駭入</strong>：智能體利用 RM 錯誤（Goodhart）。</li>
-        <li><strong>偏好雜訊</strong>：標註者不一致；需要集成 / 不確定性。</li>
-        <li><strong>分佈偏移</strong>：RM 只在見過的策略區域訓練。</li>
-        <li><strong>過度優化</strong>：KL 與 early stopping 很重要。</li>
+        <li><strong>行為克隆</strong>：像監督學習——這個狀態 → 輸出專家動作。簡單，但走歪後錯誤會滾雪球。</li>
+        <li><strong>IRL / IL</strong>：抓「在優化什麼」，並常在自己跑的軌跡上修正。</li>
+        <li>名詞（聽過就好）：MaxEnt IRL、GAIL、AIRL。</li>
       </ul>
 
-      <div class="quiz" data-answer="1" data-ok="正確——IRL 從行為/偏好推斷獎勵，之後常再跑 RL。" data-no="IRL 是標準 RL 的反方向。">
+      <h2 id="pref">不必給完整示範：只問「哪個更好」</h2>
+      <div class="story-chain">
+        人類比較：行為 A ≻ 行為 B<br/>
+        → 訓練獎勵模型 RM，使「A 總分 &gt; B 總分」<br/>
+        → <span class="hi">再用 RL 最大化 RM 的分數</span>
+      </div>
+      <div class="formula">P(A ≻ B) = σ( 總分(A) − 總分(B) )</div>
+
+      <h2 id="rlhf">RLHF 三步</h2>
+      <ol>
+        <li><strong>SFT</strong>：用高品質問答做監督微調。</li>
+        <li><strong>獎勵模型</strong>：用成對偏好標籤訓練打分器。</li>
+        <li><strong>RL（PPO / DPO 一族）</strong>：優化 RM 分數，同時 KL 懲罰「離原模型太遠」。</li>
+      </ol>
+
+      <h2 id="code">偏好損失的直覺版</h2>
+      <pre><code>import math
+
+def sigmoid(x):
+    return 1.0 / (1.0 + math.exp(-x))
+
+# 假設一個超簡單的打分模型：score = w * feature_sum
+w = 0.0
+# 一筆偏好：人類認為 A 比 B 好
+feat_A, feat_B = 5.0, 2.0   # 「好行為」特徵較高
+lr = 0.1
+
+for step in range(50):
+    score_A = w * feat_A
+    score_B = w * feat_B
+    # Bradley–Terry：P(A>B) = sigmoid(sA - sB)
+    p = sigmoid(score_A - score_B)
+    # 我們希望 p → 1（A 被選中）
+    loss = -math.log(max(p, 1e-9))
+    # 這個 toy 模型的梯度（概念）：讓 w 變大，拉開 sA 與 sB
+    grad = -(1 - p) * (feat_A - feat_B)
+    w -= lr * grad
+    if step % 10 == 0 or step == 49:
+        print(f"step={step:02d}  w={w:.3f}  P(A>B)={p:.3f}  loss={loss:.3f}")
+
+print("w 變正後，分數較高的特徵組合會被偏好")</code></pre>
+      <div class="callout tip">
+        真實 RM 是神經網路，輸入是完整對話；
+        優化端用 PPO/DPO。但核心故事不變：<strong>人類偏好 → 可微分的分數 → RL</strong>。
+      </div>
+
+      <div class="depth">
+        <div class="depth-label">更深一點 · 常見坑</div>
+        <ul>
+          <li><strong>獎勵駭入</strong>：智能體找到 RM 漏洞（Goodhart）。</li>
+          <li><strong>偏好雜訊</strong>：標註者不一致。</li>
+          <li><strong>分佈偏移</strong>：RM 只在見過的區域準。</li>
+          <li><strong>過度優化</strong>：RM 分上升、真實品質下降——要 KL / 早停。</li>
+        </ul>
+      </div>
+
+      <div class="quiz" data-answer="1" data-ok="正確——IRL 從行為/偏好推斷獎勵，之後常再跑 RL。" data=no="標準 RL 是「有獎勵→學策略」；IRL 是倒過來。">
         <h3>快速檢核</h3>
-        <div class="q">IRL 要恢復什麼？</div>
+        <div class="q">IRL 主要想恢復什麼？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">精確的環境轉移核 P</button>
+          <button class="quiz-opt">環境精確物理公式</button>
           <button class="quiz-opt">能解釋專家行為的獎勵函數</button>
-          <button class="quiz-opt">沒有策略的表格型價值函數</button>
+          <button class="quiz-opt">沒有策略的價值表</button>
           <button class="quiz-opt">只有折扣因子 γ</button>
         </div>
         <div class="quiz-feedback"></div>

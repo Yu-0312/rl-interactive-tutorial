@@ -3,75 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 12 週 · 多智能體 RL — 強化學習互動教學</title>
+  <title>第 12 週 · 多個 AI 一起玩 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="12">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#marl">MARL 地圖</a>
-      <a href="#maddpg">MADDPG</a>
-      <a href="#maml">MAML / meta-RL</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#hard">難在哪</a>
+      <a href="#maddpg">MADDPG / CTDE</a>
+      <a href="#code">CTDE 概念碼</a>
+      <a href="#maml">MAML</a>
       <a href="#coop">合作 vs 競爭</a>
-      <a href="#eval">評估建議</a>
     </aside>
     <article class="prose">
       <div class="week-label">第 12 週</div>
-      <h1>多智能體強化學習</h1>
-      <p>
-        多個學習者互動。從每個智能體的角度看環境是<strong>非平穩</strong>的，
-        因為其他智能體的策略一直在變。
-      </p>
+      <h1>多個 AI 一起玩：多智能體 RL</h1>
 
-      <h2 id="marl">研究主軸</h2>
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        環境裡不只一個學習者時，對手 / 隊友一直在變，
+        世界從「固定關卡」變成「大家都會變招」。這叫 <strong>MARL</strong>。
+      </div>
+
+      <h2 id="hard">難在哪？</h2>
       <ul>
-        <li>合作 / 競爭 / 混合激勵。</li>
-        <li>集中訓練、分散執行（CTDE）。</li>
-        <li>溝通、信用分配、對手建模。</li>
+        <li>對你來說環境<strong>非平穩</strong>——別人也在學。</li>
+        <li>合作：這局輸了是誰的錯？（信用分配）</li>
+        <li>競爭：你變強，對手也變強。</li>
+        <li>隊友臨時換人，還能配合嗎？</li>
       </ul>
 
-      <h2 id="maddpg">MADDPG</h2>
-      <p>
-        Multi-Agent DDPG（Lowe et al.）：每個智能體有演員 π<sub>i</sub>(o<sub>i</sub>)，
-        但訓練時可用<strong>集中式評論家</strong> Q<sub>i</sub>(x, a<sub>1</sub>…a<sub>N</sub>) 看到全域狀態 / 聯合動作。
-      </p>
-      <div class="formula">∇<sub>θᵢ</sub> J = 𝔼[ ∇<sub>θᵢ</sub> π<sub>i</sub>(o<sub>i</sub>) ∇<sub>aᵢ</sub> Q<sub>i</sub>(x, a)|<sub>aᵢ=πᵢ(oᵢ)</sub> ]</div>
-      <p>執行時只需局部觀測 + 演員。</p>
+      <div class="think">
+        <div class="think-label">生活比喻 · CTDE</div>
+        <div class="story-chain">
+          比賽時：球員只看眼前局勢（<span class="hi">分散執行</span>）<br/>
+          練球時：教練看整場錄影（<span class="hi">集中訓練</span>）
+        </div>
+        <p class="q">為什麼訓練時可以「偷看全局」，執行時卻要只看自己？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>
+              訓練時全局資訊幫 Critic 打分更準；
+              執行時可能沒有中央控制器，每個 agent 只能用自己的觀察。
+              所以：<strong>集中訓練、分散執行（CTDE）</strong>。
+            </p>
+          </div>
+        </details>
+      </div>
 
-      <h2 id="maml">MAML（元學習角度）</h2>
-      <p>
-        Model-Agnostic Meta-Learning 找初始化 θ，使少量梯度步就能適應新任務 / 新隊友。
-        在 MARL 中：快速適應新隊友或獎勵結構。
-      </p>
-      <div class="formula">min<sub>θ</sub> Σ<sub>tasks</sub> ℒ<sub>τ</sub>( θ − α ∇<sub>θ</sub> ℒ<sub>τ</sub>(θ) )</div>
+      <h2 id="maddpg">MADDPG 一句話</h2>
+      <div class="formula">演員 πᵢ：自己的觀察 → 動作</div>
+      <div class="formula">評論家 Qᵢ：(全局資訊, 所有人動作) → 這段好不好</div>
+
+      <h2 id="code">CTDE 概念版</h2>
+      <pre><code># 每個 agent 有自己的 actor；critic 訓練時可看聯合資訊
+class Actor:
+    def __init__(self, obs_dim, act_dim):
+        self.obs_dim = obs_dim
+        # 只吃自己的觀察
+    def act(self, obs_i):
+        ...  # π_i(o_i)
+
+class CentralCritic:
+    def __init__(self, state_dim, all_act_dim):
+        ...
+    def q(self, global_state, all_actions):
+        # 訓練時用；執行時不會呼叫
+        ...
+
+# 執行：只呼叫 actor.act(my_obs)
+# 訓練：critic.q(global_state, [a1, a2, ...]) 更新演員
+print("執行時不需要 global_state")</code></pre>
+
+      <h2 id="maml">MAML：學一個「好上手的起點」</h2>
+      <blockquote style="margin:1rem 0;padding:1rem;background:var(--bg-soft);border-left:3px solid var(--accent)">
+        不直接學「某任務最強」，而是學一個初始參數：
+        稍微再練幾步，就能快速適應新任務 / 新隊友。
+      </blockquote>
+      <div class="formula">min<sub>θ</sub> Σ<sub>tasks</sub> L( θ − α ∇L(θ) )</div>
 
       <h2 id="coop">合作 vs 競爭</h2>
       <table class="cmp">
         <thead><tr><th></th><th>合作</th><th>競爭</th></tr></thead>
         <tbody>
-          <tr><td>目標</td><td>最大化隊伍回報</td><td>零和 / 自我對弈</td></tr>
-          <tr><td>信用分配</td><td>關鍵（誰有貢獻？）</td><td>常較容易（輸贏）</td></tr>
-          <tr><td>方法</td><td>QMIX、MAPPO、共享評論家</td><td>Self-play、PSRO、聯賽訓練</td></tr>
-          <tr><td>風險</td><td>廉價對話、懶惰智能體</td><td>循環、可被利用</td></tr>
+          <tr><td>目標</td><td>隊伍總分高</td><td>零和 / 自我對弈</td></tr>
+          <tr><td>難點</td><td>誰有功勞？有人偷懶？</td><td>循環剋制、被針對</td></tr>
+          <tr><td>方法名</td><td>QMIX、MAPPO</td><td>Self-play、聯賽</td></tr>
+          <tr><td>怪現象</td><td>廉價溝通、懶惰隊友</td><td>石頭剪刀布循環</td></tr>
         </tbody>
       </table>
 
-      <h2 id="eval">評估建議</h2>
-      <ul>
-        <li>對<em>未見過</em>的隊友 / 種子評估——不只訓練池。</li>
-        <li>相關時報告可利用性或交叉對弈矩陣。</li>
-        <li>消融集中式資訊：評論家真的需要聯合動作嗎？</li>
-      </ul>
+      <div class="depth">
+        <div class="depth-label">更深一點 · 評估建議</div>
+        <ul>
+          <li>對<strong>沒一起訓練過</strong>的隊友 / 對手評估。</li>
+          <li>競爭可看交叉對弈矩陣。</li>
+          <li>合作可消融：拿掉訓練時的全局資訊，掉多少？</li>
+        </ul>
+      </div>
 
-      <div class="quiz" data-answer="0" data-ok="對——CTDE 訓練時用額外資訊，執行時分散。" data=no="MADDPG 核心是集中式評論家 + 分散式演員。">
+      <div class="quiz" data-answer="0" data-ok="對——CTDE = 集中訓練、分散執行。" data=no="MADDPG 核心：評論家訓練看全局，演員執行只看局部。">
         <h3>快速檢核</h3>
         <div class="q">CTDE 是什麼意思？</div>
         <div class="quiz-options">
           <button class="quiz-opt">集中訓練、分散執行</button>
           <button class="quiz-opt">競爭訓練、合作評估</button>
           <button class="quiz-opt">連續時間微分方程</button>
-          <button class="quiz-opt">跨任務領域嵌入</button>
+          <button class="quiz-opt">跨任務嵌入</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>

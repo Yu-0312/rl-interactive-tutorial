@@ -3,61 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 4 週 · 函數近似 — 強化學習互動教學</title>
+  <title>第 4 週 · 狀態太多記不住 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="4">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#why">為何近似</a>
-      <a href="#linear">線性 FA</a>
-      <a href="#update">半梯度更新</a>
-      <a href="#demo">Tile coding 演示</a>
-      <a href="#danger">發散風險</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#why">表格哪裡爆掉</a>
+      <a href="#approx">改用可調公式</a>
+      <a href="#features">特徵與 tile coding</a>
+      <a href="#update">怎麼更新</a>
+      <a href="#code">Python 對照</a>
+      <a href="#demo">演示</a>
+      <a href="#depth">更深一點</a>
     </aside>
     <article class="prose">
-      <div class="week-label">第 4 週 · 互動</div>
-      <h1>函數近似（Function Approximation）</h1>
-      <p>
-        表格型方法為每個狀態（-動作）存一個數。真實問題狀態空間天文數字——我們改為
-        <strong>參數化</strong> $Q(s,a;\theta)$ 或 $V(s;\theta)$，從樣本更新 θ。
-      </p>
+      <div class="week-label">第 4 週 · 互動 · 建議先讀 ML 補課 1–2</div>
+      <h1>狀態太多記不住？改用近似</h1>
 
-      <h2 id="why">為何要近似？</h2>
-      <ul>
-        <li>泛化：相近狀態共享資訊。</li>
-        <li>記憶：存權重，而不是整張表。</li>
-        <li>連續狀態：位置、速度、像素。</li>
-      </ul>
-
-      <h2 id="linear">線性函數近似</h2>
-      <div class="formula">v̂(s, w) = φ(s)ᵀ w = Σᵢ φᵢ(s) wᵢ</div>
-      <p>
-        特徵 φ 可以是<strong>多項式</strong>、<strong>RBF</strong>，或
-        <strong>tile coding</strong>（多層重疊分塊）。預測問題上線性 FA 對 w 是凸的——理論漂亮——
-        但用 bootstrap 做控制仍可能發散。
-      </p>
-
-      <h2 id="update">半梯度 TD / Q-learning</h2>
-      <p>V 的 TD(0)：</p>
-      <div class="formula">w ← w + α [ R + γ v̂(S', w) − v̂(S, w) ] ∇<sub>w</sub> v̂(S, w)</div>
-      <p>線性 FA Q-learning（狀態-動作特徵 φ(s,a)）：</p>
-      <div class="formula">w ← w + α [ R + γ max<sub>a'</sub> q̂(S', a'; w) − q̂(S, a; w) ] φ(S, a)</div>
-      <div class="callout tip">
-        <strong>半梯度</strong>表示我們不對目標網路/價值做反向傳播。
-        這是刻意的（穩定性，類似之後 DQN 的目標），但弱於真正的梯度 TD。
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        Q 表要「每個狀態存一格」。狀態一多就爆。
+        解法：改用<strong>一組可調參數</strong>算出價值——相近狀態共用參數，順便學會泛化。
+        這叫<strong>函數近似</strong>。
       </div>
 
-      <h2 id="demo">互動：tile-coded 價值學習</h2>
+      <div class="callout">
+        <strong>還沒讀 ML 補課？</strong>
+        建議先花 30 分鐘：
+        <a href="ml-01-ml-basics.html">ML 1</a> →
+        <a href="ml-02-gradient.html">ML 2</a>。
+        本週的「特徵加權」就是線性模型。
+      </div>
+
+      <h2 id="why">先感受一下「表格會怎樣爆」</h2>
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <div class="mini-map">小迷宮：10×10 = 100 狀態 → 表沒問題
+CartPole：位置與角度是連續數值 → 狀態無限
+遊戲畫面：84×84 像素 → 表根本存不下</div>
+        <p class="q">連續狀態為什麼讓表格方法失敗？還有另一個隱藏問題是什麼？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <ol>
+              <li><strong>記憶體</strong>：狀態無限 / 太多，表開不起來。</li>
+              <li><strong>沒有泛化</strong>：在 A 格學到的經驗，對很像的 A′ 完全沒幫助——每個狀態都要重新摔一次。</li>
+            </ol>
+            <p>近似方法兩件事一起解：參數比較少，而且「像的狀態」會互相支援。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="approx">從「查表」改成「算」</h2>
+      <div class="story-chain">
+        表格：V[s] = 某一格的數字<br/>
+        近似：<span class="hi">V̂(s) = f(狀態 s ; 參數 w)</span><br/>
+        學習 = 調整 w，讓 f 吐出來的數字愈來愈準
+      </div>
+      <div class="formula">線性版：V̂(s) = φ(s)·w = 各特徵分數的加權和</div>
       <p>
-        一維「軌道」環境。智能體從隨機位置出發，施加速度動作，目標是右端。
-        我們用重疊 tiling 學 $V(s)$。
+        和 ML 補課的 <code>ŷ = w·x</code> 是同一件事，
+        只是 x 換成<strong>狀態特徵 φ(s)</strong>，目標換成 RL 的 TD 目標。
       </p>
 
+      <h2 id="features">特徵：把狀態變成幾個數字</h2>
+      <ul>
+        <li><strong>位置編碼</strong>：狀態在 x=3 → 某個特徵亮起來。</li>
+        <li><strong>Tile coding</strong>：好幾層稍微錯開的格子蓋住狀態空間。</li>
+      </ul>
+      <div class="callout tip">
+        <strong>為什麼 tile coding 會泛化？</strong>
+        兩個靠近的狀態，往往在某些層落在同一小格 → 共用同一個參數 →
+        調這格時，附近的狀態也一起被調整了。
+      </div>
+
+      <div class="think">
+        <div class="think-label">小挑戰</div>
+        <div class="mini-map">φ(s) = [1, 0, 1]   （兩個特徵亮）
+w   = [0.5, 2.0, -0.2]
+γ 與 r 先不管</div>
+        <p class="q">V̂(s) = φ·w 大約是多少？（加權和）</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <div class="calc">V̂ = 0.5×1 + 2.0×0 + (−0.2)×1 = 0.3</div>
+            <p>就是「亮起來的特徵 × 對應權重」加總。狀態長得像時，亮的特徵重疊 → 估計值也會接近。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="update">更新：TD 誤差 × 特徵</h2>
+      <div class="formula">δ = r + γ · V̂(s′) − V̂(s)</div>
+      <div class="formula">w ← w + α · δ · φ(s)</div>
+      <div class="story-chain">
+        這一次看到的目標 r + γV̂(s′)<br/>
+        減掉目前估計 V̂(s)<br/>
+        = <span class="hi">差距 δ</span><br/>
+        → 往目標方向挪 α·δ，<br/>
+        但<strong>只調「這次用到的特徵」對應的權重</strong>
+      </div>
+      <div class="callout">
+        <strong>「半梯度」是什麼？</strong>
+        更新時把「下一狀態的估計」當成固定目標，不對它再往回傳梯度。
+        這是刻意的——較穩。DQN 的目標網路想法很類似。
+      </div>
+
+      <h2 id="code">Python：線性 TD(0)</h2>
+      <pre><code>import random
+
+# 一維軌道：位置 0..9，目標在 9
+# 特徵：每個位置一個 one-hot（可換成 tile coding）
+n_pos = 10
+w = [0.0] * n_pos
+alpha, gamma = 0.2, 0.9
+
+def V(s):
+    return w[s]          # 線性：φ(s) 是 one-hot
+
+def env_step(s, a):
+    """a: -1 左 / +1 右；終點 +1，走路 -1"""
+    ns = max(0, min(n_pos - 1, s + a))
+    if ns == n_pos - 1:
+        return ns, 1.0, True
+    return ns, -1.0, False
+
+for episode in range(300):
+    s = random.randint(0, n_pos - 2)
+    for _ in range(30):
+        a = random.choice([-1, 1])   # 先隨機探索
+        ns, r, done = env_step(s, a)
+
+        td_target = r + gamma * V(ns)
+        delta = td_target - V(s)
+        # one-hot → 只更新 w[s]
+        w[s] += alpha * delta
+
+        s = ns
+        if done:
+            break
+
+print("V 估計:", [round(v, 2) for v in w])
+print("參數大小 ‖w‖ ≈", round(sum(x*x for x in w) ** 0.5, 3))</code></pre>
+      <div class="callout tip">
+        把 <code>V(s) = w[s]</code> 換成 <code>sum(φ(s)[i] * w[i])</code>，
+        就是一般線性近似；把 φ 換成神經網路，就是第 5 週。
+      </div>
+
+      <h2 id="demo">動手玩：tile coding 價值學習</h2>
+      <p><strong>你可以這樣玩：</strong></p>
+      <ol>
+        <li>先按「訓練 200」，看步數與 ‖w‖ 有沒有變化。</li>
+        <li>Tilings 1→8：層數多，價值曲線通常更平滑。</li>
+        <li>α 調很大：曲線可能抖甚至爆。</li>
+        <li>γ 調小：更只顧眼前。</li>
+      </ol>
       <div class="demo">
         <div class="demo-head">
-          <h3><span class="badge">互動</span> 線性 FA TD(0)</h3>
+          <h3><span class="badge">互動</span> 線性近似 TD(0)</h3>
           <div class="controls">
             <label>Tilings <input type="range" id="fa-tilings" min="1" max="8" step="1" value="4" /> <span id="fa-tilings-v">4</span></label>
             <label>α <input type="range" id="fa-alpha" min="0.01" max="0.4" step="0.01" value="0.1" /> <span id="fa-alpha-v">0.10</span></label>
@@ -77,38 +182,45 @@
         </div>
       </div>
 
-      <h2 id="danger">致命三合組（預告）</h2>
-      <p>Bootstrapping + 函數近似 + 離政策可能發散。DQN 的修法（目標網路、replay）正是針對此——第 5 週。</p>
-      <ul>
-        <li><strong>Bootstrapping</strong>：目標使用當前估計。</li>
-        <li><strong>FA</strong>：泛化讓更新互相耦合。</li>
-        <li><strong>離政策</strong>：分佈不匹配。</li>
-      </ul>
+      <div class="depth" id="depth">
+        <div class="depth-label">更深一點 · 致命三合組</div>
+        <p>下列三件事同時發生時，學習可能<strong>發散</strong>：</p>
+        <ol>
+          <li><strong>Bootstrapping</strong>：目標用到自己的估計。</li>
+          <li><strong>函數近似</strong>：改一個參數，很多狀態一起變。</li>
+          <li><strong>離政策</strong>：資料來自亂試，目標卻在算最優。</li>
+        </ol>
+        <div class="formula">δ = r + γ max Q(s′,a′; w) − Q(s,a; w)　← 目標裡也有 w</div>
+        <p>第 5 週的 replay + 目標網路，就是在拆這組炸彈。</p>
+      </div>
 
-      <table class="cmp">
-        <thead><tr><th>方法</th><th>更新</th><th>備註</th></tr></thead>
-        <tbody>
-          <tr><td>線性 FA Q-learning</td><td>φ(s,a) × 帶 max 的 TD 誤差</td><td>簡單，可能發散</td></tr>
-          <tr><td>線性 FA SARSA</td><td>φ(s,a) × 下一動作的 TD 誤差</td><td>同政策，常更穩</td></tr>
-          <tr><td>梯度 TD</td><td>投影 Bellman 誤差的真梯度</td><td>理論多，深度 RL 較少用</td></tr>
-        </tbody>
-      </table>
+      <div class="think">
+        <div class="think-label">理解題</div>
+        <p class="q">函數近似相對「表格」最大的好處？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p class="ok">用較少參數，在相似狀態之間共享、泛化。</p>
+            <p>不是「比較快收斂」，也沒有「不用探索」——那些都是誤解。</p>
+          </div>
+        </details>
+      </div>
 
-      <div class="quiz" data-answer="1" data-ok="沒錯——特徵讓相近狀態共享參數。" data=no="想想泛化與記憶。">
+      <div class="quiz" data-answer="1" data-ok="沒錯——特徵讓相近狀態共用參數。" data=no="表格存每一個狀態；近似用少量參數算很多狀態。">
         <h3>快速檢核</h3>
-        <div class="q">函數近似相對表格的主要好處？</div>
+        <div class="q">函數近似的主要好處？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">不需要探索</button>
+          <button class="quiz-opt">完全不用探索</button>
           <button class="quiz-opt">以更少參數在相似狀態間泛化</button>
-          <button class="quiz-opt">牆鐘時間一定更快收斂</button>
-          <button class="quiz-opt">可以不用折扣因子</button>
+          <button class="quiz-opt">保證比表格學得快</button>
+          <button class="quiz-opt">可以取消折扣因子</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="03-model-free.html"><span class="dir">← 上一課</span><span class="title">第 3 週 · TD 方法</span></a>
-        <a href="05-deep-rl.html"><span class="dir">下一課</span><span class="title">第 5 週 · DQN 與 Rainbow</span></a>
+        <a href="03-model-free.html"><span class="dir">← 上一課</span><span class="title">第 3 週 · Q 表</span></a>
+        <a href="05-deep-rl.html"><span class="dir">下一課</span><span class="title">第 5 週 · DQN</span></a>
       </nav>
     </article>
   </div>

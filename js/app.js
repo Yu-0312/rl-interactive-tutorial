@@ -40,12 +40,13 @@
       <div class="inner">
         <a class="brand" href="${relRoot()}index.html">
           <span class="brand-mark">RL</span>
-          <span>強化學習互動教學</span>
+          <span>強化學習 · 新手版</span>
         </a>
         <nav class="nav-links">
           <a href="${relRoot()}index.html#syllabus" class="${active === "home" ? "active" : ""}">課綱</a>
-          <a href="${relRoot()}index.html#path" class="hide-sm">學習路徑</a>
-          <a href="${relRoot()}lessons/02-introduction.html">開始第 2 週</a>
+          <a href="${relRoot()}index.html#ml-track" class="hide-sm">ML 補課</a>
+          <a href="${relRoot()}index.html#path" class="hide-sm">新手路徑</a>
+          <a href="${relRoot()}lessons/01-overview.html">從第 1 週開始</a>
           <a href="${relRoot()}index.html#progress">進度 <span id="nav-progress">0%</span></a>
         </nav>
       </div>`;

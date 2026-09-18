@@ -103,13 +103,15 @@
     const gw = W - padL - padR;
     const gh = H - padT - padB;
 
-    ctx.fillStyle = "#0d1426";
+    ctx.fillStyle = "#f3efe4";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#ebe5d6";
     ctx.fillRect(padL, padT, gw, gh);
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.strokeStyle = "rgba(63,58,50,0.1)";
     ctx.strokeRect(padL, padT, gw, gh);
 
     // goal band
-    ctx.fillStyle = "rgba(61,214,140,0.15)";
+    ctx.fillStyle = "rgba(122,158,126,0.22)";
     ctx.fillRect(padL + gw * 0.97, padT, gw * 0.03, gh);
 
     // polyline
@@ -120,12 +122,12 @@
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     });
-    ctx.strokeStyle = "#5b8cff";
+    ctx.strokeStyle = "#7a9e7e";
     ctx.lineWidth = 2.5;
     ctx.stroke();
 
     // axes labels
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.fillStyle = "rgba(63,58,50,0.55)";
     ctx.font = "11px system-ui, sans-serif";
     ctx.textAlign = "center";
     ctx.fillText("state: position on track →", W / 2, H - 18);
@@ -141,7 +143,7 @@
     // last episode steps sparkline
     if (track.curve.length > 1) {
       const maxS = Math.max(...track.curve, 10);
-      ctx.strokeStyle = "#3dd6c6";
+      ctx.strokeStyle = "#d4a574";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       track.curve.forEach((s, i) => {
@@ -151,7 +153,7 @@
         else ctx.lineTo(x, y);
       });
       ctx.stroke();
-      ctx.fillStyle = "rgba(61,214,198,0.8)";
+      ctx.fillStyle = "rgba(166,122,61,0.85)";
       ctx.textAlign = "right";
       ctx.fillText("episode length (recent)", W - padR, H - 36);
     }

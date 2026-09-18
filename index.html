@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>強化學習互動教學</title>
-  <meta name="description" content="互動式強化學習課程：動態規劃、TD、DQN、策略梯度、Actor-Critic、多智能體與模型式方法。" />
+  <title>強化學習互動教學 · 新手也讀得懂</title>
+  <meta name="description" content="給完全沒學過強化學習的人：用生活例子、互動演示和小測驗，從零讀懂 Q-learning、DQN、PPO。" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body data-lesson="0">
@@ -12,16 +12,70 @@
 
   <main class="wrap">
     <section class="hero">
-      <div class="hero-kicker">互動教學 · 共 18 週</div>
-      <h1>把強化學習，做成可以動手跑的課</h1>
+      <div class="hero-kicker">互動教學 · 新手友善 · 共 18 週</div>
+      <h1>強化學習，給完全沒學過的人</h1>
       <p class="lede">
-        完整對應一學期 RL 課綱：從策略迭代、Q-learning，到 Rainbow、PPO、MADDPG 與基於模型的方法。
-        核心章節附有即時演示、擬程式碼與小測驗——用執行演算法來學，而不是只讀文字。
+        不用先精通機器學習。我們用生活例子、一步步的對話式講解、
+        可跑的 Python，以及「更深一點」補充，帶你從零搞懂 RL。
+        每一課都可以動手玩演示——看得懂更好，玩了會更有感覺。
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="lessons/02-introduction.html">從動態規劃開始</a>
-        <a class="btn btn-ghost" href="#syllabus">瀏覽課綱</a>
-        <a class="btn btn-ghost" href="lessons/01-overview.html">課程總覽</a>
+        <a class="btn btn-primary" href="lessons/01-overview.html">從第 1 週開始（推薦）</a>
+        <a class="btn btn-ghost" href="lessons/ml-01-ml-basics.html">沒學過 ML → 先上補課</a>
+        <a class="btn btn-ghost" href="lessons/03-model-free.html">直接看 Q 表怎麼學</a>
+        <a class="btn btn-ghost" href="#syllabus">看全部課綱</a>
+      </div>
+    </section>
+
+    <section class="section" id="prereq">
+      <div class="section-head">
+        <div>
+          <h2>要先會機器學習嗎？</h2>
+          <p>表格型 RL 不必。若你完全沒學過 ML，我們把要用的 ML 直接補進教材裡。</p>
+        </div>
+      </div>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>第 1–3 週</h3>
+          <p><strong>不需要 ML。</strong>只用加減乘除，手算 Return、Value、Q 表更新。</p>
+          <div class="meta"><span class="pill green">現在就能開始</span></div>
+        </div>
+        <div class="card">
+          <h3>ML 補課 1–3</h3>
+          <p>沒有標籤的標準答案是什麼、梯度下降、神經網路直覺——剛好銜接第 4–5 週。</p>
+          <div class="meta"><span class="pill gold">約 1–2 小時</span></div>
+        </div>
+        <div class="card">
+          <h3>第 4 週起</h3>
+          <p>函數近似與 DQN 會用到 loss、梯度、網路。先補 ML，公式就不會是天書。</p>
+          <div class="meta"><span class="pill">對話式 + 程式</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="ml-track">
+      <div class="section-head">
+        <div>
+          <h2>ML 補課專區（沒學過 ML 從這裡開始）</h2>
+          <p>三課都用對話式：先想一想 → 打開答案 → Python → 接回 RL。</p>
+        </div>
+      </div>
+      <div class="grid grid-3">
+        <div class="card">
+          <h3>ML 1 · ML 是什麼</h3>
+          <p>監督式學習、特徵 / 標籤 / 損失，和 RL 的差別。</p>
+          <div class="meta"><a class="pill green" href="lessons/ml-01-ml-basics.html">開始閱讀</a></div>
+        </div>
+        <div class="card">
+          <h3>ML 2 · 梯度下降</h3>
+          <p>loss、梯度、學習率；DQN 的 loss 其實同一套。</p>
+          <div class="meta"><a class="pill green" href="lessons/ml-02-gradient.html">開始閱讀</a></div>
+        </div>
+        <div class="card">
+          <h3>ML 3 · 神經網路</h3>
+          <p>前向傳播、反向傳播直覺、最小 PyTorch 版。</p>
+          <div class="meta"><a class="pill green" href="lessons/ml-03-neural-nets.html">開始閱讀</a></div>
+        </div>
       </div>
     </section>
 
@@ -29,7 +83,7 @@
       <div class="section-head">
         <div>
           <h2>你的進度</h2>
-          <p>存在本機瀏覽器，不需帳號。</p>
+          <p>進度存在這台電腦的瀏覽器裡，不用註冊帳號。</p>
         </div>
         <div style="min-width:220px">
           <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;font-size:0.85rem;color:var(--ink-muted)">
@@ -41,19 +95,19 @@
       </div>
       <div class="grid grid-3">
         <div class="card">
-          <h3>核心演算法</h3>
-          <p>DP、TD、Q-learning、SARSA、函數近似、DQN 與 Rainbow。</p>
-          <div class="meta"><span class="pill">第 2–5 週</span></div>
+          <h3>先搞懂基礎</h3>
+          <p>什麼是狀態、獎勵？怎麼在小地圖上算出「哪裡比較好」？Q-learning 是什麼？</p>
+          <div class="meta"><span class="pill">第 1–3 週 · 新手必修</span></div>
         </div>
         <div class="card">
-          <h3>策略搜尋</h3>
-          <p>無梯度優化、REINFORCE、PPO、Actor-Critic 家族。</p>
-          <div class="meta"><span class="pill">第 6–7、10 週</span></div>
+          <h3>再看深度方法</h3>
+          <p>狀態太多記不住怎麼辦？神經網路版的 Q-learning（DQN）、PPO 又是什麼？</p>
+          <div class="meta"><span class="pill">第 4–7、10 週</span></div>
         </div>
         <div class="card">
-          <h3>進階主題</h3>
-          <p>逆強化學習、多智能體、樣本高效的模型式方法、實驗設計。</p>
-          <div class="meta"><span class="pill">第 11–14 週</span></div>
+          <h3>進階開眼界</h3>
+          <p>從人類偏好學習、多個 AI 一起玩、先學「世界規則」再想像訓練……</p>
+          <div class="meta"><span class="pill">第 11–14 週 · 可選</span></div>
         </div>
       </div>
     </section>
@@ -61,20 +115,26 @@
     <section class="section" id="path">
       <div class="section-head">
         <div>
-          <h2>建議學習路徑</h2>
-          <p>若你是 RL 新手，先按此順序再跳到深度方法。</p>
+          <h2>新手建議怎麼學</h2>
+          <p>不要跳過第 1–3 週。後面的花式方法，都是建立在這三週的直覺上。</p>
         </div>
       </div>
       <div class="card">
         <ol>
-          <li><strong>形式化 MDP</strong>：狀態、動作、轉移、獎勵、折扣 γ。</li>
-          <li><strong>精確求解小 MDP</strong>：策略迭代 / 價值迭代（第 2 週）。</li>
-          <li><strong>無模型學習</strong>：SARSA 與 Q-learning（第 3 週）。</li>
-          <li><strong>擴展規模</strong>：函數近似與神經網路（第 4–5 週）。</li>
-          <li><strong>直接優化策略</strong>：連續控制與穩定性（第 6–7、10 週）。</li>
-          <li><strong>拓展設定</strong>：人類偏好、多智能體、模型式（第 11–13 週）。</li>
-          <li><strong>做出可發表的實驗</strong>：嚴謹評估（第 14 週）。</li>
+          <li><strong>第 1 週</strong>：先弄懂「RL 就是試誤學習」。<em>不需要先會 ML</em>。</li>
+          <li><strong>第 2 週</strong>：手算 Return / Value / γ，再玩 GridWorld 看價值往回流。</li>
+          <li><strong>第 3 週</strong>：Q 表從 0 開始更新；比較 SARSA 與 Q-learning；跑 Python。</li>
+          <li><strong>第 4–5 週</strong>：狀態太多時，改用函數 / 神經網路「估」價值（這時才要 ML）。</li>
+          <li><strong>第 6–7、10 週</strong>：另一條路——直接學「看到什麼就做什麼動作」（策略方法）。</li>
+          <li><strong>第 11–13 週</strong>：開眼界，知道 RL 還能做什麼。</li>
+          <li><strong>第 14 週</strong>：如果要做專題，學會「怎麼把實驗做好」。</li>
         </ol>
+      </div>
+      <div class="callout tip" style="margin-top:1rem">
+        <strong>讀法建議。</strong>
+        每課依序：① 先自己答「先想一想」→ ② 打開答案對照 → ③ 讀程式 →
+        ④ 玩演示 → ⑤ 有餘力再看「更深一點」。
+        公式出現時，你應該已經先懂它在講的故事。
       </div>
     </section>
 
@@ -82,7 +142,7 @@
       <div class="section-head">
         <div>
           <h2>完整課綱</h2>
-          <p>18 週 · 含專題里程碑 · 標示「互動」者有即時演示。</p>
+          <p>18 週 · 標「互動」的課有即時演示 · 標「專題」的是作業週（自學可跳過）。</p>
         </div>
       </div>
       <div class="weeks" id="week-list"></div>
@@ -94,20 +154,20 @@
       </div>
       <div class="grid grid-2">
         <div class="card">
-          <h3>每個演示都動手跑</h3>
-          <p>調整超參數（α、ε、γ）、單步執行，觀察價值函數與策略如何變化。直覺比死記更重要。</p>
+          <h3>每一課都動手玩</h3>
+          <p>演示下面會寫「你可以這樣玩」。調調滑桿、按單步，比死背公式有用一百倍。</p>
         </div>
         <div class="card">
-          <h3>搭配程式庫實作</h3>
-          <p>看完表格型演示後，用 NumPy 或 PyTorch 重寫同一演算法。Gymnasium 的 <code>CliffWalking-v0</code> 與 <code>CartPole-v1</code> 很適合入門。</p>
+          <h3>遇到看不懂的詞</h3>
+          <p>課文第一次出現新詞時會立刻解釋。若還是卡住，回上一週或重玩演示。</p>
         </div>
         <div class="card">
-          <h3>每週寫筆記</h3>
-          <p>每個演算法記：目標、更新式、同政策/離政策、常見失敗模式。之後就是專題文獻回顧。</p>
+          <h3>小挑戰 + 程式 + 深度</h3>
+          <p>先自己答「先想一想」，再對照 Python，最後看「更深一點」補充。</p>
         </div>
         <div class="card">
-          <h3>專題檢查點</h3>
-          <p>第 8–9 週提案；第 15–16 週發表；第 17–18 週報告寫作。可用第 14 週的實驗設計清單。</p>
+          <h3>想寫程式？可選</h3>
+          <p>純讀 + 玩演示就夠入門。若想練手，安裝 <code>gymnasium</code> 和 <code>numpy</code> 即可；深度學習再裝 <code>torch</code>。</p>
         </div>
       </div>
     </section>
@@ -115,7 +175,7 @@
 
   <footer class="site-footer">
     <div class="inner">
-      <div>強化學習互動教學 · 開放學習教材</div>
+      <div>強化學習互動教學 · 新手版</div>
       <div>自學與課堂皆可使用</div>
     </div>
   </footer>
@@ -123,24 +183,27 @@
   <script src="js/app.js"></script>
   <script>
     const WEEKS = [
-      { n: 1, title: "課程總覽", topics: ["課程大綱", "環境設定"], lesson: "01-overview.html", kind: "lesson" },
-      { n: 2, title: "導論 — 動態規劃", topics: ["策略迭代", "價值迭代"], lesson: "02-introduction.html", kind: "interactive" },
-      { n: 3, title: "無模型演算法", topics: ["Q-learning", "SARSA"], lesson: "03-model-free.html", kind: "interactive" },
-      { n: 4, title: "函數近似", topics: ["線性 FA Q-learning", "線性 FA SARSA"], lesson: "04-function-approx.html", kind: "interactive" },
-      { n: 5, title: "深度強化學習", topics: ["深度 Q 網路", "Rainbow"], lesson: "05-deep-rl.html", kind: "interactive" },
-      { n: 6, title: "策略搜尋 I — 無梯度", topics: ["演化策略（ERL）", "CEM-RL"], lesson: "06-policy-search-1.html", kind: "lesson" },
-      { n: 7, title: "策略搜尋 II — 策略梯度", topics: ["REINFORCE", "PPO"], lesson: "07-policy-gradient.html", kind: "interactive" },
-      { n: 8, title: "學期專題提案 I", topics: ["主題選擇", "基線規劃"], kind: "project" },
-      { n: 9, title: "學期專題提案 II", topics: ["方法提案", "評估規劃"], kind: "project" },
-      { n: 10, title: "策略搜尋 III — Actor-Critic", topics: ["DDPG 與 TD3", "SAC 與 REDQ"], lesson: "10-actor-critic.html", kind: "interactive" },
-      { n: 11, title: "逆強化學習", topics: ["從人類偏好學習"], lesson: "11-irl.html", kind: "lesson" },
-      { n: 12, title: "多智能體強化學習", topics: ["MADDPG", "MAML"], lesson: "12-multi-agent.html", kind: "lesson" },
-      { n: 13, title: "樣本效率 — 模型式 RL", topics: ["ME-TRPO", "Dreamer"], lesson: "13-model-based.html", kind: "lesson" },
-      { n: 14, title: "總結：如何做好 RL", topics: ["實驗設計"], lesson: "14-wrap-up.html", kind: "lesson" },
-      { n: 15, title: "專題發表 I", topics: [], kind: "project" },
-      { n: 16, title: "專題發表 II", topics: [], kind: "project" },
-      { n: 17, title: "自主學習", topics: ["專題報告寫作"], kind: "project" },
-      { n: 18, title: "自主學習", topics: ["專題報告寫作"], kind: "project" },
+      { n: 1, title: "RL 是什麼？要先會 ML 嗎？", topics: ["對話式入門", "概念鏈"], lesson: "01-overview.html", kind: "lesson", level: "新手" },
+      { n: 2, title: "手算 Return 與 Value", topics: ["折扣 γ", "價值迭代"], lesson: "02-introduction.html", kind: "interactive", level: "新手" },
+      { n: 3, title: "Q 表怎麼從零學會", topics: ["Q-learning", "SARSA", "Python"], lesson: "03-model-free.html", kind: "interactive", level: "新手" },
+      { n: "M1", title: "ML 補課 1 · ML 是什麼", topics: ["監督式學習", "特徵 / 損失"], lesson: "ml-01-ml-basics.html", kind: "lesson", level: "新手", ml: true },
+      { n: "M2", title: "ML 補課 2 · 梯度下降", topics: ["loss", "梯度", "學習率"], lesson: "ml-02-gradient.html", kind: "lesson", level: "新手", ml: true },
+      { n: "M3", title: "ML 補課 3 · 神經網路", topics: ["前向傳播", "PyTorch 直覺"], lesson: "ml-03-neural-nets.html", kind: "lesson", level: "新手", ml: true },
+      { n: 4, title: "狀態太多記不住", topics: ["函數近似", "Tile coding", "半梯度"], lesson: "04-function-approx.html", kind: "interactive", level: "進階" },
+      { n: 5, title: "用神經網路學 Q 值", topics: ["DQN", "目標網路", "Rainbow"], lesson: "05-deep-rl.html", kind: "interactive", level: "進階" },
+      { n: 6, title: "不靠梯度也能搜", topics: ["演化策略", "CEM-RL"], lesson: "06-policy-search-1.html", kind: "lesson", level: "進階" },
+      { n: 7, title: "直接學「做什麼」", topics: ["REINFORCE", "PPO"], lesson: "07-policy-gradient.html", kind: "interactive", level: "進階" },
+      { n: 8, title: "學期專題提案 I", topics: ["主題選擇", "基線規劃"], kind: "project", level: "專題" },
+      { n: 9, title: "學期專題提案 II", topics: ["方法提案", "評估規劃"], kind: "project", level: "專題" },
+      { n: 10, title: "演員 + 評論家", topics: ["DDPG / TD3", "SAC / REDQ"], lesson: "10-actor-critic.html", kind: "interactive", level: "進階" },
+      { n: 11, title: "從示範反推獎勵", topics: ["逆強化學習", "RLHF"], lesson: "11-irl.html", kind: "lesson", level: "進階" },
+      { n: 12, title: "多個 AI 一起玩", topics: ["MADDPG", "MAML", "CTDE"], lesson: "12-multi-agent.html", kind: "lesson", level: "進階" },
+      { n: 13, title: "先學世界規則再想像", topics: ["ME-TRPO", "Dreamer"], lesson: "13-model-based.html", kind: "lesson", level: "進階" },
+      { n: 14, title: "怎麼把實驗做好", topics: ["實驗設計", "多種子"], lesson: "14-wrap-up.html", kind: "lesson", level: "專題" },
+      { n: 15, title: "專題發表 I", topics: [], kind: "project", level: "專題" },
+      { n: 16, title: "專題發表 II", topics: [], kind: "project", level: "專題" },
+      { n: 17, title: "自主學習", topics: ["專題報告寫作"], kind: "project", level: "專題" },
+      { n: 18, title: "自主學習", topics: ["專題報告寫作"], kind: "project", level: "專題" },
     ];
 
     RL.renderTopNav("home");
@@ -149,20 +212,26 @@
 
     const list = document.getElementById("week-list");
     list.innerHTML = WEEKS.map((w) => {
-      const pct = RL.getLessonProgress(w.n);
+      const pct = w.ml ? 0 : RL.getLessonProgress(w.n);
       const href = w.lesson ? `lessons/${w.lesson}` : null;
-      const tag =
+      const kindTag =
+        w.ml ? '<span class="pill gold">ML 補課</span>' :
         w.kind === "interactive" ? '<span class="pill green">互動</span>' :
         w.kind === "project" ? '<span class="pill gold">專題</span>' :
-        w.kind === "lesson" ? '<span class="pill">課程</span>' : "";
+        '<span class="pill">課程</span>';
+      const levelTag =
+        w.level === "新手" ? '<span class="pill green">新手</span>' :
+        w.level === "進階" ? '<span class="pill">進階</span>' :
+        '<span class="pill gold">專題</span>';
       const bar = pct > 0 ? `<div class="progress-bar" style="margin-top:0.65rem"><span style="width:${pct}%"></span></div>` : "";
       const topics = w.topics.length ? `<p class="topics">${w.topics.join(" · ")}</p>` : '<p class="topics">里程碑 / 寫作週</p>';
+      const num = typeof w.n === "string" ? w.n : String(w.n).padStart(2, "0");
       const inner = `
-        <div class="week-num">${String(w.n).padStart(2, "0")}</div>
+        <div class="week-num" style="${w.ml ? "font-size:0.95rem;letter-spacing:0" : ""}">${num}</div>
         <div>
           <h3>${w.title}</h3>
           ${topics}
-          <div class="meta">${tag}${pct ? `<span class="pill dim">${pct}%</span>` : ""}</div>
+          <div class="meta">${kindTag}${levelTag}${pct ? `<span class="pill dim">${pct}%</span>` : ""}</div>
           ${bar}
         </div>
         <div class="go" style="color:var(--ink-dim);font-size:0.9rem;align-self:center">${href ? "開啟 →" : "—"}</div>`;

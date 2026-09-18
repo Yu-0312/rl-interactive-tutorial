@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ML 補課 1 · 機器學習是什麼 — 強化學習互動教學</title>
+  <link rel="stylesheet" href="../css/style.css" />
+</head>
+<body data-lesson="91">
+  <header class="topnav" id="topnav"></header>
+  <div class="wrap lesson-layout">
+    <aside class="toc">
+      <a href="#tldr">一句話總結</a>
+      <a href="#why">為什麼要補 ML</a>
+      <a href="#sl">監督式學習</a>
+      <a href="#vocab">五個關鍵詞</a>
+      <a href="#quiz1">小挑戰</a>
+      <a href="#code">第一段 ML 程式</a>
+      <a href="#rl">和 RL 怎麼接</a>
+    </aside>
+    <article class="prose">
+      <div class="week-label">ML 補課 1 · 可隨時插入</div>
+      <h1>機器學習是什麼？（給完全沒學過的人）</h1>
+
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        機器學習（ML）不是「讓電腦變聰明」的魔法，
+        而是：<strong>給很多例子，讓電腦自動調參數，好讓「輸出」盡量接近「我們想要的答案」</strong>。
+        強化學習會用到 ML 的工具（尤其是神經網路），但先懂這句就夠入門。
+      </div>
+
+      <h2 id="why">為什麼這份 RL 教材要補 ML？</h2>
+      <p>
+        第 1–3 週的表格型 RL <strong>不需要</strong> ML。
+        但第 4–5 週起，狀態多到開不了表，我們會改用「可調參數的公式 / 神經網路」去估價值。
+        那時你會遇到：<em>特徵、損失、梯度下降、網路</em>。
+      </p>
+      <div class="callout">
+        <strong>建議插入時機。</strong>
+        學完第 3 週（Q 表會動了）之後、進入第 4 週之前，把本系列三課讀完即可。
+        也可以先跳過，卡住再回來。
+      </div>
+
+      <h2 id="sl">先看最經典的一種：監督式學習</h2>
+      <p>想像你要教電腦「看圖片認貓」：</p>
+      <div class="story-chain">
+        輸入（圖片） → 模型 → 輸出（是貓 / 不是貓）<br/>
+        ↑ 有標準答案！每張圖都標好了標籤
+      </div>
+      <p>流程很像學生做題對答案：</p>
+      <ol>
+        <li>模型看一張圖，猜一個答案。</li>
+        <li>和<strong>標準答案</strong>比，算出<strong>猜錯多少</strong>（這就是損失 loss）。</li>
+        <li>調整模型內部的<strong>參數</strong>，讓下次猜得更準。</li>
+        <li>重複幾千、幾百萬次。</li>
+      </ol>
+
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <p class="q">
+          下面哪一個比較像監督式學習？為什麼？
+        </p>
+        <ol>
+          <li>A：給 1000 張標好「有病 / 沒病」的 X 光，訓練模型判斷。</li>
+          <li>B：小狗坐下給零食，亂跳沒零食，讓它自己學會坐下。</li>
+        </ol>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p><span class="ok">A 比較像監督式學習</span>——每一筆資料都有標準答案。</p>
+            <p>
+              B 是<strong>強化學習</strong>：沒有「每一步該做什麼」的答案，只有結果好壞的回饋。
+            </p>
+            <table class="cmp">
+              <thead><tr><th></th><th>監督式學習</th><th>強化學習</th></tr></thead>
+              <tbody>
+                <tr><td>學習信號</td><td>標準答案（標籤）</td><td>獎勵 / 懲罰</td></tr>
+                <tr><td>資料</td><td>別人整理好的一筆筆</td><td>自己邊做邊收集</td></tr>
+                <tr><td>像什麼</td><td>看答案本刷題</td><td>學騎腳踏車</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="vocab">五個關鍵詞（之後每週都會用）</h2>
+      <table class="cmp">
+        <thead><tr><th>名詞</th><th>白話</th><th>例子</th></tr></thead>
+        <tbody>
+          <tr><td><strong>特徵 x</strong></td><td>描述「這題長什麼樣」的數字</td><td>身高 170、體重 60、年齡 25</td></tr>
+          <tr><td><strong>標籤 y</strong></td><td>標準答案</td><td>「有病」=1、「沒病」=0</td></tr>
+          <tr><td><strong>模型</strong></td><td>看到 x，吐出預測 ŷ 的規則</td><td>一條直線：ŷ = w·x + b</td></tr>
+          <tr><td><strong>參數</strong></td><td>模型裡可以調的旋鈕</td><td>斜率 w、截距 b</td></tr>
+          <tr><td><strong>損失 Loss</strong></td><td>猜錯多少（越小越好）</td><td>(ŷ − y)²</td></tr>
+        </tbody>
+      </table>
+
+      <div class="story-chain">
+        目標：<span class="hi">調整參數，讓損失變小</span><br/>
+        → 預測就愈來愈接近標準答案
+      </div>
+
+      <div class="think">
+        <div class="think-label">小挑戰</div>
+        <div class="mini-map">x = 2（輸入）
+模型：ŷ = w · x
+目前 w = 3
+標準答案 y = 10</div>
+        <p class="q">現在的預測 ŷ 是多少？若損失用 (ŷ − y)²，loss 是多少？w 要調大還是調小？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <div class="calc">ŷ = 3 × 2 = 6<br/>loss = (6 − 10)² = 16</div>
+            <p>預測 6 比答案 10 <strong>太小</strong>，所以 w 應該<strong>調大</strong>一點。</p>
+            <p>至於「要調多少」——下一課的<strong>梯度下降</strong>就是在回答這件事。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="code">同一概念，用 Python 寫</h2>
+      <p class="code-note">只用標準函式庫。你不需要 TensorFlow / PyTorch 就能懂這件事。</p>
+      <pre><code># 線性模型：y_hat = w * x
+# 目標：找一個 w，讓預測接近答案
+
+x = 2.0
+y = 10.0
+w = 3.0
+lr = 0.1          # 學習率：每一步調多少
+
+for step in range(20):
+    y_hat = w * x
+    loss = (y_hat - y) ** 2
+
+    # 「如果 w 變大一點，loss 會變大還是變小？」
+    # 對這個模型：dL/dw = 2 * (y_hat - y) * x
+    grad = 2 * (y_hat - y) * x
+    w = w - lr * grad       # 往 loss 變小的方向走一小步
+
+    if step % 5 == 0 or step == 19:
+        print(f"step={step:02d}  w={w:.3f}  y_hat={y_hat:.3f}  loss={loss:.3f}")
+
+print("最後 w ≈", round(w, 3), "（理論上應接近 5，因為 5×2=10）")</code></pre>
+
+      <div class="callout tip">
+        <strong>你剛剛已經做了「機器學習的核心循環」：</strong>
+        預測 → 算 loss → 用梯度修正參數 → 重複。
+        神經網路只是把「ŷ = w·x」換成很多層的可調公式；精神完全一樣。
+      </div>
+
+      <h2 id="rl">和 RL 怎麼接起來？</h2>
+      <p>到了第 4–5 週，表格換成模型時，對應關係是：</p>
+      <table class="cmp">
+        <thead><tr><th>監督式學習</th><th>RL 裡對應成</th></tr></thead>
+        <tbody>
+          <tr><td>輸入 x</td><td>狀態 s（或狀態+動作）</td></tr>
+          <tr><td>標籤 y</td><td>「目標 Q / 目標 V」（會動，不是人標的）</td></tr>
+          <tr><td>模型 ŷ</td><td>Q(s,a; θ) 或 V(s; θ)</td></tr>
+          <tr><td>參數</td><td>網路權重 θ</td></tr>
+          <tr><td>loss</td><td>(Q 現在估的 − 學習目標)²</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <strong>一個關鍵差異（記起來）。</strong>
+        監督式學習的 y 是固定的標準答案；
+        RL 的「學習目標」會<strong>隨模型自己改變</strong>——這就是為什麼 RL 較容易不穩，
+        也是 DQN 要「目標網路」的原因（第 5 週）。
+      </div>
+
+      <div class="depth">
+        <div class="depth-label">更深一點 · ML 的三大類（聽過就好）</div>
+        <ul>
+          <li><strong>監督式</strong>：有標籤（分類 / 回歸）。</li>
+          <li><strong>非監督式</strong>：沒標籤，找結構（分群、降維）。</li>
+          <li><strong>強化學習</strong>：靠互動與獎勵，學決策。</li>
+        </ul>
+        <p>RLHF（聊天模型）則是「用 RL 優化一個從人類偏好訓練出來的獎勵模型」——第 11 週會講。</p>
+      </div>
+
+      <div class="quiz" data-answer="1" data-ok="對——ML 是調參數讓輸出接近目標；RL 的目標是互動中的長期獎勵。" data=no="想想：有沒有標準答案？是別人給的，還是自己試出來的？">
+        <h3>快速檢核</h3>
+        <div class="q">關於「ML 與 RL 的關係」？</div>
+        <div class="quiz-options">
+          <button class="quiz-opt">RL 完全不屬於 ML，也永遠用不到 ML 工具</button>
+          <button class="quiz-opt">ML 是「調參數逼近目標」；表格型 RL 不必會它，但深度 RL 會用到</button>
+          <button class="quiz-opt">只有先拿到碩士學位才能學 RL</button>
+          <button class="quiz-opt">ML 和 RL 的差別只在名稱不同</button>
+        </div>
+        <div class="quiz-feedback"></div>
+      </div>
+
+      <nav class="lesson-nav">
+        <a href="03-model-free.html"><span class="dir">← 建議前一課</span><span class="title">第 3 週 · Q 表</span></a>
+        <a href="ml-02-gradient.html"><span class="dir">下一課</span><span class="title">ML 補課 2 · 梯度下降</span></a>
+      </nav>
+    </article>
+  </div>
+  <script src="../js/app.js"></script>
+  <script>
+    RL.renderTopNav();
+    RL.bindToc();
+    RL.bindQuizzes();
+    RL.bindLessonProgress();
+  </script>
+</body>
+</html>

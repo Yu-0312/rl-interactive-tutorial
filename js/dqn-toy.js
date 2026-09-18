@@ -62,11 +62,13 @@
       vmin = Math.min(...vals, 0);
       vmax = Math.max(...vals, 1);
     }
-    ctx.fillStyle = "#0d1426";
+    ctx.fillStyle = "#f3efe4";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#ebe5d6";
     ctx.fillRect(padL, padT, gw, gh);
 
     // ideal Q ~ gamma^distance * 1
-    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+    ctx.strokeStyle = "rgba(63,58,50,0.22)";
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
     const ideal = chain.gamma ** 1;
@@ -84,7 +86,7 @@
         if (i === 0) ctx.moveTo(x, y);
         else ctx.lineTo(x, y);
       });
-      ctx.strokeStyle = "#5b8cff";
+      ctx.strokeStyle = "#7a9e7e";
       ctx.lineWidth = 2.2;
       ctx.stroke();
     }
@@ -94,18 +96,18 @@
       const x = padL + (s / (N - 1)) * gw;
       const q = chain.Q[s * 2 + 1];
       const t = Math.max(0, Math.min(1, q));
-      ctx.fillStyle = RL.lerpColor("#1a2744", "#2dd4bf", t);
+      ctx.fillStyle = RL.lerpColor("#e7e0cf", "#7a9e7e", t);
       ctx.beginPath();
       ctx.roundRect(x - gw / (N * 2.2), H - 24, gw / (N * 1.4), 14, 3);
       ctx.fill();
     }
 
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.fillStyle = "rgba(63,58,50,0.6)";
     ctx.font = "11px system-ui, sans-serif";
     ctx.textAlign = "left";
     ctx.fillText("Q(s_near_goal, right) over training", padL, 14);
     ctx.textAlign = "center";
-    ctx.fillText("states (bright = higher Q to move right)", padL + gw / 2, H - 4);
+    ctx.fillText("states (darker green = higher Q to move right)", padL + gw / 2, H - 4);
   }
 
   function init() {

@@ -3,64 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 2 週 · 策略迭代與價值迭代 — 強化學習互動教學</title>
+  <title>第 2 週 · 手算 Value — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="2">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#mdp">MDP 複習</a>
-      <a href="#bellman">Bellman 方程</a>
-      <a href="#policy-iter">策略迭代</a>
-      <a href="#value-iter">價值迭代</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#return">Return 與折扣</a>
+      <a href="#q1">手算小挑戰</a>
+      <a href="#value">Value 是什麼</a>
+      <a href="#bellman">往回流</a>
+      <a href="#code2">Python 對照</a>
       <a href="#demo">GridWorld 演示</a>
-      <a href="#compare">如何選擇</a>
+      <a href="#depth2">更深一點</a>
     </aside>
     <article class="prose">
-      <div class="week-label">第 2 週 · 互動</div>
-      <h1>動態規劃：策略迭代與價值迭代</h1>
-      <p>
-        在<strong>已知模型</strong> $P(s'|s,a)$ 與獎勵 $R(s,a,s')$ 下，我們可以掃過整個狀態空間
-        算出最優價值。這是後續所有無模型方法的基礎。
-      </p>
+      <div class="week-label">第 2 週 · 互動 · 新手必修</div>
+      <h1>在小地圖上算「哪裡比較好」（手算開始）</h1>
 
-      <h2 id="mdp">MDP 複習</h2>
-      <ul>
-        <li><strong>狀態</strong> $s \in \mathcal{S}$。</li>
-        <li><strong>動作</strong> $a \in \mathcal{A}(s)$。</li>
-        <li><strong>轉移</strong> $P(s' \mid s, a)$。</li>
-        <li><strong>獎勵</strong> $R(s,a,s')$。</li>
-        <li><strong>折扣</strong> $\gamma \in [0,1)$。</li>
-      </ul>
-      <div class="formula">G_t = R_{t+1} + γ R_{t+2} + γ² R_{t+3} + … = Σ_{k=0}^∞ γ^k R_{t+k+1}</div>
-
-      <h2 id="bellman">Bellman 方程</h2>
-      <p>策略 π 下的狀態價值：</p>
-      <div class="formula">v<sub>π</sub>(s) = Σ<sub>a</sub> π(a|s) Σ<sub>s'</sub> P(s'|s,a) [ R(s,a,s') + γ v<sub>π</sub>(s') ]</div>
-      <p>最優價值（Bellman 最優性）：</p>
-      <div class="formula">v*(s) = max<sub>a</sub> Σ<sub>s'</sub> P(s'|s,a) [ R(s,a,s') + γ v*(s') ]</div>
-
-      <h2 id="policy-iter">策略迭代</h2>
-      <p>交替兩步直到策略穩定：</p>
-      <ol>
-        <li><strong>策略評估</strong>：解線性系統 / 迭代 $v_{k+1} = T^\pi v_k$ 至收斂。</li>
-        <li><strong>策略改進</strong>：$\pi'(s) = \arg\max_a \sum_{s'} P(s'|s,a)[R + \gamma v(s')]$。</li>
-      </ol>
-      <div class="callout">
-        <strong>保證。</strong> 有限 MDP 上策略迭代在有限步內收斂到最優策略（策略被嚴格改進直到穩定）。
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        Agent 的目標不是「單步拿最多」，而是<strong>長期累積獎勵（Return）最大</strong>。
+        未來的獎勵要打折扣 γ。把「從這裡出發大概能拿多少」寫成一個數字，就是 <strong>Value</strong>。
       </div>
 
-      <h2 id="value-iter">價值迭代</h2>
-      <p>把評估壓進一輪掃描，直接用最優算子：</p>
-      <div class="formula">v<sub>k+1</sub>(s) ← max<sub>a</sub> Σ<sub>s'</sub> P(s'|s,a) [ R(s,a,s') + γ v<sub>k</sub>(s') ]</div>
-      <p>當 $v$ 不再變化（在 ε 內），取出貪婪策略。迭代次數常更少，每步更便宜。</p>
-
-      <h2 id="demo">即時 GridWorld 演示</h2>
+      <h2 id="return">先從累積說起：Return（回報）</h2>
+      <p>假設 Agent 學到一條路：</p>
+      <div class="mini-map">A → B → C → 🏆
++1    +1   +10</div>
+      <p>那麼從 A 開始的累積獎勵是：</p>
+      <div class="calc">1 + 1 + 10 = 12</div>
       <p>
-        經典網格：起點、目標（+1）、陷阱（−1）與小步進成本。
-        觀察價值熱力圖如何填滿、貪婪箭頭如何穩定。
+        所以即使 A → B 當下只有 +1，A 仍可能是「很有價值的狀態」——
+        因為從這裡出發，未來可以接到 +10。
       </p>
+
+      <div class="think">
+        <div class="think-label">小挑戰</div>
+        <p class="q">
+          兩條路，如果你只看「最後總共拿多少」，會選哪條？<br/>
+          路線甲：A → B → 🏆，+1 +10，總共 11<br/>
+          路線乙：A → C → D → E → 🏆，+2 +2 +2 +10，總共 16
+        </p>
+        <details class="reveal">
+          <summary>先想再看</summary>
+          <div class="body">
+            <p>只看總和，乙比較高。<span class="no">但這樣夠嗎？</span></p>
+            <p>
+              若乙要走 1000 步才拿到 +10，甲只要 2 步就拿到 +10，
+              「16 一定比 11 好」就不成立了。
+              這就是為什麼 RL 需要 <strong>Discount Factor γ（折扣因子）</strong>：
+              <em>未來的獎勵，我要打幾折？</em>
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="q1">手算：Value = 現在 + 打折後的未來</h2>
+      <div class="story-chain">
+        假設：在 A 往 B<br/>
+        當下 Reward = +2<br/>
+        B 的 Value V(B) = 10<br/>
+        γ = 0.9<br/><br/>
+        那麼「A 往 B 這個選擇」的價值 ≈
+        <span class="hi">2 + 0.9 × 10 = 11</span>
+      </div>
+
+      <div class="think">
+        <div class="think-label">再進一步</div>
+        <p class="q">
+          A 有兩個選擇：<br/>
+          往 B：馬上 Reward = +2，且 V(B) = 10<br/>
+          往 C：馬上 Reward = +5，且 V(C) = 5<br/>
+          γ = 0.9<br/>
+          選 B 的價值？選 C 的價值？Agent 應該選哪個？
+        </p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <div class="calc">
+              Q(A, B) = 2 + 0.9 × 10 = 11<br/>
+              Q(A, C) = 5 + 0.9 × 5 = 9.5
+            </div>
+            <p class="ok">所以 Agent 在 A 應該選 B。</p>
+            <p>
+              你剛剛算的東西，正式名字就是 <strong>Q-value</strong>：
+              「在這個 State 做這個 Action，預期未來大概值多少」。
+            </p>
+            <ul>
+              <li><strong>V(s)</strong> →「我在這個狀態，這個狀態有多好？」</li>
+              <li><strong>Q(s,a)</strong> →「我在這個狀態做這個動作，這個選擇有多好？」</li>
+            </ul>
+            <p>
+              注意：Q 不是「立刻賺多少」，而是<strong>包含未來回報的長期估計</strong>。
+              所以剛剛若你直覺「C 馬上 +5 比較好」，會被 0.9×10 的未來價值翻盤。
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <div class="depth">
+        <div class="depth-label">更深一點 · Bellman 的故事版</div>
+        <p>
+          你剛剛其實已經碰到 Bellman Equation 的核心：
+        </p>
+        <div class="formula">現在的價值 = 現在拿到的 Reward + 打折後的未來價值</div>
+        <div class="formula">Q(s,a) ≈ r + γ · V(s′)　　或　　Q(s,a) ≈ r + γ · max<sub>a′</sub> Q(s′,a′)</div>
+        <p>
+          「估計會往回流」：終點旁邊先變有價值，再一格一格往回擴散。
+          這也是為什麼動態規劃（DP）能算出整張價值圖。
+        </p>
+      </div>
+
+      <h2 id="code2">同一手算，用 Python 對照</h2>
+      <pre><code># 手算 Q = r + gamma * V[next]
+gamma = 0.9
+V = {"B": 10.0, "C": 5.0}
+
+options = {
+    "A→B": {"r": 2.0, "next": "B"},
+    "A→C": {"r": 5.0, "next": "C"},
+}
+
+Q = {}
+for name, info in options.items():
+    Q[name] = info["r"] + gamma * V[info["next"]]
+    print(name, "→", Q[name])
+
+best = max(Q, key=Q.get)
+print("Agent 應該選:", best)   # 期望輸出 A→B = 11.0</code></pre>
+
+      <div class="callout tip">
+        <strong>程式 ↔ 手算一一對應。</strong>
+        <code>Q[name] = r + gamma * V[next]</code>
+        就是你剛剛在紙上寫的「2 + 0.9×10」。
+        之後價值迭代只是：把每一格都這樣刷新很多輪，直到數字穩定。
+      </div>
+
+      <h2 id="demo">動手玩：價值如何「往回流」</h2>
+      <p><strong>你可以這樣玩：</strong></p>
+      <ol>
+        <li>演算法選「價值迭代」，按幾次<strong>單步</strong>，盯著顏色從目標 / 陷阱往旁邊擴散。</li>
+        <li>按<strong>連續執行</strong>，看箭頭（建議走法）如何穩定。</li>
+        <li>把 <strong>γ</strong> 調小：更只顧眼前，可能選超近但危險的路。</li>
+        <li>把 <strong>γ</strong> 調大：更願意繞遠避開陷阱。</li>
+        <li>切到「策略迭代」，比較兩種「算好壞」的節奏。</li>
+      </ol>
 
       <div class="demo" id="dp-demo">
         <div class="demo-head">
@@ -82,10 +172,10 @@
           <canvas id="dp-canvas" width="520" height="360"></canvas>
         </div>
         <div class="legend">
-          <span><i style="background:#5b8cff"></i> 價值（藍=低 → 青=高）</span>
-          <span><i style="background:#3dd68c"></i> 目標</span>
-          <span><i style="background:#ff6b7a"></i> 陷阱</span>
-          <span><i style="background:#f0b429"></i> 起點</span>
+          <span><i style="background:#8fb892"></i> 目標</span>
+          <span><i style="background:#d4a0a0"></i> 陷阱</span>
+          <span><i style="background:#e0c090"></i> 起點</span>
+          <span><i style="background:linear-gradient(90deg,#e7e0cf,#7a9e7e)"></i> 價值（淺=低 → 綠=高）</span>
         </div>
         <div class="demo-stats">
           <div class="stat"><span class="k">迭代次數</span><span class="v" id="dp-iter">0</span></div>
@@ -94,44 +184,57 @@
         </div>
       </div>
 
-      <h3>你應該觀察到</h3>
-      <ul>
-        <li>價值從目標與陷阱<strong>反向擴散</strong>——這就是 backup。</li>
-        <li>γ 越大，遠端獎勵越重要；智能體更偏好較長的安全路徑。</li>
-        <li>策略迭代：每次「單步」做完整評估（多個內部掃描）再做一次改進。</li>
-      </ul>
-
-      <h2 id="compare">如何選擇</h2>
-      <table class="cmp">
-        <thead><tr><th></th><th>策略迭代</th><th>價值迭代</th></tr></thead>
-        <tbody>
-          <tr><td>需要模型 P</td><td>是</td><td>是</td></tr>
-          <tr><td>每個外層步</td><td>昂貴（解/評估 π）</td><td>便宜的一輪掃描</td></tr>
-          <tr><td>收斂</td><td>有限次策略改進</td><td>漸近 / ε-最優</td></tr>
-          <tr><td>適用</td><td>動作少、需要精確策略</td><td>大範圍掃描、串流更新</td></tr>
-        </tbody>
-      </table>
-
-      <div class="callout warn">
-        <strong>限制。</strong> DP 需要 $P$ 並對 $\mathcal{S}$ 做完整掃描。
-        巨大或未知環境需要無模型採樣——下一週。
+      <div class="depth">
+        <div class="depth-label">更深一點 · 價值迭代 vs 策略迭代</div>
+        <p>
+          兩者都需要模型 P（知道做這動作會到哪）。價值迭代每次刷新：
+          <span class="formula" style="display:inline-block;padding:0.25rem 0.55rem">V(s) ← max<sub>a</sub> Σ P [ R + γ V(s′) ]</span>
+        </p>
+        <p>
+          策略迭代則是「評估目前策略 → 改進成更好的策略」交替，直到策略不再變。
+          白話：價值迭代一直在刷分數表；策略迭代在修規則本。
+          狀態空間巨大或模型未知時，兩者都用不了——那要等第 3 週無模型方法。
+        </p>
       </div>
 
-      <div class="quiz" data-answer="0" data-ok="正確——價值迭代直接套用 Bellman 最優算子。" data-no="回想哪個更新式外層有 max_a。">
+      <div class="think">
+        <div class="think-label">本週理解題</div>
+        <p class="q">
+          如果有人告訴你「State A 的 Value = 20」，你覺得這個 20 大概在描述什麼？
+          （不用術語，用自己的話）
+        </p>
+        <details class="reveal">
+          <summary>看標準說法</summary>
+          <div class="body">
+            <p>
+              接近「從 A 出發，之後大概還能累積拿多少」。
+              更精確一點：
+              <strong>Value（價值）= 從某個 State 出發，按照某個策略行動後，預期能得到的未來累積回報</strong>。
+            </p>
+            <ul>
+              <li>Reward：這一步拿多少</li>
+              <li>Return：這一連串最後累積多少</li>
+              <li>Value：現在這個 State「未來大概值多少」</li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="quiz" data-answer="0" data-ok="正確——價值迭代直接取「最好的動作」刷新 V。" data=no="看哪個更新有 max：有 max 的是價值迭代。">
         <h3>快速檢核</h3>
-        <div class="q">哪一個是價值迭代的更新？</div>
+        <div class="q">價值迭代的更新想法是？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">v(s) ← max<sub>a</sub> Σ P [ R + γ v(s') ]</button>
-          <button class="quiz-opt">v(s) ← Σ<sub>a</sub> π(a|s) Σ P [ R + γ v(s') ]</button>
-          <button class="quiz-opt">v(s) ← 只取 R，忽略下一狀態</button>
-          <button class="quiz-opt">v(s) ← 所有動作 Q 的平均，不做 max</button>
+          <button class="quiz-opt">每一格 ← 在所有動作裡取「獎勵 + γ × 下一格價值」的最大值</button>
+          <button class="quiz-opt">每一格 ← 只看目前固定規則下的平均表現</button>
+          <button class="quiz-opt">每一格 ← 只記這一步獎勵，不管以後</button>
+          <button class="quiz-opt">每一格 ← 把所有動作做平均，不做選擇</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="01-overview.html"><span class="dir">← 上一課</span><span class="title">第 1 週 · 總覽</span></a>
-        <a href="03-model-free.html"><span class="dir">下一課</span><span class="title">第 3 週 · Q-learning 與 SARSA</span></a>
+        <a href="01-overview.html"><span class="dir">← 上一課</span><span class="title">第 1 週 · RL 是什麼</span></a>
+        <a href="03-model-free.html"><span class="dir">下一課</span><span class="title">第 3 週 · Q 表怎麼更新</span></a>
       </nav>
     </article>
   </div>

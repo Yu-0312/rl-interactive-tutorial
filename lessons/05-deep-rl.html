@@ -3,65 +3,185 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 5 週 · DQN 與 Rainbow — 強化學習互動教學</title>
+  <title>第 5 週 · 用神經網路學 Q — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="5">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#dqn">DQN 要素</a>
-      <a href="#algorithm">演算法</a>
-      <a href="#rainbow">Rainbow 元件</a>
-      <a href="#demo">目標網路直覺</a>
-      <a href="#practice">實作清單</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#ml">ML 補課導覽</a>
+      <a href="#why">為何會學崩</a>
+      <a href="#tricks">兩大穩定技巧</a>
+      <a href="#algo">DQN 流程</a>
+      <a href="#code">PyTorch 版</a>
+      <a href="#rainbow">Rainbow 小百科</a>
+      <a href="#demo">演示</a>
     </aside>
     <article class="prose">
-      <div class="week-label">第 5 週 · 互動</div>
-      <h1>深度強化學習：DQN 與 Rainbow</h1>
-      <p>
-        用<strong>深度網路</strong> $Q(s,a;\theta)$ 取代線性 FA，並用兩大技巧穩定學習：
-        <strong>經驗回放（replay）</strong>與<strong>目標網路（target network）</strong>。
-      </p>
+      <div class="week-label">第 5 週 · 互動 · 這裡開始要 ML</div>
+      <h1>用神經網路學 Q 值：DQN</h1>
 
-      <h2 id="dqn">為何樸素深度 Q 會失敗</h2>
-      <ul>
-        <li>連續樣本高度相關，破壞 SGD 假設。</li>
-        <li>bootstrap 目標隨 θ 移動 → 震盪 / 發散（致命三合組）。</li>
-      </ul>
-
-      <h2 id="algorithm">DQN 更新</h2>
-      <div class="formula">y = R + γ max<sub>a'</sub> Q(S', a'; θ⁻)  &nbsp;&nbsp;（θ⁻ = 凍結的目標權重）</div>
-      <div class="formula">Loss = ( Q(S,A; θ) − y )²</div>
-      <p>
-        把轉移 $(s,a,r,s',done)$ 存進 replay buffer；採樣 minibatch；定期
-        複製 $\theta \leftarrow \theta^-$。
-      </p>
-
-      <div class="callout tip">
-        <strong>Double DQN</strong> 減少高估：用 $a^* = \arg\max_{a'} Q(s',a';\theta)$ 選動作，
-        但用 $Q(s', a^*; \theta^-)$ 評估。
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        把估 Q 的公式換成<strong>神經網路</strong>，就是 DQN。
+        為了不讓網路學崩，加了<strong>經驗回放</strong>與<strong>目標網路</strong>。
+        訓練本質仍是：loss + 梯度下降。
       </div>
 
-      <h2 id="rainbow">Rainbow：組合式改進</h2>
+      <h2 id="ml">如果你還沒學過 ML</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>先補這三課</h3>
+          <p>
+            <a href="ml-01-ml-basics.html">ML 1：ML 是什麼</a><br/>
+            <a href="ml-02-gradient.html">ML 2：損失與梯度</a><br/>
+            <a href="ml-03-neural-nets.html">ML 3：神經網路直覺</a>
+          </p>
+          <div class="meta"><span class="pill gold">約 1–2 小時</span></div>
+        </div>
+        <div class="card">
+          <h3>你需要會的三件事</h3>
+          <p>① loss 在量什麼；② 梯度下降是「參數往 loss 小的方向走」；③ 網路 = 可調的多層函數。</p>
+          <div class="meta"><span class="pill">就這些</span></div>
+        </div>
+      </div>
+
+      <h2 id="why">為什麼「直接把表格換成網路」會炸？</h2>
+      <ul>
+        <li><strong>資料太黏</strong>：連續幾步幾乎長一樣，網路容易只記得最近這一小段。</li>
+        <li><strong>目標一直在動</strong>：你用網路自己算「下一格價值」，而權重每步都在改——像追一個一直跑走的靶子。</li>
+      </ul>
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <p class="q">
+          若老師改考卷時，「標準答案」每秒都在變（因為它來自學生自己的草稿），會怎樣？
+        </p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>學生會愈學愈亂，甚至集體把錯誤答案越推越離譜。</p>
+            <p>這就是「用自己當目標」的危險。DQN 的解法不是改數學信仰，而是：<strong>目標暫時凍結</strong>。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="tricks">兩大穩定技巧</h2>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>1. 經驗回放 Replay</h3>
+          <p>把 (s,a,r,s′) 丟進大袋子，訓練時<strong>隨機抽一把</strong>舊經驗，而不是只用剛剛發生的。</p>
+          <p><strong>白話：</strong>別只背今天的事，偶爾翻舊筆記。</p>
+        </div>
+        <div class="card">
+          <h3>2. 目標網路 Target</h3>
+          <p>另存一份較舊的權重 θ⁻，<strong>過一陣子才更新</strong>；訓練目標用它算。</p>
+          <p><strong>白話：</strong>改考卷用上週答案，不是每秒都在改的草稿。</p>
+        </div>
+      </div>
+
+      <h2 id="algo">DQN 流程（白話版）</h2>
+      <ol>
+        <li>狀態 s → Q 網路看哪個動作分數高 → 做動作（有時亂試）。</li>
+        <li>拿到 r、s′，經驗丟進回放袋。</li>
+        <li>隨機抽一批舊經驗。</li>
+        <li>用<strong>目標網路</strong>算目標 y = r + γ max Q(s′,a′; θ⁻)。</li>
+        <li>loss = (Q(s,a;θ) − y)²，更新 θ。</li>
+        <li>每隔幾步把 θ 複製到 θ⁻。</li>
+      </ol>
+      <div class="formula">y = r + γ max<sub>a′</sub> Q(s′, a′; θ⁻)</div>
+      <div class="formula">Loss = ( Q(S,A; θ) − y )²</div>
+      <div class="callout tip">
+        <strong>Double DQN（聽過就好）。</strong>
+        用<strong>目前網路</strong>挑「哪個動作最好」，用<strong>目標網路</strong>打那個動作的分數。
+        挑和評分分開 → 高估少一點。
+      </div>
+
+      <h2 id="code">概念版 PyTorch 實作</h2>
+      <p class="code-note">這是「心智模型可跑版」，不是完整 Atari 引擎。讀懂它，論文 code 就不會全是天書。</p>
+      <pre><code>import random
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class QNet(nn.Module):
+    def __init__(self, n_obs, n_actions):
+        super().__init__()
+        self.fc = nn.Sequential(
+            nn.Linear(n_obs, 64), nn.ReLU(),
+            nn.Linear(64, n_actions),
+        )
+    def forward(self, x):
+        return self.fc(x)
+
+n_obs, n_actions = 4, 2
+q = QNet(n_obs, n_actions)
+q_target = QNet(n_obs, n_actions)
+q_target.load_state_dict(q.state_dict())
+opt = torch.optim.Adam(q.parameters(), lr=1e-3)
+
+replay = []  # [(s, a, r, s2, done), ...]
+gamma = 0.99
+batch_size = 32
+
+def act(state, epsilon=0.1):
+    if random.random() < epsilon:
+        return random.randrange(n_actions)
+    with torch.no_grad():
+        qs = q(torch.tensor(state, dtype=torch.float32))
+        return int(qs.argmax())
+
+def train_step():
+    if len(replay) < batch_size:
+        return
+    batch = random.sample(replay, batch_size)
+    s, a, r, s2, d = zip(*batch)
+    s = torch.tensor(s, dtype=torch.float32)
+    a = torch.tensor(a, dtype=torch.int64)
+    r = torch.tensor(r, dtype=torch.float32)
+    s2 = torch.tensor(s2, dtype=torch.float32)
+    d = torch.tensor(d, dtype=torch.float32)
+
+    q_sa = q(s).gather(1, a.view(-1, 1)).squeeze(1)
+    with torch.no_grad():
+        # 目標網路算 y（穩定的靶）
+        y = r + gamma * q_target(s2).max(1).values * (1 - d)
+
+    loss = F.mse_loss(q_sa, y)
+    opt.zero_grad()
+    loss.backward()
+    opt.step()
+
+# 訓練主迴圈示意（環境請用 gymnasium）
+# for step in range(...):
+#     a = act(s); s2, r, done, _ = env.step(a)
+#     replay.append((s, a, r, s2, float(done)))
+#     train_step()
+#     if step % 200 == 0:
+#         q_target.load_state_dict(q.state_dict())  # 同步目標網路</code></pre>
+
+      <h2 id="rainbow">Rainbow 小百科</h2>
       <table class="cmp">
-        <thead><tr><th>元件</th><th>想法</th><th>角色</th></tr></thead>
+        <thead><tr><th>元件</th><th>白話</th><th>解決什麼</th></tr></thead>
         <tbody>
-          <tr><td>DQN</td><td>Replay + 目標網路</td><td>深度 Q 基線</td></tr>
-          <tr><td>Double Q</td><td>解耦選動作/評估</td><td>減少高估</td></tr>
-          <tr><td>優先 replay</td><td>高 |TD| 更常被採樣</td><td>樣本效率</td></tr>
-          <tr><td>Dueling</td><td>拆開 V(s) 與 A(s,a)</td><td>更好的價值學習</td></tr>
-          <tr><td>多步</td><td>n-step 回報</td><td>更快信用分配</td></tr>
-          <tr><td>Noisy nets</td><td>可學習權重雜訊</td><td>狀態相關探索</td></tr>
-          <tr><td>C51 分佈式</td><td>建模 Z(s,a)，不只 E[Z]</td><td>更豐富目標、更穩</td></tr>
+          <tr><td>DQN 基線</td><td>回放 + 目標網路</td><td>穩定</td></tr>
+          <tr><td>Double</td><td>挑動作 / 打分數分開</td><td>高估</td></tr>
+          <tr><td>優先回放</td><td>錯很大的經驗多抽</td><td>樣本效率</td></tr>
+          <tr><td>Dueling</td><td>拆「狀態好不好」+「動作額外好不好」</td><td>價值更細</td></tr>
+          <tr><td>多步回報</td><td>看 n 步總和</td><td>獎勵傳遞</td></tr>
+          <tr><td>Noisy nets</td><td>參數自己會抖</td><td>探索</td></tr>
+          <tr><td>C51 分佈式</td><td>估整段可能分數</td><td>資訊更豐富</td></tr>
         </tbody>
       </table>
-      <p>Rainbow（Hessel et al., 2018）顯示組合後在 Atari 上優於各單項。</p>
 
-      <h2 id="demo">互動：目標延遲 vs bootstrap 雜訊</h2>
-      <p>
-        玩具 1D 鏈。智能體朝遠端獎勵學 $Q$。切換「目標延遲」觀察凍結目標如何平滑學習曲線。
-      </p>
+      <h2 id="demo">動手玩：目標網路有沒有用？</h2>
+      <p><strong>你可以這樣玩：</strong></p>
+      <ol>
+        <li>目標延遲選「無」→ 曲線通常較抖。</li>
+        <li>改「每 10 步」→ 通常更平穩。</li>
+        <li>「每 50 步」→ 目標很舊，可能變慢但不亂飛。</li>
+      </ol>
       <div class="demo">
         <div class="demo-head">
           <h3><span class="badge">互動</span> 目標網路效果</h3>
@@ -83,27 +203,29 @@
         </div>
         <div class="demo-stats">
           <div class="stat"><span class="k">步數</span><span class="v" id="dqn-steps">0</span></div>
-          <div class="stat"><span class="k">Q(s0, 右)</span><span class="v" id="dqn-q0">—</span></div>
-          <div class="stat"><span class="k">TD |err| 平均</span><span class="v" id="dqn-td">—</span></div>
+          <div class="stat"><span class="k">Q(起點, 向右)</span><span class="v" id="dqn-q0">—</span></div>
+          <div class="stat"><span class="k">TD 誤差平均</span><span class="v" id="dqn-td">—</span></div>
         </div>
       </div>
 
-      <h2 id="practice">DQN 工程清單</h2>
-      <ul>
-        <li>Atari：4 幀堆疊 + 兩幀 max-pool。</li>
-        <li>Huber loss；梯度裁剪。</li>
-        <li>ε-greedy 線性衰減；評估時 ε=0.01。</li>
-        <li>記錄回報、Q 均值、buffer 大小與 seed。</li>
-      </ul>
+      <div class="depth">
+        <div class="depth-label">更深一點 · 工程小抄</div>
+        <ul>
+          <li>遊戲常把連續幾幀疊在一起當狀態。</li>
+          <li>Huber loss + 梯度裁剪。</li>
+          <li>ε 從高往下降；評估時幾乎不探索。</li>
+          <li>記錄：回合分數、Q 均值、buffer 大小、seed。</li>
+        </ul>
+      </div>
 
-      <div class="quiz" data-answer="1" data-ok="對——目標網路凍結 θ⁻，讓回歸目標更平穩。" data=no="Replay 去相關樣本；目標網路穩定目標。">
+      <div class="quiz" data-answer="1" data-ok="對——目標網路凍結一份舊參數，讓學習目標暫時穩定。" data=no="回放負責資料別太黏；目標網路負責靶別亂跑。">
         <h3>快速檢核</h3>
         <div class="q">目標網路的主要作用？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">用雜訊增加探索</button>
-          <button class="quiz-opt">凍結近期權重以穩定 bootstrap 目標</button>
+          <button class="quiz-opt">加雜訊增加探索</button>
+          <button class="quiz-opt">凍結較舊參數，讓學習目標暫時穩定</button>
           <button class="quiz-opt">取代折扣因子</button>
-          <button class="quiz-opt">壓縮 replay buffer</button>
+          <button class="quiz-opt">壓縮回放袋</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>

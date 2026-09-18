@@ -147,19 +147,21 @@
     if (vmax - vmin < 1e-6) vmax = vmin + 1e-6;
 
     ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = "#f3efe4";
+    ctx.fillRect(0, 0, W, H);
 
     for (let r = 0; r < ROWS; r++) {
       for (let c = 0; c < COLS; c++) {
         const x = pad + c * cw;
         const y = pad + r * ch;
         const t = (grid.v[idx(r, c)] - vmin) / (vmax - vmin);
-        let fill = RL.lerpColor("#1a2744", "#2dd4bf", t);
-        if (r === GOAL[0] && c === GOAL[1]) fill = "#1f6b45";
-        if (r === PIT[0] && c === PIT[1]) fill = "#6b2a32";
-        if (r === START[0] && c === START[1]) fill = "#7a5a12";
+        let fill = RL.lerpColor("#e7e0cf", "#7a9e7e", t);
+        if (r === GOAL[0] && c === GOAL[1]) fill = "#8fb892";
+        if (r === PIT[0] && c === PIT[1]) fill = "#d4a0a0";
+        if (r === START[0] && c === START[1]) fill = "#e0c090";
 
         ctx.fillStyle = fill;
-        ctx.strokeStyle = "rgba(255,255,255,0.08)";
+        ctx.strokeStyle = "rgba(63,58,50,0.1)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.roundRect(x + 2, y + 2, cw - 4, ch - 4, 8);
@@ -167,7 +169,7 @@
         ctx.stroke();
 
         // value text
-        ctx.fillStyle = "rgba(255,255,255,0.85)";
+        ctx.fillStyle = "#3f3a32";
         ctx.font = "600 11px SF Mono, ui-monospace, monospace";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -178,7 +180,7 @@
 
         // policy arrow
         if (!grid.isTerminal(r, c)) {
-          ctx.fillStyle = "#ffffff";
+          ctx.fillStyle = "#3f3a32";
           ctx.font = "700 18px system-ui, sans-serif";
           ctx.fillText(ARROWS[grid.pi[idx(r, c)]], x + cw / 2, y + ch / 2 + 12);
         }
@@ -186,7 +188,7 @@
     }
 
     // labels
-    ctx.fillStyle = "rgba(255,255,255,0.45)";
+    ctx.fillStyle = "rgba(63,58,50,0.55)";
     ctx.font = "600 10px system-ui, sans-serif";
     ctx.textAlign = "left";
     ctx.fillText("S", pad + 8, pad + 14);

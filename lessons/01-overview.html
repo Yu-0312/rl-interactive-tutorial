@@ -3,113 +3,245 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 1 週 · 課程總覽 — 強化學習互動教學</title>
+  <title>第 1 週 · RL 是什麼？要先會機器學習嗎？ — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="1">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#goals">學習目標</a>
-      <a href="#setup">環境設定</a>
-      <a href="#roadmap">課程地圖</a>
-      <a href="#tooling">工具習慣</a>
-      <a href="#checklist">第一週清單</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#prereq">要先會 ML 嗎？</a>
+      <a href="#quiz1">先回答四個問題</a>
+      <a href="#loop">一次 RL 互動</a>
+      <a href="#chain">概念怎麼串</a>
+      <a href="#code1">第一段程式</a>
+      <a href="#depth1">更深一點</a>
+      <a href="#checklist">本週清單</a>
     </aside>
     <article class="prose">
-      <div class="week-label">第 1 週</div>
-      <h1>課程總覽與環境設定</h1>
+      <div class="week-label">第 1 週 · 新手必修 · 對話式</div>
+      <h1>強化學習是什麼？（要先會機器學習嗎？）</h1>
+
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        RL 是：一個「會做決定的東西」在環境裡試誤，
+        用獎勵慢慢學會「怎麼做比較好」。
+        <strong>表格型基礎（第 1–4 週）不需要先修機器學習</strong>；
+        到神經網路方法（第 5 週起）才會用到 ML 概念。
+      </div>
+
+      <h2 id="prereq">先回答：機器學習會不會是前置作業？</h2>
       <p>
-        本互動教材對應完整一學期強化學習課程。第 1 週先建立心智模型、軟體環境，
-        以及後面幾週能順利動手的習慣。
+        簡短答案：<strong>不是硬性前置，但強烈建議並行補上。</strong>
+        這份教材的設計是「先建立 RL 直覺，再補深度工具」。
       </p>
 
-      <h2 id="goals">學習目標</h2>
-      <ul>
-        <li>說明<strong>智能體–環境迴圈</strong>，以及 RL 與監督式學習的差異。</li>
-        <li>定義 <strong>MDP</strong>：$(S, A, P, R, \gamma)$ 與回報 $G_t$。</li>
-        <li>建好 Python RL 環境（Gymnasium + NumPy，可選 PyTorch）。</li>
-        <li>掌握課程弧線：精確 DP → 無模型 TD → 函數近似 → 深度 RL → 策略搜尋 → 進階主題。</li>
-      </ul>
+      <div class="prereq-grid">
+        <div class="prereq-item">
+          <span class="tag no">不需要先會</span>
+          <p><strong>第 1–3 週</strong>：狀態、獎勵、Q 表、手算更新。只要會加減乘除與「看懂一點 Python」即可。</p>
+        </div>
+        <div class="prereq-item">
+          <span class="tag nice">會一點更好</span>
+          <p><strong>向量與矩陣直覺</strong>：第 4 週函數近似會把特徵加權起來（像線性模型）。</p>
+        </div>
+        <div class="prereq-item">
+          <span class="tag later">之後才需要</span>
+          <p><strong>第 5 週起（DQN / PPO）</strong>：神經網路、梯度下降、損失函數——這時「機器學習」才變成真前置。</p>
+        </div>
+        <div class="prereq-item">
+          <span class="tag nice">並行建議</span>
+          <p>若你完全沒碰過 ML：先學完本教材第 1–3 週，同時用 1–2 週補「什麼是模型、什麼是梯度」即可銜接。</p>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>一句話對照。</strong>
+        監督式學習：給標準答案，抄著學。
+        強化學習：沒有每一步的答案，只有「這次結果好不好」，自己試出來。
+        所以 RL 的入門門檻在「思維」，不在「會不會用 TensorFlow」。
+      </div>
+
+      <h2 id="quiz1">先不要背公式。我問你四個問題</h2>
+      <p>
+        假設機器人現在站在地圖中央，可以選擇「左」或「右」。
+        你就算完全不知道術語也沒關係，<strong>直接用自己的話回答</strong>：
+      </p>
+
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <p class="q">下面四個東西，你會怎麼稱呼它們？</p>
+        <ol>
+          <li>機器人本身叫什麼？</li>
+          <li>「它現在站在地圖中央」這個資訊叫什麼？</li>
+          <li>「左、右」叫什麼？</li>
+          <li>「走到終點得到 +10、掉進陷阱 −10」這個叫什麼？</li>
+        </ol>
+        <details class="reveal">
+          <summary>看對照（想完再點）</summary>
+          <div class="body">
+            <table class="cmp exp-table">
+              <thead><tr><th>你的說法</th><th>RL 正式概念</th><th>例子</th></tr></thead>
+              <tbody>
+                <tr><td>訓練目標 / 機器人</td><td><strong>Agent</strong>（智能體）</td><td>機器人本身</td></tr>
+                <tr><td>定位 / 現在在哪</td><td><strong>State</strong>（狀態）</td><td>站在地圖中央</td></tr>
+                <tr><td>方向 / 可以做什麼</td><td><strong>Action</strong>（動作）</td><td>往左、往右、往上、往下</td></tr>
+                <tr><td>獎勵機制 / 加減分</td><td><strong>Reward</strong>（獎勵）</td><td>終點 +10、陷阱 −10</td></tr>
+              </tbody>
+            </table>
+            <p>
+              有一點要修正：「訓練目標」≠ Agent。
+              Agent 是<strong>誰在學習、誰在做決定</strong>；
+              真正的目標是：<strong>最大化長期累積獎勵</strong>。
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="loop">一次完整的 RL 互動長怎樣</h2>
+      <div class="story-chain">
+        <span class="hi">Agent</span> → 選一個 <span class="hi">Action</span> → <span class="hi">Environment</span> 回饋<br/>
+        → 得到 <span class="hi">Reward</span> + 下一個 <span class="hi">State</span> → Agent 再決定下一步
+      </div>
+
+      <div class="think">
+        <div class="think-label">小挑戰</div>
+        <p class="q">
+          機器人在 A。它選「上」，結果撞牆：
+          沒有移動，而且 Reward = −1。<br/>
+          那麼這一步的 State / Action / Next State / Reward 分別是什麼？
+        </p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <ul>
+              <li>State：還在 <strong>A</strong></li>
+              <li>Action：<strong>上</strong></li>
+              <li>Next State：還是 <strong>A</strong>（原地不動）</li>
+              <li>Reward：<strong>−1</strong></li>
+            </ul>
+            <p>
+              這就是一次完整的 RL interaction：
+              <span class="ok">State → Action → Environment → Reward + Next State</span>。
+            </p>
+            <p>
+              你可能會問：「撞牆有沒有回饋？」——有，而且很重要。
+              Reward 怎麼設計，會直接影響 Agent 最後學到什麼行為。
+              例如撞牆可以是 0、−1 或 −5；三種設定，學到的路線可能都不一樣。
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="chain">把核心概念串成一條線</h2>
+      <div class="story-chain">
+        Agent<br/>
+        <span class="step">↓ 誰在做決定</span><br/>
+        State → Action → Reward<br/>
+        <span class="step">↓ 這一連串累積起來</span><br/>
+        Return（回報：整段路徑的累積獎勵）<br/>
+        <span class="step">↓ 未來要打折扣 γ</span><br/>
+        Value / Q-value（估計未來大概能拿多少）<br/>
+        <span class="step">↓ 根據估計決定怎麼走</span><br/>
+        Policy（策略）<br/>
+        <span class="step">↓ 一邊試新的、一邊用舊的</span><br/>
+        Exploration ↔ Exploitation
+      </div>
+      <p>
+        這條線就是後面每一週的骨架。第 2 週會把 Value 算給你看；
+        第 3 週會把 Q 表一格一格更新出來。
+      </p>
+
+      <h2 id="code1">同一件事，用程式寫一次</h2>
+      <p class="code-note">不需要先會 ML。你只要能看懂「字典像表格、函數像步驟」就夠了。</p>
+
+      <pre><code># 最小 RL 迴圈：Agent 在 1D 世界，只能往右走
+# 狀態: 0, 1, 2（2 是終點）
+# 動作: "right"
+# 終點 reward = +10，走路 reward = -1
+
+state = 0
+total_reward = 0
+gamma = 0.9          # 未來打幾折，第 2 週會細講
+V = {0: 0.0, 1: 0.0, 2: 0.0}   # 每個狀態「大概有多好」的估計
+
+for step in range(5):
+    action = "right"                 # 先固定往右（之後才學「怎麼選」）
+    next_state = state + 1
+    reward = 10.0 if next_state == 2 else -1.0
+    total_reward += reward
+
+    print(f"State={state}  Action={action}  "
+          f"Reward={reward}  Next={next_state}")
+
+    # 用「剛剛看到的結果」回頭修一點估計（TD 的雛形）
+    td_target = reward + gamma * V[next_state]
+    V[state] += 0.3 * (td_target - V[state])   # 0.3 是學習率 α
+
+    state = next_state
+    if state == 2:
+        break
+
+print("累積 Reward =", total_reward)
+print("Value 估計 =", V)
+print("這個 value 0.3 這個學習率 α")</code></pre>
 
       <div class="callout tip">
-        <strong>學習建議。</strong> 每週共用一個筆記本（或 repo）：演算法名稱、更新式、
-        一句直覺、可執行腳本連結。之後就是專題的參考工具箱。
+        <strong>你剛剛在程式裡已經碰到三件事：</strong>
+        ① 互動迴圈（State→Action→Reward→Next State）；
+        ② 累積回報（total_reward）；
+        ③ 用經驗修正估計（那行 <code>V[state] += ...</code>）。
+        後面所有花式方法，都是在把③做得更穩、更快、更通用。
       </div>
 
-      <h2 id="setup">環境設定</h2>
-      <p>建議技術堆疊（Python 3.10+）：</p>
-<pre><code># 先建立 venv / conda env，然後：
-pip install gymnasium numpy matplotlib
-pip install torch          # 深度 RL 週（5、7、10）
-pip install jupyterlab     # 可選
-
-# 冒煙測試
-python -c "import gymnasium as gym; print(gym.make('CliffWalking-v0'))"</code></pre>
-
-      <table class="cmp">
-        <thead>
-          <tr><th>元件</th><th>用途</th><th>備註</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Gymnasium</td><td>標準環境 API</td><td>建議 <code>CliffWalking</code>、<code>FrozenLake</code>、<code>CartPole</code></td></tr>
-          <tr><td>NumPy</td><td>表格型演算法</td><td>第 2–4 週足夠</td></tr>
-          <tr><td>PyTorch</td><td>DQN / PPO / SAC</td><td>GPU 可選；小網路用 CPU 即可</td></tr>
-          <tr><td>Matplotlib</td><td>學習曲線</td><td>務必畫多 seed 的 mean ± std</td></tr>
-        </tbody>
-      </table>
-
-      <h2 id="roadmap">課程地圖</h2>
-      <div class="grid grid-2">
-        <div class="card">
-          <h3>精確與表格型</h3>
-          <p>第 2–3 週：可證明收斂。小狀態空間。建立 bootstrapping 與探索直覺的最佳起點。</p>
-        </div>
-        <div class="card">
-          <h3>近似與深度 RL</h3>
-          <p>第 4–5 週：用線性 FA 與神經網路泛化。replay、目標網路與穩定性成為主要工程議題。</p>
-        </div>
-        <div class="card">
-          <h3>策略優化</h3>
-          <p>第 6–7、10 週：黑盒搜尋、REINFORCE、PPO 與 Actor-Critic。連續控制的主流方法。</p>
-        </div>
-        <div class="card">
-          <h3>前沿與專題</h3>
-          <p>第 11–14 週：偏好、多智能體、模型式效率、實驗設計。之後進入學期專題。</p>
-        </div>
+      <h2 id="depth1">更深一點（可第二遍再看）</h2>
+      <div class="depth">
+        <div class="depth-label">更深一點 · 術語正式版</div>
+        <p>
+          RL 的形式骨架是 <strong>MDP（馬可夫決策過程）</strong>：
+          狀態集合 S、動作集合 A、轉移 P(s′|s,a)、獎勵 R(s,a,s′)、折扣 γ。
+        </p>
+        <div class="formula">G<sub>t</sub> = R<sub>t+1</sub> + γ R<sub>t+2</sub> + γ² R<sub>t+3</sub> + …</div>
+        <p>
+          Agent 的目標是最大化期望的 G。若環境模型 P 已知，屬於「有模型」方法（第 2 週 DP）；
+          若未知，只能靠採樣經驗，屬於「無模型」方法（第 3 週以後）。
+        </p>
       </div>
 
-      <h2 id="tooling">程式庫 / 工具習慣</h2>
-      <ul>
-        <li><strong>一個演算法一個檔案</strong>：<code>q_learning.py</code>、<code>ppo.py</code>…</li>
-        <li><strong>設定即資料</strong>：α、ε、γ、網路大小放 dict 或 argparse——不要寫死在迴圈裡。</li>
-        <li><strong>隨機種子</strong>：暴露 <code>seed</code> 並記錄。沒有 seed 的 RL 結果只是軼事。</li>
-        <li><strong>檢查點</strong>：存最佳評估回報，而不是最後一組權重。</li>
-      </ul>
+      <div class="depth">
+        <div class="depth-label">更深一點 · 為什麼 RL 不一定要先會 ML</div>
+        <p>
+          表格型方法只需要「陣列 + 迴圈 + 期望估計」。
+          機器學習（尤其是深度學習）是在狀態空間太大、無法開表時，
+          用參數化函數去<em>近似</em>價值或策略——那是工具，不是 RL 的定義。
+          你可以先懂「在試什麼」，再換更強的估計器。
+        </p>
+      </div>
 
-      <h2 id="checklist">第一週清單</h2>
+      <h2 id="checklist">本週清單</h2>
       <ol>
-        <li>安裝 Gymnasium，隨機跑 <code>FrozenLake-v1</code> 10 個 episode。</li>
-        <li>寫出回報公式 $G_t = \sum_{k=0}^\infty \gamma^k R_{t+k+1}$，用一句話解釋 γ。</li>
-        <li>瀏覽第 2–3 週互動演示——把價值迭代跑到策略不再變化。</li>
-        <li>寫 5 行專題想法（可選，第 8–9 週再細化）。</li>
+        <li>用自己的話回答：Agent / State / Action / Reward 各是什麼？</li>
+        <li>判斷：你要做「表格型 Q-learning」，現在需要先會 PyTorch 嗎？（答案：不需要）</li>
+        <li>把上面那段 Python 跑一次，改一下 <code>gamma</code> 或學習率，看 Value 有沒有變。</li>
+        <li>打開第 2 週，開始手算 Value——那才是真正「懂 RL」的開始。</li>
       </ol>
 
-      <div class="quiz" data-answer="1" data-ok="沒錯——RL 優化的是不確定性下的累積獎勵，不是固定監督損失。" data-no="想想序列決策與延遲獎勵。">
+      <div class="quiz" data-answer="1" data-ok="沒錯——RL 優化的是長期累積獎勵；表格型基礎也不需要先會深度學習。" data=no="回想小狗學坐下：沒有每一步的標準答案，只有零食回饋。">
         <h3>快速檢核</h3>
-        <div class="q">RL 的核心目標是什麼？</div>
+        <div class="q">關於「機器學習是不是 RL 的前置」？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">在固定 i.i.d. 資料集上最小化預測誤差</button>
-          <button class="quiz-opt">最大化智能體互動的期望折扣回報</button>
-          <button class="quiz-opt">把狀態分類成離散標籤</button>
-          <button class="quiz-opt">精確重建環境動力學</button>
+          <button class="quiz-opt">一定要先精通 ML，否則完全學不動 RL</button>
+          <button class="quiz-opt">表格型基礎不必先會 ML；到 DQN 等方法才需要神經網路概念</button>
+          <button class="quiz-opt">RL 和 ML 完全無關，永遠不用學 ML</button>
+          <button class="quiz-opt">只要會影像分類就會 RL</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
         <a href="../index.html"><span class="dir">← 首頁</span><span class="title">課綱</span></a>
-        <a href="02-introduction.html"><span class="dir">下一課</span><span class="title">第 2 週 · 動態規劃</span></a>
+        <a href="02-introduction.html"><span class="dir">下一課</span><span class="title">第 2 週 · 手算 Value</span></a>
       </nav>
     </article>
   </div>

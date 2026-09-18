@@ -3,70 +3,134 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 10 週 · Actor-Critic — 強化學習互動教學</title>
+  <title>第 10 週 · 演員 + 評論家 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="10">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#ac">Actor-Critic 模式</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#ac">演員與評論家</a>
       <a href="#ddpg">DDPG</a>
-      <a href="#td3">TD3 修法</a>
-      <a href="#sac">SAC 與 REDQ</a>
-      <a href="#demo">雙評論家直覺</a>
-      <a href="#select">如何選擇</a>
+      <a href="#td3">TD3 修了什麼</a>
+      <a href="#sac">SAC</a>
+      <a href="#code">概念版 TD3 更新</a>
+      <a href="#demo">雙評論家演示</a>
     </aside>
     <article class="prose">
       <div class="week-label">第 10 週 · 互動</div>
-      <h1>策略搜尋 III：Actor-Critic</h1>
-      <p>
-        把策略（演員）與學到的價值函數（評論家）結合。對<strong>連續控制</strong>，
-        確定性策略梯度方法——DDPG、TD3——與最大熵方法——SAC——是主流。
-      </p>
+      <h1>演員 + 評論家：Actor-Critic</h1>
 
-      <h2 id="ac">模式</h2>
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        <strong>Actor</strong> 決定做什麼動作；
+        <strong>Critic</strong> 打分「這狀態 / 動作大概值多少」。
+        兩個一起練。連續控制主流是 DDPG、TD3、SAC。
+      </div>
+
+      <h2 id="ac">為什麼要兩個網路？</h2>
+      <div class="story-chain">
+        Actor：看到狀態 → 直接輸出動作<br/>
+        Critic：看到狀態+動作 → 輸出 Q 分數<br/><br/>
+        Critic 用 TD 學打分（像第 5 週）<br/>
+        Actor 調整自己，<span class="hi">讓 Critic 對「我輸出的動作」打更高分</span>
+      </div>
+      <div class="think">
+        <div class="think-label">生活比喻</div>
+        <p class="q">演員在台上即興；評論家在台下打分。兩邊如何一起進步？</p>
+        <details class="reveal">
+          <summary>看展開</summary>
+          <div class="body">
+            <p>演員看「上次這樣演分數高」就繼續；評論家看多了戲，分數愈打愈準。</p>
+            <p>若只有 REINFORCE：要整局結束才知道好壞，訊號很吵。Critic 提供每步的「現在幾分」。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="ddpg">DDPG：連續動作版 DQN 思路</h2>
       <ul>
-        <li><strong>Actor</strong> π<sub>θ</sub>(s) → 動作（確定性或高斯）。</li>
-        <li><strong>Critic</strong> Q<sub>φ</sub>(s,a) → 回報估計。</li>
-        <li>Critic 用 TD 訓練；Actor 用 ∇<sub>θ</sub> Q(s, π<sub>θ</sub>(s)) 訓練。</li>
+        <li>Actor + Critic 都有回放袋與目標網路。</li>
+        <li>探索：在 Actor 輸出上加雜訊。</li>
+        <li>Actor 目標：輸出的動作讓 Critic 的 Q 盡量高。</li>
       </ul>
+      <div class="formula">∇<sub>θ</sub>J ≈ 𝔼[ ∇<sub>θ</sub>μ(s) · ∇<sub>a</sub> Q(s,a)|<sub>a=μ(s)</sub> ]</div>
 
-      <h2 id="ddpg">DDPG</h2>
-      <p>Deep Deterministic Policy Gradient——「連續動作版 DQN」：</p>
-      <ul>
-        <li>演員與評論家都有 replay buffer + 目標網路。</li>
-        <li>用 OU / 高斯動作雜訊探索。</li>
-        <li>Actor 最大化 Q(s, μ(s))。</li>
-      </ul>
-      <div class="formula">∇<sub>θ</sub> J ≈ 𝔼[ ∇<sub>θ</sub> μ(s) ∇<sub>a</sub> Q(s,a)|<sub>a=μ(s)</sub> ]</div>
-
-      <h2 id="td3">TD3 — Twin Delayed DDPG</h2>
+      <h2 id="td3">TD3：修 DDPG 的三個毛病</h2>
       <ol>
-        <li><strong>雙評論家</strong>：對兩個 Q 目標取 min（降低高估偏差）。</li>
-        <li><strong>延遲策略更新</strong>：Actor 比 Critic 少更新。</li>
-        <li><strong>目標策略平滑</strong>：對目標動作加裁剪雜訊。</li>
+        <li>
+          <strong>雙評論家（Twin）</strong>：兩個 Critic，目標取 min。<br/>
+          白話：兩個評審，<em>先當比較嚴的那位說了算</em>——不易自我感覺良好。
+        </li>
+        <li>
+          <strong>延遲更新 Actor（Delayed）</strong>：評論家多練幾次，演員少改幾次。
+        </li>
+        <li>
+          <strong>目標策略平滑</strong>：算目標時對動作加一點雜訊，別對單點過度自信。
+        </li>
       </ol>
-      <div class="formula">y = r + γ min<sub>i=1,2</sub> Q<sub>φ'<sub>i</sub></sub>(s', π<sub>θ'</sub>(s') + ε)</div>
+      <div class="formula">y = r + γ · min(Q₁, Q₂)( s′, π(s′)+ε )</div>
 
-      <h2 id="sac">SAC 與 REDQ</h2>
-      <p>
-        <strong>Soft Actor-Critic</strong> 同時最大化獎勵<em>與</em>熵：
-        $J = \mathbb{E}[ r + \alpha \mathcal{H}(\pi(\cdot|s)) ]$。
-      </p>
-      <ul>
-        <li>隨機高斯策略；自動熵溫度 α。</li>
-        <li>不需手調動作雜訊的穩健探索。</li>
-        <li><strong>REDQ</strong>：大型評論家集成，隨機子集取 min，極端樣本高效。</li>
-      </ul>
+      <h2 id="sac">SAC：動作也要保持多樣</h2>
+      <div class="formula">目標 ≈ 獎勵 + α × 熵（策略的隨機程度）</div>
+      <p>白話：不只看戰績，也鼓勵「別把所有局打成同一套」。常更穩、樣本效率不錯。</p>
+      <p><strong>REDQ</strong>：很多個 Critic，每次隨機抽幾個取 min——更嚴格、更省樣本。</p>
 
-      <h2 id="demo">互動：為何雙評論家重要</h2>
-      <p>
-        玩具景觀：某一區域評論家高估較多。使用 <strong>min(Q1,Q2)</strong> 得到較不樂觀（更可靠）的動作選擇。
-      </p>
+      <h2 id="code">概念版：雙 Q 取 min</h2>
+      <pre><code>import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class Critic(nn.Module):
+    def __init__(self, n_obs, n_act):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_obs + n_act, 64), nn.ReLU(),
+            nn.Linear(64, 1),
+        )
+    def forward(self, s, a):
+        return self.net(torch.cat([s, a], dim=-1)).squeeze(-1)
+
+class Actor(nn.Module):
+    def __init__(self, n_obs, n_act):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_obs, 64), nn.ReLU(),
+            nn.Linear(64, n_act), nn.Tanh(),  # 動作假設在 [-1,1]
+        )
+    def forward(self, s):
+        return self.net(s)
+
+q1, q2 = Critic(4, 2), Critic(4, 2)
+actor = Actor(4, 2)
+opt_q = torch.optim.Adam(list(q1.parameters()) + list(q2.parameters()), lr=1e-3)
+opt_a = torch.optim.Adam(actor.parameters(), lr=1e-3)
+gamma = 0.99
+
+def td3_targets(r, s2, done):
+    with torch.no_grad():
+        a2 = actor(s2)
+        # 目標策略平滑：加一點裁剪雜訊
+        a2 = (a2 + 0.1 * torch.randn_like(a2)).clamp(-1, 1)
+        q1_next = q1(s2, a2)
+        q2_next = q2(s2, a2)
+        y = r + gamma * torch.min(q1_next, q2_next) * (1 - done)
+    return y
+
+# 更新 Critic：兩個 Q 都逼近 y
+# 更新 Actor（可延遲幾步再更）：最大化 q1(s, actor(s))
+# 重點是 min(Q1,Q2) —— 對抗高估</code></pre>
+
+      <h2 id="demo">動手玩：為什麼雙評論家重要</h2>
+      <p><strong>你可以這樣玩：</strong></p>
+      <ol>
+        <li>勾選「使用 min(Q1,Q2)」，多按「重新採樣評論家」，看選中動作穩不穩。</li>
+        <li>取消勾選再採樣：可能被某個虛高評論家帶跑。</li>
+        <li>雜訊調高：min 的保護效果更明顯；對照「相對最優後悔」。</li>
+      </ol>
       <div class="demo">
         <div class="demo-head">
-          <h3><span class="badge">互動</span> 評論家集成 min</h3>
+          <h3><span class="badge">互動</span> 雙評論家取 min</h3>
           <div class="controls">
             <label>雜訊大小
               <input type="range" id="ac-noise" min="0" max="1" step="0.05" value="0.5" />
@@ -80,31 +144,33 @@
           <canvas id="ac-canvas" width="640" height="280"></canvas>
         </div>
         <div class="demo-stats">
-          <div class="stat"><span class="k">argmax 動作</span><span class="v" id="ac-arg">—</span></div>
+          <div class="stat"><span class="k">選中的動作</span><span class="v" id="ac-arg">—</span></div>
           <div class="stat"><span class="k">該點真實 Q</span><span class="v" id="ac-true">—</span></div>
           <div class="stat"><span class="k">相對最優後悔</span><span class="v" id="ac-regret">—</span></div>
         </div>
       </div>
 
-      <h2 id="select">如何選擇演算法</h2>
-      <table class="cmp">
-        <thead><tr><th>方法</th><th>動作空間</th><th>備註</th></tr></thead>
-        <tbody>
-          <tr><td>PPO</td><td>離散 / 連續</td><td>很好的預設，同政策</td></tr>
-          <tr><td>TD3</td><td>連續</td><td>強離政策基線</td></tr>
-          <tr><td>SAC</td><td>連續</td><td>隨機策略，樣本高效</td></tr>
-          <tr><td>DQN/Rainbow</td><td>離散</td><td>Atari 風格</td></tr>
-        </tbody>
-      </table>
+      <div class="depth">
+        <div class="depth-label">更深一點 · 怎麼選演算法</div>
+        <table class="cmp">
+          <thead><tr><th>方法</th><th>動作空間</th><th>白話定位</th></tr></thead>
+          <tbody>
+            <tr><td>PPO</td><td>離散 / 連續</td><td>很穩的預設</td></tr>
+            <tr><td>DQN</td><td>離散</td><td>選按鍵那類</td></tr>
+            <tr><td>TD3</td><td>連續</td><td>離政策強基線，抗高估</td></tr>
+            <tr><td>SAC</td><td>連續</td><td>隨機策略，常樣本效率佳</td></tr>
+          </tbody>
+        </table>
+      </div>
 
-      <div class="quiz" data-answer="1" data-ok="正確——TD3 的雙評論家 min 減少 Q 高估。" data=no="TD3 = 雙評論家 + 延遲 Actor + 目標平滑。">
+      <div class="quiz" data-answer="1" data-ok="正確——兩個 Critic 取 min，直接壓低高估。" data=no="TD3 = 雙評論家 + 延遲 Actor + 目標平滑。">
         <h3>快速檢核</h3>
-        <div class="q">TD3 哪個技巧直接對抗高估偏差？</div>
+        <div class="q">TD3 哪個技巧最直接對抗 Q 高估？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">只有目標策略平滑</button>
-          <button class="quiz-opt">裁剪雙 Q 學習（兩評論家取 min）</button>
-          <button class="quiz-opt">更大的 replay 容量</button>
+          <button class="quiz-opt">只把回放袋開更大</button>
+          <button class="quiz-opt">兩個評論家打分，更新時取較小的</button>
           <button class="quiz-opt">Actor 用更大學習率</button>
+          <button class="quiz-opt">完全取消探索</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>

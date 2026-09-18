@@ -65,7 +65,9 @@
     function X(i) { return padL + (i / 200) * gw; }
     function Y(v) { return padT + gh - ((v - yMin) / (yMax - yMin + 1e-9)) * gh; }
 
-    ctx.fillStyle = "#0d1426";
+    ctx.fillStyle = "#f3efe4";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#ebe5d6";
     ctx.fillRect(padL, padT, gw, gh);
 
     function line(data, color, width, dash) {
@@ -81,10 +83,10 @@
       ctx.setLineDash([]);
     }
 
-    line(TRUE, "rgba(255,255,255,0.35)", 1.5, [4, 3]);
-    line(Q1, "rgba(91,140,255,0.35)", 1);
-    line(Q2, "rgba(240,180,41,0.35)", 1);
-    line(policy, "#3dd6c6", 2.4);
+    line(TRUE, "rgba(63,58,50,0.35)", 1.5, [4, 3]);
+    line(Q1, "rgba(138,173,184,0.55)", 1);
+    line(Q2, "rgba(212,165,116,0.65)", 1);
+    line(policy, "#7a9e7e", 2.4);
 
     // argmax of selected policy
     let bestI = 0;
@@ -92,7 +94,7 @@
     let trueBest = 0;
     for (let i = 0; i <= 200; i++) if (TRUE[i] > TRUE[trueBest]) trueBest = i;
 
-    ctx.fillStyle = "#ff6b7a";
+    ctx.fillStyle = "#c98b8b";
     ctx.beginPath();
     ctx.arc(X(bestI), Y(policy[bestI]), 6, 0, Math.PI * 2);
     ctx.fill();
@@ -101,10 +103,10 @@
     document.getElementById("ac-true").textContent = TRUE[bestI].toFixed(3);
     document.getElementById("ac-regret").textContent = (TRUE[trueBest] - TRUE[bestI]).toFixed(3);
 
-    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.fillStyle = "rgba(63,58,50,0.6)";
     ctx.font = "11px system-ui, sans-serif";
     ctx.textAlign = "left";
-    ctx.fillText("white dashed = true Q   blue/gold = critics   teal = selected   red = argmax", padL, 12);
+    ctx.fillText("dashed = true Q   sky/gold = critics   sage = selected   rose = argmax", padL, 12);
   }
 
   function init() {

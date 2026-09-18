@@ -3,57 +3,164 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 7 週 · REINFORCE 與 PPO — 強化學習互動教學</title>
+  <title>第 7 週 · 直接學動作 · REINFORCE 與 PPO — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="7">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#pg">策略梯度定理</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#shift">換一條路</a>
       <a href="#reinforce">REINFORCE</a>
-      <a href="#baseline">基線與優勢</a>
-      <a href="#ppo">PPO</a>
-      <a href="#demo">重要性比率演示</a>
-      <a href="#tips">PPO 實務</a>
+      <a href="#baseline">為什麼要減基線</a>
+      <a href="#ppo">PPO 在防什麼</a>
+      <a href="#code">最小 REINFORCE</a>
+      <a href="#demo">clip 演示</a>
+      <a href="#rlhf">接到 RLHF</a>
     </aside>
     <article class="prose">
       <div class="week-label">第 7 週 · 互動</div>
-      <h1>策略搜尋 II：策略梯度（REINFORCE 與 PPO）</h1>
-      <p>
-        直接優化<strong>參數化隨機策略</strong> π<sub>θ</sub>(a|s)——上升期望回報。
-        可用於連續動作，也是現代 LLM RLHF 的骨幹。
-      </p>
+      <h1>直接學「看到狀態就做什麼」</h1>
 
-      <h2 id="pg">策略梯度定理</h2>
-      <div class="formula">∇<sub>θ</sub> J(θ) = 𝔼<sub>π<sub>θ</sub></sub> [ ∇<sub>θ</sub> log π<sub>θ</sub>(A|S) · ψ ]</div>
-      <p>其中 ψ 是回報 / Q / 優勢估計。Score-function 梯度：不必對 P 做微分。</p>
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        不先估 Q，而是<strong>直接調策略網路</strong>：
+        好結果出現過的動作，以後更容易被選中。
+        穩定版叫 <strong>PPO</strong>——核心直覺是「一次別改太猛」。
+      </div>
 
-      <h2 id="reinforce">REINFORCE</h2>
+      <div class="callout">
+        <strong>需要的 ML 底子。</strong>
+        請先會：
+        <a href="ml-02-gradient.html">梯度下降</a> 與
+        <a href="ml-03-neural-nets.html">網路輸出機率</a>。
+        策略網路最後一層常用 softmax（離散）或高斯頭（連續）。
+      </div>
+
+      <h2 id="shift">和 DQN 差在哪</h2>
+      <table class="cmp">
+        <thead><tr><th></th><th>價值方法（DQN）</th><th>策略梯度</th></tr></thead>
+        <tbody>
+          <tr><td>網路輸出</td><td>每個動作的 Q 值</td><td>動作的機率 / 連續動作</td></tr>
+          <tr><td>怎麼選動作</td><td>argmax Q</td><td>直接從機率抽樣 / 輸出</td></tr>
+          <tr><td>連續動作</td><td>彆扭</td><td>自然</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="reinforce">REINFORCE：最經典的想法</h2>
+      <div class="story-chain">
+        照目前策略玩完整一局<br/>
+        → 每一步算「從這裡開始總共拿多少」G<sub>t</sub><br/>
+        → <span class="hi">分數高：把當時選的動作機率調高</span><br/>
+        → 分數低：機率調低
+      </div>
       <div class="formula">∇J ≈ Σ<sub>t</sub> ∇ log π(A<sub>t</sub>|S<sub>t</sub>) · G<sub>t</sub></div>
-      <p>Monte-Carlo，無偏，但<strong>高變異</strong>。修法：</p>
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <p class="q">為什麼 REINFORCE 很「吵」？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>
+              一整局的好壞會<strong>算到前面每一步頭上</strong>。
+              有時只是後面運氣好，前面無關的動作也被一起鼓勵了——變異很大。
+            </p>
+            <p>修法：減掉基線、用優勢、以及之後 Actor-Critic 學一個價值當評審。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="baseline">修法：減掉「普通水準」</h2>
+      <div class="formula">改用 (G<sub>t</sub> − b)　　b ≈ 這個狀態的平均表現</div>
       <ul>
-        <li>基線 b(s)：用 $G_t - b(s)$（不偏置梯度）。</li>
-        <li>折扣回報 / 獎勵縮放。</li>
-        <li>Actor-critic：學習 $b \approx V(s)$（第 10 週）。</li>
+        <li>回報 &gt; 基線 → 鼓勵這個動作。</li>
+        <li>回報 &lt; 基線 → 抑制。</li>
       </ul>
-
-      <h2 id="baseline">優勢與 GAE</h2>
-      <div class="formula">A<sup>λ</sup><sub>t</sub> = Σ<sub>l=0</sub><sup>∞</sup> (γλ)<sup>l</sup> δ<sub>t+l</sub>，&nbsp; δ<sub>t</sub> = r<sub>t</sub> + γV(s<sub>t+1</sub>) − V(s<sub>t</sub>)</div>
-      <p>GAE (λ) 在偏差與變異間取捨。PPO 實作幾乎都用它。</p>
-
-      <h2 id="ppo">PPO-Clip</h2>
-      <p>信任區域風格更新，但不對優化器加 KL 約束：</p>
-      <div class="formula">r<sub>t</sub>(θ) = π<sub>θ</sub>(a|s) / π<sub>θ_old</sub>(a|s)</div>
-      <div class="formula">L = 𝔼[ min( r·A , clip(r, 1−ε, 1+ε)·A ) ]</div>
       <p>
-        若新策略離資料收集策略太遠，目標函數變平——防止毀滅性大步，同時允許每批多個 epoch。
+        再進一步用<strong>優勢 A</strong>：「比平常好多少」。
+        PPO 實作幾乎都用 GAE——名詞聽過就好。
       </p>
 
-      <h2 id="demo">互動：信任區域 / clip 直覺</h2>
+      <h2 id="ppo">PPO：防止「一次改太猛」</h2>
+      <div class="story-chain">
+        比率 r = 新策略對這個動作的機率 ÷ 舊機率<br/>
+        r ≈ 1：改動不大；r 很大：這個動作被放超大<br/><br/>
+        目標 = <span class="hi">min( r·A ，  把 r 夾在 1±ε 之後 × A )</span>
+      </div>
+      <div class="formula">L = 𝔼[ min( r·A , clip(r, 1−ε, 1+ε)·A ) ]</div>
+      <p>白話：可以往好動作多走一點，但走得離譜時獎勵<strong>變平</strong>，不再給甜頭。</p>
+
+      <h2 id="code">最小 REINFORCE（概念版）</h2>
+      <pre><code>import math
+import random
+import torch
+import torch.nn as nn
+from torch.distributions import Categorical
+
+class Policy(nn.Module):
+    def __init__(self, n_obs, n_actions):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_obs, 64), nn.ReLU(),
+            nn.Linear(64, n_actions),  # 輸出未歸一化分數
+        )
+    def forward(self, x):
+        return Categorical(logits=self.net(x))
+
+policy = Policy(n_obs=4, n_actions=2)
+opt = torch.optim.Adam(policy.parameters(), lr=1e-2)
+gamma = 0.99
+
+def run_episode(env):
+    """env 自行提供 reset/step，回傳 (log_probs, rewards)"""
+    s, _ = env.reset()
+    log_probs, rewards = [], []
+    for _ in range(500):
+        dist = policy(torch.tensor(s, dtype=torch.float32))
+        a = dist.sample()
+        s2, r, done, trunc, _ = env.step(int(a))
+        log_probs.append(dist.log_prob(a))
+        rewards.append(r)
+        s = s2
+        if done or trunc:
+            break
+    return log_probs, rewards
+
+def reinforce_update(log_probs, rewards):
+    # 把每一步的回報 G_t 算出來（從後往前折扣累加）
+    G, returns = 0.0, []
+    for r in reversed(rewards):
+        G = r + gamma * G
+        returns.insert(0, G)
+    returns = torch.tensor(returns, dtype=torch.float32)
+    returns = (returns - returns.mean()) / (returns.std() + 1e-8)  # 簡易基線
+
+    loss = sum(-lp * G for lp, G in zip(log_probs, returns))
+    opt.zero_grad()
+    loss.backward()
+    opt.step()
+
+# for ep in range(...):
+#     log_probs, rewards = run_episode(env)
+#     reinforce_update(log_probs, rewards)</code></pre>
+      <div class="callout tip">
+        <code>-log π × G</code> 的意義：
+        G 大 → 降低 loss 的方式是<strong>提高</strong>這次動作的 log 機率；
+        G 小或負 → 反過來。和「好行為被強化」一致。
+      </div>
+
+      <h2 id="demo">動手玩：clip 什麼時候生效</h2>
+      <p><strong>你可以這樣玩：</strong></p>
+      <ol>
+        <li>優勢 A 調成正 → 我們希望 r 變大。</li>
+        <li>一路拉大 r，看「clip 是否生效」何時變「是」。</li>
+        <li>比較：未裁剪 r·A 一直線性升；PPO 目標到某點後<strong>變平</strong>。</li>
+        <li>A 調負 → 方向反了。ε 調大 → 允許的單步改動更寬。</li>
+      </ol>
       <div class="demo">
         <div class="demo-head">
-          <h3><span class="badge">互動</span> PPO 比率目標</h3>
+          <h3><span class="badge">互動</span> PPO 的裁剪目標</h3>
           <div class="controls">
             <label>優勢 A
               <input type="range" id="ppo-a" min="-3" max="3" step="0.1" value="1.5" />
@@ -74,32 +181,35 @@
         </div>
         <div class="demo-stats">
           <div class="stat"><span class="k">未裁剪 r·A</span><span class="v" id="ppo-raw">—</span></div>
-          <div class="stat"><span class="k">PPO min(clip)</span><span class="v" id="ppo-obj">—</span></div>
+          <div class="stat"><span class="k">PPO 目標值</span><span class="v" id="ppo-obj">—</span></div>
           <div class="stat"><span class="k">clip 是否生效</span><span class="v" id="ppo-active">—</span></div>
         </div>
       </div>
 
-      <h2 id="tips">PPO 工程建議</h2>
-      <ul>
-        <li>每批正規化優勢。</li>
-        <li>訓練早期加熵獎勵；之後退火。</li>
-        <li>價值損失係數 ~0.5；價值損失可分開 clip。</li>
-        <li>Mini-batch epoch 3–10；監控近似 KL。</li>
-        <li>向量化環境（16–64）以穩定批次統計。</li>
-      </ul>
-
-      <div class="callout">
-        <strong>與 RLHF 的連結。</strong> 以參考策略 KL 懲罰的 PPO，是從偏好分數微調語言模型的經典配方。
+      <h2 id="rlhf">為什麼聊天模型也用 PPO</h2>
+      <ol>
+        <li>用高品質答案做監督微調（SFT）。</li>
+        <li>用人類偏好訓練<strong>獎勵模型</strong>。</li>
+        <li>用 PPO 類方法<strong>提高獎勵模型分數</strong>，同時懲罰「離原本模型太遠」（KL）。</li>
+      </ol>
+      <div class="depth">
+        <div class="depth-label">更深一點 · 實務小抄</div>
+        <ul>
+          <li>每批把優勢正規化。</li>
+          <li>早期可加熵獎勵（多樣性），之後退火。</li>
+          <li>同一批資料重複 3–10 個 epoch，但盯著 KL。</li>
+          <li>向量化環境 16–64，批次統計較穩。</li>
+        </ul>
       </div>
 
-      <div class="quiz" data-answer="2" data-ok="正確——代理目標取原始與裁剪兩者之 min。" data=no="PPO 最大化的是裁剪後的代理目標，不只是 KL。">
+      <div class="quiz" data-answer="2" data-ok="正確——優化 min(r·A, clip(r)·A)。" data=no="不是只做 MSE，也不是完全照 TRPO 的約束式優化。">
         <h3>快速檢核</h3>
-        <div class="q">PPO-Clip 優化的是什麼？</div>
+        <div class="q">PPO-Clip 主要在優化什麼？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">只有價值函數 MSE</button>
-          <button class="quiz-opt">精確 TRPO 二次 KL 約束</button>
-          <button class="quiz-opt">min( r·A , clip(r,1±ε)·A )</button>
-          <button class="quiz-opt">對離散動作表取 max（像 DQN）</button>
+          <button class="quiz-opt">只有價值 MSE</button>
+          <button class="quiz-opt">嚴格解帶 KL 約束的優化</button>
+          <button class="quiz-opt">min（ r·A ， 夾住後的 r·A ）</button>
+          <button class="quiz-opt">像 DQN 一樣對動作表取 max</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>

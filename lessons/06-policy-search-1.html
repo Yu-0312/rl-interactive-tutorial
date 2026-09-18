@@ -3,97 +3,136 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 6 週 · 無梯度策略搜尋 — 強化學習互動教學</title>
+  <title>第 6 週 · 不靠梯度也能搜 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="6">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#idea">黑盒優化</a>
-      <a href="#ga">演化策略 / ERL</a>
-      <a href="#cem">CEM 與 CEM-RL</a>
-      <a href="#tradeoffs">取捨</a>
-      <a href="#when">何時使用</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#idea">黑盒搜尋</a>
+      <a href="#code">ES 的最小程式</a>
+      <a href="#erl">ERL / CEM</a>
+      <a href="#trade">和梯度法比</a>
+      <a href="#when">什麼時候用</a>
     </aside>
     <article class="prose">
       <div class="week-label">第 6 週</div>
-      <h1>策略搜尋 I：無梯度優化</h1>
-      <p>
-        把策略 π<sub>θ</sub> 當黑盒。採樣參數擾動、評估回報，只用適應度更新 θ——
-        <strong>不對環境動力學反向傳播</strong>。
-      </p>
+      <h1>策略搜尋 I：不靠梯度也能搜</h1>
 
-      <h2 id="idea">通用迴圈</h2>
-      <ol>
-        <li>在目前 θ 周圍採樣族群 {θ<sub>i</sub>}。</li>
-        <li>滾出每個策略；記錄回報 J(θ<sub>i</sub>)。</li>
-        <li>把 θ 往高回報樣本更新（加權平均、CEM 精英特集、ES 梯度）。</li>
-        <li>重複。</li>
-      </ol>
-      <div class="formula">ES 梯度（OpenAI ES）：∇J ≈ (1/nσ) Σᵢ J(θ+σεᵢ) εᵢ &nbsp;，εᵢ ~ 𝒩(0, I)</div>
-
-      <h2 id="ga">ERL — 演化 + RL 混合</h2>
-      <p>
-        <strong>Evolutionary Reinforcement Learning</strong> 通常把演員族群與評論家結合
-        （或用演化發現可做 RL 種子的策略）。要點：
-      </p>
-      <ul>
-        <li>演化做全域探索；RL 用梯度做局部微調。</li>
-        <li>族群維持多樣性 → 比單一 ε 排程更好的探索。</li>
-        <li>平行 rollout 對應大量 CPU worker。</li>
-      </ul>
-
-      <h2 id="cem">CEM 與 CEM-RL</h2>
-      <p><strong>交叉熵方法（Cross-Entropy Method）</strong>：</p>
-      <ol>
-        <li>從高斯 (μ, Σ) 採樣 θ。</li>
-        <li>保留前 k 精英（分位數）。</li>
-        <li>用精英重擬合 μ, Σ；可注入均勻雜訊維持多樣性。</li>
-      </ol>
-      <p>
-        <strong>CEM-RL</strong>（Ma et al.）交替 CEM 世代與 Actor-Critic 梯度步——
-        例如半個族群用 CEM 選擇，半個用 PPO/TD3 更新。
-      </p>
-
-      <div class="callout tip">
-        <strong>為何許多實驗室仍以梯度為主。</strong> 高維網路下 ES 需要更多 episode，
-        但可高度平行、且免導數（對不可微環境、稀疏獎勵或嘈雜模擬器較穩健）。
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        有時算不出「往哪調參數會更好」。
+        那就<strong>多試幾組參數、看誰分數高、往好的那邊靠</strong>——像養一群候選人，淘汰爛的。
+        這叫<strong>無梯度優化</strong>。
       </div>
 
-      <h2 id="tradeoffs">比較</h2>
+      <h2 id="idea">黑盒搜尋：只看分數</h2>
+      <div class="story-chain">
+        在目前參數附近隨機微調 → 每個版本玩幾局記分<br/>
+        → <span class="hi">分數高的改法加總起來</span> → 作為這次要走的方向<br/>
+        → 重複
+      </div>
+      <div class="formula">∇J ≈ (1/nσ) Σᵢ J(θ+σεᵢ) · εᵢ　（εᵢ 是隨機雜訊向量）</div>
+      <div class="think">
+        <div class="think-label">先想一想</div>
+        <p class="q">這和 ML 補課 2 的梯度下降有什麼相同與不同？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p><strong>相同：</strong>都要更新參數，都希望「某個分數 / loss 變好」。</p>
+            <p><strong>不同：</strong>
+              梯度下降需要對 loss 微分（要模型可微）；
+              無梯度方法只用「試出來的回報」估方向，<span class="ok">不需要對環境反向傳播</span>。
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="code">最小 ES：看得懂就夠了</h2>
+      <pre><code>import random
+
+# 假參數：一個數字。目標函數黑盒（我們不對它微分）
+theta = 0.0
+sigma = 0.1      # 探索半徑
+lr = 0.3
+n_samples = 20
+
+def J(th):
+    # 真實世界可能是：跑一局遊戲的總分
+    # 這裡用一個有峰的函數代替，峰值在 th=2
+    return -((th - 2.0) ** 2) + 1.0
+
+for step in range(40):
+    # 1) 在 theta 周圍採樣很多微調
+    noises = [random.gauss(0, 1) for _ in range(n_samples)]
+    rewards = [J(theta + sigma * e) for e in noises]
+
+    # 2) 把「分數高的改法」加起來（這裡用簡單加權平均）
+    mean_r = sum(rewards) / n_samples
+    grad_est = sum((r - mean_r) * e for r, e in zip(rewards, noises))
+    grad_est /= n_samples * sigma
+
+    # 3) 往估計方向走一小步
+    theta += lr * grad_est
+    if step % 10 == 0:
+        print(f"step={step:02d}  theta={theta:.3f}  J={J(theta):.3f}")
+
+print("theta 應接近 2")</code></pre>
+
+      <h2 id="erl">ERL 與 CEM-RL（名詞版）</h2>
+      <ul>
+        <li><strong>ERL（演化+RL）</strong>：演化負責大範圍探索；梯度 RL 負責局部精修。</li>
+        <li><strong>CEM</strong>：抽樣 → 只留精英 → 用精英重擬合分佈 → 再抽。</li>
+        <li><strong>CEM-RL</strong>：一半族群演化篩選，一半用 Actor-Critic 梯度更新。</li>
+      </ul>
+      <div class="callout tip">
+        白話：演化像「海選 + 留種」，梯度像「入選後精雕」。
+        兩者混用，比單打獨鬥穩。
+      </div>
+
+      <h2 id="trade">和策略梯度比一比</h2>
       <table class="cmp">
-        <thead><tr><th></th><th>無梯度（ES/CEM）</th><th>策略梯度（下週）</th></tr></thead>
+        <thead><tr><th></th><th>無梯度（ES / CEM）</th><th>策略梯度（下一週）</th></tr></thead>
         <tbody>
-          <tr><td>需可微 π</td><td>否</td><td>是</td></tr>
-          <tr><td>樣本效率</td><td>常較低</td><td>較高（配 advantage / GAE）</td></tr>
-          <tr><td>平行性</td><td>極佳</td><td>佳（向量化環境）</td></tr>
-          <tr><td>局部最優</td><td>族群有幫助</td><td>單一策略，需小心種子</td></tr>
+          <tr><td>策略要可微嗎</td><td>不用</td><td>要</td></tr>
+          <tr><td>樣本效率</td><td>通常較差</td><td>通常較好</td></tr>
+          <tr><td>平行友好</td><td>非常適合</td><td>也適合</td></tr>
+          <tr><td>容易全卡在爛解</td><td>較不易（一群）</td><td>單一策略要小心初始化</td></tr>
         </tbody>
       </table>
 
-      <h2 id="when">何時選無梯度</h2>
+      <h2 id="when">什麼時候考慮無梯度</h2>
       <ul>
-        <li>接觸不連續或不可微物理的模擬器。</li>
-        <li>有大量平行算力且動作維度中等。</li>
-        <li>混合使用：演化族群後蒸餾成單一演員部署。</li>
+        <li>環境黑盒、不可微、充滿硬切換。</li>
+        <li>有很多平行機器。</li>
+        <li>想先探索出幾條路線，之後再蒸餾成單一策略。</li>
       </ul>
+      <div class="depth">
+        <div class="depth-label">更深一點 · 為何實驗室仍以梯度為主</div>
+        <p>
+          參數上百萬時，純演化通常要跑更多回合。
+          但在不可微模擬、稀疏獎勵、或模擬器很吵時，演化反而穩健。
+          工程上也有「ES 找種子 → PPO 精修」的混合配方。
+        </p>
+      </div>
 
-      <div class="quiz" data-answer="0" data-ok="正確——ES 用隨機擾動與其回報估計梯度。" data=no="無梯度方法仍會更新參數，只是不對環境反向傳播。">
+      <div class="quiz" data-answer="0" data-ok="正確——隨機微調 + 按分數加權，估出方向。" data=no="無梯度不是「不更新參數」，而是不對環境反向傳播。">
         <h3>快速檢核</h3>
-        <div class="q">OpenAI 風格 ES 如何更新權重？</div>
+        <div class="q">風格像 OpenAI ES 的方法怎麼更新權重？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">隨機雜訊向量依回報加權求和</button>
-          <button class="quiz-opt">只對 Q 網路反傳 TD 誤差</button>
-          <button class="quiz-opt">環境動力學的精確梯度</button>
-          <button class="quiz-opt">不更新參數——只有動作雜訊</button>
+          <button class="quiz-opt">試很多隨機微調，把分數高的改法加總起來</button>
+          <button class="quiz-opt">只用 Q 網路梯度下降</button>
+          <button class="quiz-opt">對環境物理做精確反向傳播</button>
+          <button class="quiz-opt">完全不更新參數</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
         <a href="05-deep-rl.html"><span class="dir">← 上一課</span><span class="title">第 5 週 · DQN</span></a>
-        <a href="07-policy-gradient.html"><span class="dir">下一課</span><span class="title">第 7 週 · REINFORCE 與 PPO</span></a>
+        <a href="07-policy-gradient.html"><span class="dir">下一課</span><span class="title">第 7 週 · 策略梯度</span></a>
       </nav>
     </article>
   </div>

@@ -3,57 +3,276 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>第 3 週 · Q-learning 與 SARSA — 強化學習互動教學</title>
+  <title>第 3 週 · Q 表怎麼從零學會 — 強化學習互動教學</title>
   <link rel="stylesheet" href="../css/style.css" />
 </head>
 <body data-lesson="3">
   <header class="topnav" id="topnav"></header>
   <div class="wrap lesson-layout">
     <aside class="toc">
-      <a href="#model-free">無模型想法</a>
-      <a href="#td">TD 學習</a>
-      <a href="#sarsa">SARSA</a>
-      <a href="#qlearn">Q-learning</a>
+      <a href="#tldr">一句話總結</a>
+      <a href="#explore">為何不能試過就不再走</a>
+      <a href="#qtable">Q 表是什麼</a>
+      <a href="#walk">走一回合</a>
+      <a href="#update">更新式的故事</a>
+      <a href="#sarsa">SARSA vs Q-learning</a>
+      <a href="#code3">完整 Python</a>
       <a href="#demo">懸崖演示</a>
-      <a href="#explore">探索策略</a>
+      <a href="#depth3">更深一點</a>
     </aside>
     <article class="prose">
-      <div class="week-label">第 3 週 · 互動</div>
-      <h1>無模型演算法：SARSA 與 Q-learning</h1>
-      <p>
-        拋開轉移模型。用<strong>時序差分（TD）</strong> backup，直接從採樣經驗學習動作價值 $Q(s,a)$。
-      </p>
+      <div class="week-label">第 3 週 · 互動 · 新手必修</div>
+      <h1>沒有說明書時：Q 表怎麼從零學會</h1>
 
-      <h2 id="model-free">從 DP 到採樣</h2>
-      <p>DP 對所有 $s'$ 求和；無模型方法用單筆樣本替換該期望：</p>
-      <div class="formula">Σ<sub>s'</sub> P(s'|s,a) f(s')  ≈  f(S')  ，其中 S' ~ P(·|s,a)</div>
-      <p>取捨：需要更多資料，但 $P$ 未知或巨大時仍可用。</p>
-
-      <h2 id="td">TD 目標與 TD 誤差</h2>
-      <div class="formula">δ = R + γ V(S') − V(S) &nbsp;&nbsp;（Q 版：R + γ Q(S',A') − Q(S,A)）</div>
-      <p>把估計往目標方向移動一小步 α（學習率）。</p>
-
-      <h2 id="sarsa">SARSA（同政策 / on-policy）</h2>
-      <p><strong>S</strong>tate, <strong>A</strong>ction, <strong>R</strong>eward, <strong>S'</strong>, <strong>A'</strong>——使用策略實際會做的下一動作。</p>
-      <div class="formula">Q(S,A) ← Q(S,A) + α [ R + γ Q(S',A') − Q(S,A) ]</div>
-      <p>
-        因為 bootstrap 使用 $A' \sim \pi(\cdot|S')$，SARSA 學到的是
-        <strong>行為策略</strong>的價值（包含探索雜訊）。
-      </p>
-
-      <h2 id="qlearn">Q-learning（離政策 / off-policy）</h2>
-      <div class="formula">Q(S,A) ← Q(S,A) + α [ R + γ max<sub>a'</sub> Q(S',a') − Q(S,A) ]</div>
-      <p>
-        用<strong>貪婪 max</strong> bootstrap，同時仍以 ε-greedy 探索。
-        在標準條件下學習 $Q^*$，與探索策略無關。
-      </p>
-
-      <div class="callout tip">
-        <strong>經典懸崖結果。</strong> 在「懸崖」網格上，Q-learning 的最優路徑貼著懸崖邊（最優但探索時危險）。
-        SARSA 學到更安全的內陸路徑，因為學習過程中探索會掉下懸崖。
+      <div class="callout tip" id="tldr">
+        <strong>一句話總結。</strong>
+        不知道環境規則也沒關係：Agent 靠<strong>經驗表（Q 表）</strong>記住
+        「在這裡做這個動作，之後大概值多少」，
+        每走一步就用「剛剛看到的結果」修正一點。
+        Q-learning 用「下一格最好的值」來修正；SARSA 用「實際會走的下一步」。
       </div>
 
-      <h2 id="demo">互動：懸崖世界</h2>
+      <h2 id="explore">先建立一個關鍵直覺：從經驗中學</h2>
+      <div class="story-chain">
+        <span class="hi">探索</span> → 得到經驗 → <span class="hi">更新 Q</span> → 利用 → 再探索 → 再更新……
+      </div>
+
+      <div class="think">
+        <div class="think-label">小挑戰</div>
+        <div class="mini-map">A → B → 🏆
+      ↘ 💀</div>
+        <p class="q">
+          如果 Agent 只允許「試過一次就永遠不再走那條」，會有什麼問題？
+        </p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>它可能找不到真正最好的路。</p>
+            <p>例如第一次走 B 拿到 +1，就認定「B 很好」；但其實往 C 最後能拿 +100。</p>
+            <p>所以 RL 有一對核心概念：</p>
+            <ul>
+              <li><strong>Exploration（探索）</strong>：「我再試試其他選擇，說不定有更好的。」</li>
+              <li><strong>Exploitation（利用）</strong>：「我已經知道右邊不錯，那就一直走右邊。」</li>
+            </ul>
+            <p>常見做法是 <strong>ε-greedy</strong>：有 ε 的機率亂試，否則走目前 Q 最大的動作。</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="qtable">Q 表：Agent 的「經驗表」</h2>
+      <p>想像 Agent 有一張表，一開始什麼都不知道，所以都是 0：</p>
+      <table class="cmp exp-table">
+        <thead><tr><th>State</th><th>Action</th><th>Q-value</th></tr></thead>
+        <tbody>
+          <tr><td>A</td><td>往左</td><td>0</td></tr>
+          <tr><td>A</td><td>往右</td><td>0</td></tr>
+          <tr><td>B</td><td>往左</td><td>0</td></tr>
+          <tr><td>B</td><td>往右</td><td>0</td></tr>
+        </tbody>
+      </table>
+      <div class="story-chain">
+        A —往右→ B —往右→ 🏆<br/>
+        <span class="step">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+10</span>
+      </div>
+      <p>
+        第一次它亂走，得到經驗：「從 B 往右，可以拿到 +10」。
+        於是開始更新 Q(B, 往右)。接著這個資訊又可以往前傳：
+      </p>
+      <div class="story-chain">
+        <span class="hi">B 很有價值</span><br/>
+        ↓<br/>
+        所以「A 往右到 B」也變得有價值<br/>
+        ↓<br/>
+        🏆 +10 的資訊會一格一格往前傳
+      </div>
+      <p>
+        最後 Agent 不需要有人告訴它「A 要往右、B 要往右」——
+        它可以從一次次經驗裡<strong>自己建立出這套策略</strong>。
+      </p>
+
+      <div class="think">
+        <div class="think-label">🔥 小挑戰</div>
+        <div class="mini-map">Q(A, 左) = 3
+Q(A, 右) = 8</div>
+        <p class="q">
+          Agent 現在在 A。如果完全不做 Exploration，只做純粹的 Exploitation，
+          它會選哪個？為什麼？
+        </p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p><span class="ok">選右。</span>因為 8 &gt; 3。</p>
+            <p>
+              這裡有個細節：Q-value 代表「從現在這個狀態採取這個 Action，
+              <em>預期能的長期回報</em>」，不是單純的立刻獲利。
+              所以純 exploitation：選目前估計長期價值較高的那個。
+            </p>
+            <p>
+              Exploration 則是：「雖然右邊看起來比較好，但偶爾還是試試左邊，
+              說不定左邊其實有更好的未來。」
+            </p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="walk">走一回合，累積經驗</h2>
+      <div class="mini-map">S · ·
+· ▽ ·
+· · 🏆
+規則：🏆=+10  ▽=−10  每步=−1</div>
+      <p>假設某次 Agent 從 S 出發，路徑是：上、下、下、下、右</p>
+      <table class="cmp exp-table">
+        <thead><tr><th>Step</th><th>State</th><th>Action</th><th>Reward</th><th>Next State</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>S</td><td>上</td><td>−1</td><td>S（撞牆）</td></tr>
+          <tr><td>2</td><td>S</td><td>下</td><td>−1</td><td>下方</td></tr>
+          <tr><td>3</td><td>下方</td><td>下</td><td>−1</td><td>底部</td></tr>
+          <tr><td>4</td><td>底部</td><td>下</td><td>−1</td><td>底部（撞牆）</td></tr>
+          <tr><td>5</td><td>底部</td><td>右</td><td>+10</td><td>🏆</td></tr>
+        </tbody>
+      </table>
+      <div class="calc">這一回合 Return ≈ −1 −1 −1 −1 +10 = +6</div>
+      <div class="think">
+        <div class="think-label">你想一下</div>
+        <p class="q">
+          雖然成功了，但 Agent 走得有點蠢。若另一條路是「下→下→右→右」，
+          Return = −1 −1 −1 +10 = +7。<br/>
+          這告訴我們 RL 不只在學什麼？
+        </p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>
+              不只是「怎麼到終點？」而是
+              <span class="ok">「怎麼用更好的方式到終點？」</span>
+            </p>
+            <p>Agent 每次走完都會更新：「在這個 State 做這個 Action，到底有多好？」</p>
+          </div>
+        </details>
+      </div>
+
+      <h2 id="update">更新式：先聽故事，再看公式</h2>
+      <div class="story-chain">
+        假設某一次：<br/>
+        目前 Q(右) = 5<br/>
+        實際 Reward = +2<br/>
+        下一 State 的最佳 Q-value = 10<br/>
+        γ = 0.9<br/>
+        先不要管 α，暫時假設完全按照新的估計更新<br/><br/>
+        新的估計目標 = <span class="hi">2 + 0.9 × 10 = 11</span>
+      </div>
+
+      <div class="think">
+        <div class="think-label">關鍵釐清</div>
+        <p class="q">Q(A, 右) 是「A 往右的平均獲利」嗎？</p>
+        <details class="reveal">
+          <summary>看精確說法</summary>
+          <div class="body">
+            <p class="no">不完全是。「平均獲利」的說法容易誤導。</p>
+            <p>
+              Q(A, 右) 比較接近：
+              <span class="ok">「如果我現在在 A，選擇『右』這個 Action，
+              那麼從這個選擇開始，我預期未來可以得到多少累積回報？」</span>
+            </p>
+            <p>所以它不是單純「往右平均拿多少錢」，而是<strong>往右這個決策的長期價值估計</strong>。</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="formula">Q(s,a) ← Q(s,a) + α [ r + γ · max<sub>a′</sub> Q(s′,a′) − Q(s,a) ]</div>
+      <div class="callout tip">
+        <strong>翻譯成人話：</strong>
+        新的 Q 值 = 舊的 Q 值 + 學習率 ×（這次實際看到的目標 − 舊的 Q 值）
+        <ul>
+          <li>這次實際看到的目標 = r + γ ×（下一狀態的估計）</li>
+          <li>「舊估計」→「實際拿到的 Reward」→「下一個 State 未來可能的 Value」→ 比較差異 → 修正 Q</li>
+        </ul>
+      </div>
+
+      <h2 id="sarsa">SARSA vs Q-learning：差在「用誰的下一步」</h2>
+      <table class="cmp">
+        <thead><tr><th></th><th>SARSA</th><th>Q-learning</th></tr></thead>
+        <tbody>
+          <tr><td>更新時用的下一動作</td><td>實際走的 A′</td><td>Q 表裡最好的 a</td></tr>
+          <tr><td>類型</td><td>同政策 on-policy</td><td>離政策 off-policy</td></tr>
+          <tr><td>學到什麼</td><td>「含探索的真實走法」好不好</td><td>理論上最優怎麼走</td></tr>
+          <tr><td>懸崖上常見</td><td>較安全的內側路</td><td>較短但貼崖的路</td></tr>
+        </tbody>
+      </table>
+      <div class="callout tip">
+        <strong>經典懸崖結果。</strong>
+        Q-learning 的最優路線會貼著懸崖邊（最短）；
+        SARSA 因為學習時真的會亂試掉崖，往往學出更靠內側的安全路線。
+        原因就藏在更新式：SARSA 把「探索造成的風險」也算進價值裡。
+      </div>
+
+      <h2 id="code3">把整件事寫成可跑的 Python</h2>
+      <p class="code-note">表格型 Q-learning，環境用 Gymnasium 的 CliffWalking。就算沒裝，也能先讀懂邏輯。</p>
+
+      <pre><code>import numpy as np
+
+# ---- 最小 Q-learning（自製 1D 世界，不必裝任何東西）----
+n_states, n_actions = 4, 2   # 0,1,2,3；動作 0=左 1=右
+goal = 3
+Q = np.zeros((n_states, n_actions))
+alpha, gamma, epsilon = 0.5, 0.9, 0.2
+
+def step(s, a):
+    """Environment: 回傳 (next_state, reward, done)"""
+    ns = s - 1 if a == 0 else s + 1
+    ns = max(0, min(n_states - 1, ns))
+    if ns == goal:
+        return ns, +10.0, True
+    return ns, -1.0, False
+
+def choose(s):
+    """ε-greedy：有 ε 亂試，否則走目前 Q 最大的動作"""
+    if np.random.rand() < epsilon:
+        return np.random.randint(n_actions)
+    return int(np.argmax(Q[s]))
+
+for episode in range(200):
+    s = 0
+    for t in range(20):
+        a = choose(s)
+        ns, r, done = step(s, a)
+
+        # Q-learning 更新：下一格用 max Q（不管實際會走哪）
+        best_next = Q[ns].max()
+        td_target = r + gamma * best_next
+        Q[s, a] += alpha * (td_target - Q[s, a])
+
+        s = ns
+        if done:
+            break
+
+print("Q 表：")
+print(Q)
+print("建議策略（每個狀態選 argmax）：", Q.argmax(axis=1))</code></pre>
+
+      <div class="depth">
+        <div class="depth-label">更深一點 · 收斂條件（聽過就好）</div>
+        <p>
+          教科書會說：在足夠探索（GLIE）、且步長滿足 Robbins–Monro
+          （Σα=∞，Σα²&lt;∞）時，表格型 Q-learning 會收斂到 Q*。
+          實作常用固定 α 與有限 ε——多半好用，但沒有形式保證。
+        </p>
+        <p>
+          「致命三合組」預告：bootstrapping（用自己估計當目標）+ 函數近似 + 離政策，
+          可能發散。第 4–5 週的目標網路與 replay，就是在對付這件事。
+        </p>
+      </div>
+
+      <h2 id="demo">動手玩：懸崖世界</h2>
+      <p><strong>你可以這樣玩：</strong></p>
+      <ol>
+        <li>先跑 <strong>Q-learning</strong> 的「跑 50」幾次，看近 20 平均有沒有上升。</li>
+        <li>切到 <strong>SARSA</strong> 重置再跑，比較最後走的路線。</li>
+        <li>調大 <strong>ε</strong>：更愛亂試，早期可能更慘，但有機會發現更好的路。</li>
+        <li>調大 <strong>α</strong>：學得快但抖動；調小則慢而穩。</li>
+        <li>調小 <strong>γ</strong>：更只顧眼前。</li>
+      </ol>
+
       <div class="demo">
         <div class="demo-head">
           <h3><span class="badge">互動</span> SARSA vs Q-learning</h3>
@@ -79,49 +298,54 @@
           <div class="stat"><span class="k">回合數</span><span class="v" id="cliff-episodes">0</span></div>
           <div class="stat"><span class="k">上一回報</span><span class="v" id="cliff-return">—</span></div>
           <div class="stat"><span class="k">近 20 平均</span><span class="v" id="cliff-avg">—</span></div>
-          <div class="stat"><span class="k">ε-greedy 箭頭</span><span class="v" id="cliff-note">Q(s,·)</span></div>
+          <div class="stat"><span class="k">目前 Q 箭頭</span><span class="v" id="cliff-note">Q(s,·)</span></div>
         </div>
       </div>
 
-      <table class="cmp">
-        <thead><tr><th></th><th>SARSA</th><th>Q-learning</th></tr></thead>
-        <tbody>
-          <tr><td>Bootstrap</td><td>Q(S', A')，A' ~ π</td><td>max<sub>a</sub> Q(S', a)</td></tr>
-          <tr><td>政策類型</td><td>同政策</td><td>離政策</td></tr>
-          <tr><td>學到什麼</td><td>探索策略的價值</td><td>最優 Q*（目標策略）</td></tr>
-          <tr><td>安全性</td><td>ε-greedy 下常更安全</td><td>可能貼著風險最優邊</td></tr>
-        </tbody>
-      </table>
-
-      <h2 id="explore">探索策略</h2>
-      <ul>
-        <li><strong>ε-greedy</strong>：以機率 ε 隨機動作；否則貪婪。簡單有效。</li>
-        <li><strong>Softmax / Boltzmann</strong>：依 exp(Q/τ) 採樣。溫度 τ 控制探索。</li>
-        <li><strong>樂觀初始化</strong>：較高的初始 Q 鼓勵造訪未知動作。</li>
-        <li><strong>UCB / 計數式</strong>：不確定性加成——後續樣本效率週。</li>
-      </ul>
-
-      <div class="callout">
-        <strong>收斂備註。</strong> 表格型 Q-learning 在 GLIE 探索與 Robbins–Monro 步長
-        （$\sum \alpha=\infty$，$\sum \alpha^2 < \infty$）下收斂到 $Q^*$。
-        實務上常用常數 α 與有限 ε——能用，但沒有形式保證。
+      <div class="depth">
+        <div class="depth-label">更深一點 · 若要改用 Gymnasium</div>
+        <pre><code># pip install gymnasium numpy
+import gymnasium as gym
+env = gym.make("CliffWalking-v0")
+obs, info = env.reset(seed=0)
+print("狀態編號:", obs)   # 4×12 網格被攤平成 0..47</code></pre>
+        <p>
+          把上面自製 <code>step()</code> 換成 <code>env.step(a)</code>，
+          Q 表形狀改成 (48, 4)，其餘更新式完全相同。
+          這就是「懂概念之後，換環境只是換 I/O」。
+        </p>
       </div>
 
-      <div class="quiz" data-answer="2" data-ok="對——Q-learning 對下一動作取 max，因此是離政策。" data-no="同政策 vs 離政策取決於你 bootstrap 什麼。">
+      <div class="think">
+        <div class="think-label">理解題</div>
+        <p class="q">哪一個是離政策（off-policy）方法？為什麼？</p>
+        <details class="reveal">
+          <summary>看答案</summary>
+          <div class="body">
+            <p>
+              <span class="ok">Q-learning</span>，因為它更新時對下一格取
+              <code>max Q(s′,a)</code>，而不是「實際走的 A′」。
+            </p>
+            <p>同政策 vs 離政策，取決於你 bootstrap 的是「誰的下一步」。</p>
+          </div>
+        </details>
+      </div>
+
+      <div class="quiz" data-answer="2" data-ok="對——Q-learning 用 max Q(S',a) 做 bootstrap，所以是離政策。" data=no="看更新式有沒有用「實際走的下一步」。">
         <h3>快速檢核</h3>
-        <div class="q">哪個演算法是離政策（off-policy）？</div>
+        <div class="q">哪一個是離政策（off-policy）方法？</div>
         <div class="quiz-options">
-          <button class="quiz-opt">SARSA，因為它用下一採樣動作</button>
-          <button class="quiz-opt">Expected SARSA（ε-greedy）</button>
-          <button class="quiz-opt">Q-learning，因為它 bootstrap 用 max<sub>a</sub> Q(S',a)</button>
-          <button class="quiz-opt">Monte Carlo 每次造訪回報</button>
+          <button class="quiz-opt">SARSA，因為它用了下一狀態</button>
+          <button class="quiz-opt">隨機策略，因為它會亂走</button>
+          <button class="quiz-opt">Q-learning，因為它更新時取下一格最大的 Q</button>
+          <button class="quiz-opt">價值迭代，因為它會掃描所有狀態</button>
         </div>
         <div class="quiz-feedback"></div>
       </div>
 
       <nav class="lesson-nav">
-        <a href="02-introduction.html"><span class="dir">← 上一課</span><span class="title">第 2 週 · DP</span></a>
-        <a href="04-function-approx.html"><span class="dir">下一課</span><span class="title">第 4 週 · 函數近似</span></a>
+        <a href="02-introduction.html"><span class="dir">← 上一課</span><span class="title">第 2 週 · 手算 Value</span></a>
+        <a href="04-function-approx.html"><span class="dir">下一課</span><span class="title">第 4 週 · 狀態太多記不住</span></a>
       </nav>
     </article>
   </div>
