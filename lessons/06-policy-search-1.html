@@ -35,7 +35,7 @@
         → 重複
       </div>
       <div class="formula">∇J ≈ (1/nσ) Σᵢ J(θ+σεᵢ) · εᵢ　（εᵢ 是隨機雜訊向量）</div>
-      <div class="quiz challenge" data-answer="2" data-ok="正確：都要更新參數；差別在梯度下降要對 loss 微分，無梯度只用回報估方向。" data=no="相同：都在調參數求改進。不同：要不要對目標函數做微分 / 反向傳播。">
+      <div class="quiz challenge" data-answer="2" data-ok="正確：都要更新參數；差別在梯度下降要對 loss 微分，無梯度只用回報估方向。" data-no="相同：都在調參數求改進。不同：要不要對目標函數做微分 / 反向傳播。">
         <div class="think-label">先想一想 · 點選答案</div>
         <p class="q">無梯度搜尋和 ML 的梯度下降，哪個比較對？</p>
         <div class="quiz-options">
@@ -122,7 +122,7 @@ print("theta 應接近 2")</code></pre>
         </p>
       </div>
 
-      <div class="quiz" data-answer="0" data-ok="正確——隨機微調 + 按分數加權，估出方向。" data=no="無梯度不是「不更新參數」，而是不對環境反向傳播。">
+      <div class="quiz" data-answer="0" data-ok="正確——隨機微調 + 按分數加權，估出方向。" data-no="無梯度不是「不更新參數」，而是不對環境反向傳播。">
         <h3>快速檢核</h3>
         <div class="q">風格像 OpenAI ES 的方法怎麼更新權重？</div>
         <div class="quiz-options">

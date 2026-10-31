@@ -56,7 +56,7 @@
         → 分數低：機率調低
       </div>
       <div class="formula">∇J ≈ Σ<sub>t</sub> ∇ log π(A<sub>t</sub>|S<sub>t</sub>) · G<sub>t</sub></div>
-      <div class="quiz challenge" data-answer="0" data-ok="對——整局好壞會算到每一步頭上，變異很大；所以要基線 / 優勢 / Actor-Critic。" data=no="REINFORCE 用整局回報 G 調每一步，後面運氣好會誤獎前面的動作 → 很吵。">
+      <div class="quiz challenge" data-answer="0" data-ok="對——整局好壞會算到每一步頭上，變異很大；所以要基線 / 優勢 / Actor-Critic。" data-no="REINFORCE 用整局回報 G 調每一步，後面運氣好會誤獎前面的動作 → 很吵。">
         <div class="think-label">先想一想 · 點選答案</div>
         <p class="q">為什麼 REINFORCE 很「吵」？</p>
         <div class="quiz-options">
@@ -206,7 +206,7 @@ def reinforce_update(log_probs, rewards):
         </ul>
       </div>
 
-      <div class="quiz" data-answer="2" data-ok="正確——優化 min(r·A, clip(r)·A)。" data=no="不是只做 MSE，也不是完全照 TRPO 的約束式優化。">
+      <div class="quiz" data-answer="2" data-ok="正確——優化 min(r·A, clip(r)·A)。" data-no="不是只做 MSE，也不是完全照 TRPO 的約束式優化。">
         <h3>快速檢核</h3>
         <div class="q">PPO-Clip 主要在優化什麼？</div>
         <div class="quiz-options">

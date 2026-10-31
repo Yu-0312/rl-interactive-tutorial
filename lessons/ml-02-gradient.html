@@ -177,7 +177,7 @@ lr = 1.5      # 危險：可能震盪 / 爆炸
         網路：θ ← θ − α ∇(Q(s,a;θ) − 目標)²　　　<span style="color:var(--ink-dim)">（參數，經由梯度間接改）</span>
       </div>
 
-      <div class="quiz" data-answer="0" data-ok="正確——θ ← θ − α·∇L，往 loss 變小的方向走。" data=no="梯度指向 loss 上升最快的方向，所以要減掉它。">
+      <div class="quiz" data-answer="0" data-ok="正確——θ ← θ − α·∇L，往 loss 變小的方向走。" data-no="梯度指向 loss 上升最快的方向，所以要減掉它。">
         <h3>快速檢核</h3>
         <div class="q">梯度下降的參數更新是？</div>
         <div class="quiz-options">

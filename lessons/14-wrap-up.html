@@ -40,7 +40,7 @@
         <li><strong>預算</strong>：與其 10 個變體各跑 1 次，不如 2 個方法各跑 5 種子。</li>
       </ul>
 
-      <div class="quiz challenge" data-answer="2" data-ok="正確：不行。RL 跨種子變異很大，單次 run 很可能是運氣；主結論至少 5 種子。" data=no="只跑 1 個 seed 贏 20% 不能當結論——很可能是運氣。">
+      <div class="quiz challenge" data-answer="2" data-ok="正確：不行。RL 跨種子變異很大，單次 run 很可能是運氣；主結論至少 5 種子。" data-no="只跑 1 個 seed 贏 20% 不能當結論——很可能是運氣。">
         <div class="think-label">小挑戰 · 點選答案</div>
         <p class="q">新方法只跑 1 個 seed，贏過基線 20%。可以直接寫進結論嗎？</p>
         <div class="quiz-options">
@@ -132,7 +132,7 @@ print(json.dumps(meta, ensure_ascii=False))</code></pre>
         </div>
       </div>
 
-      <div class="quiz" data-answer="0" data-ok="對——單種子 RL 曲線常是運氣，不是實力。" data=no="RL 對隨機種子非常敏感。">
+      <div class="quiz" data-answer="0" data-ok="對——單種子 RL 曲線常是運氣，不是實力。" data-no="RL 對隨機種子非常敏感。">
         <h3>快速檢核</h3>
         <div class="q">為什麼要跑多個隨機種子？</div>
         <div class="quiz-options">

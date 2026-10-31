@@ -76,7 +76,7 @@
         <span class="hi">2 + 0.9 × 10 = 11</span>
       </div>
 
-      <div class="quiz challenge" data-answer="0" data-ok="正確：Q(A,B)=2+0.9×10=11；Q(A,C)=5+0.9×5=9.5 → 應選 B。Q 是包含未來的長期估計。" data=no="別只看立刻的 +5。用 r + γV(next) 算：B=11、C=9.5，所以要選 B。">
+      <div class="quiz challenge" data-answer="0" data-ok="正確：Q(A,B)=2+0.9×10=11；Q(A,C)=5+0.9×5=9.5 → 應選 B。Q 是包含未來的長期估計。" data-no="別只看立刻的 +5。用 r + γV(next) 算：B=11、C=9.5，所以要選 B。">
         <div class="think-label">再進一步 · 點選答案</div>
         <p class="q">
           A 往 B：r=+2，V(B)=10<br/>
@@ -199,6 +199,8 @@ print("Agent 應該選:", best)   # 期望輸出 A→B = 11.0</code></pre>
         <p>
           策略迭代則是「評估目前策略 → 改進成更好的策略」交替，直到策略不再變。
           白話：價值迭代一直在刷分數表；策略迭代在修規則本。
+          （這個演示的「評估」每輪最多做 20 次掃描就進入改進，嚴格說是 <em>modified policy iteration</em>；
+          策略穩定後結果與完整評估相同。）
           狀態空間巨大或模型未知時，兩者都用不了——那要等第 3 週無模型方法。
         </p>
       </div>
@@ -225,7 +227,7 @@ print("Agent 應該選:", best)   # 期望輸出 A→B = 11.0</code></pre>
         </details>
       </div>
 
-      <div class="quiz" data-answer="0" data-ok="正確——價值迭代直接取「最好的動作」刷新 V。" data=no="看哪個更新有 max：有 max 的是價值迭代。">
+      <div class="quiz" data-answer="0" data-ok="正確——價值迭代直接取「最好的動作」刷新 V。" data-no="看哪個更新有 max：有 max 的是價值迭代。">
         <h3>快速檢核</h3>
         <div class="q">價值迭代的更新想法是？</div>
         <div class="quiz-options">

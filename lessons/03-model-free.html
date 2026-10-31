@@ -37,7 +37,7 @@
         <span class="hi">探索</span> → 得到經驗 → <span class="hi">更新 Q</span> → 利用 → 再探索 → 再更新……
       </div>
 
-      <div class="quiz challenge" data-answer="1" data-ok="對——只試一次就鎖死，可能永遠不知道其實有更好的路。這就是 Exploration vs Exploitation。" data=no="第一次走 B 拿 +1 不代表 B 最好；往 C 最後可能 +100。所以要探索。">
+      <div class="quiz challenge" data-answer="1" data-ok="對——只試一次就鎖死，可能永遠不知道其實有更好的路。這就是 Exploration vs Exploitation。" data-no="第一次走 B 拿 +1 不代表 B 最好；往 C 最後可能 +100。所以要探索。">
         <div class="think-label">小挑戰 · 點選答案</div>
         <div class="mini-map">A → B → 🏆
       ↘ 💀</div>
@@ -142,7 +142,7 @@ Q(A, 右) = 8</div>
         </tbody>
       </table>
       <div class="calc">這一回合 Return ≈ −1 −1 −1 −1 +10 = +6</div>
-      <div class="quiz challenge" data-answer="0" data-ok="對——RL 不只學「到終點」，還學「怎麼用更好的方式到終點」。" data=no="比較 +6 與 +7：成功了但走得蠢。Agent 要學的是更好的路徑，不只是到達。">
+      <div class="quiz challenge" data-answer="0" data-ok="對——RL 不只學「到終點」，還學「怎麼用更好的方式到終點」。" data-no="比較 +6 與 +7：成功了但走得蠢。Agent 要學的是更好的路徑，不只是到達。">
         <div class="think-label">你想一下 · 點選答案</div>
         <p class="q">
           這回合 Return = −1−1−1−1+10 = +6，但走得有點蠢。<br/>
@@ -303,6 +303,11 @@ print("建議策略（每個狀態選 argmax）：", Q.argmax(axis=1))</code></p
         <li>調大 <strong>α</strong>：學得快但抖動；調小則慢而穩。</li>
         <li>調小 <strong>γ</strong>：更只顧眼前。</li>
       </ol>
+      <div class="callout tip">
+        <strong>和課本的差別。</strong>Sutton &amp; Barto 的懸崖世界裡，掉下懸崖是 −100 並<strong>傳送回起點、回合繼續</strong>；
+        這個演示為了讓每一回合的軌跡好畫，改成掉下去就<strong>結束這一回合</strong>。
+        兩種設定下「SARSA 走內側安全路、Q-learning 貼著懸崖走」的結論相同。
+      </div>
 
       <div class="demo">
         <div class="demo-head">
@@ -372,7 +377,7 @@ print("狀態編號:", obs)   # 4×12 網格被攤平成 0..47</code></pre>
         </details>
       </div>
 
-      <div class="quiz" data-answer="2" data-ok="對——Q-learning 用 max Q(S',a) 做 bootstrap，所以是離政策。" data=no="看更新式有沒有用「實際走的下一步」。">
+      <div class="quiz" data-answer="2" data-ok="對——Q-learning 用 max Q(S',a) 做 bootstrap，所以是離政策。" data-no="看更新式有沒有用「實際走的下一步」。">
         <h3>快速檢核</h3>
         <div class="q">哪一個是離政策（off-policy）方法？</div>
         <div class="quiz-options">

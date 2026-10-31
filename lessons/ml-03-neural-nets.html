@@ -50,7 +50,7 @@
         輸出 ŷ（例如：每一個動作的 Q 值）
       </div>
       <div class="formula">一層的白話：輸出 = 活化函數( 權重 × 上一層輸出 + 偏置 )</div>
-      <div class="quiz challenge" data-answer="1" data-ok="正確：線性接線性仍是線性；所以需要 ReLU 等非線性活化。" data=no="100 層「純加權和」= 還是一條直線。非線性才能擬合複雜關係。">
+      <div class="quiz challenge" data-answer="1" data-ok="正確：線性接線性仍是線性；所以需要 ReLU 等非線性活化。" data-no="100 層「純加權和」= 還是一條直線。非線性才能擬合複雜關係。">
         <div class="think-label">先想一想 · 點選答案</div>
         <p class="q">若只有加權和、沒有非線性，疊 100 層網路本質等於？</p>
         <div class="quiz-options">
@@ -198,7 +198,7 @@ opt.step()        # 梯度下降</code></pre>
         你會發現課文裡的公式，很多只是把「這裡的 loss + 梯度」翻成 RL 的故事。
       </div>
 
-      <div class="quiz" data-answer="1" data-ok="對——DQN 用網路估 Q，訓練仍是 loss + 梯度下降，只是目標來自 RL。" data=no="DQN 沒有魔法優化器；穩定技巧是 replay 與目標網路，不是另一套微積分。">
+      <div class="quiz" data-answer="1" data-ok="對——DQN 用網路估 Q，訓練仍是 loss + 梯度下降，只是目標來自 RL。" data-no="DQN 沒有魔法優化器；穩定技巧是 replay 與目標網路，不是另一套微積分。">
         <h3>快速檢核</h3>
         <div class="q">DQN 用神經網路時，訓練的核心是？</div>
         <div class="quiz-options">

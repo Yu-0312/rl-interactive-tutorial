@@ -13,7 +13,12 @@
   }
 
   function saveProgress(progress) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    // Safari 無痕模式或儲存空間滿時 setItem 會丟例外；進度存不了不該讓整頁壞掉
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    } catch {
+      /* ignore */
+    }
   }
 
   function markLessonDone(id, pct) {

@@ -36,7 +36,7 @@
         Critic 用 TD 學打分（像第 5 週）<br/>
         Actor 調整自己，<span class="hi">讓 Critic 對「我輸出的動作」打更高分</span>
       </div>
-      <div class="quiz challenge" data-answer="0" data-ok="對——Actor 依 Critic 分數調整；Critic 靠經驗打準。比純 REINFORCE 每步都有回饋。" data=no="不是演員自己猜、也不是評論家直接下場做動作；是打分 ↔ 調策略。">
+      <div class="quiz challenge" data-answer="0" data-ok="對——Actor 依 Critic 分數調整；Critic 靠經驗打準。比純 REINFORCE 每步都有回饋。" data-no="不是演員自己猜、也不是評論家直接下場做動作；是打分 ↔ 調策略。">
         <div class="think-label">生活比喻 · 點選答案</div>
         <p class="q">Actor-Critic 比較接近哪一種合作方式？</p>
         <div class="quiz-options">
@@ -170,7 +170,7 @@ def td3_targets(r, s2, done):
         </table>
       </div>
 
-      <div class="quiz" data-answer="1" data-ok="正確——兩個 Critic 取 min，直接壓低高估。" data=no="TD3 = 雙評論家 + 延遲 Actor + 目標平滑。">
+      <div class="quiz" data-answer="1" data-ok="正確——兩個 Critic 取 min，直接壓低高估。" data-no="TD3 = 雙評論家 + 延遲 Actor + 目標平滑。">
         <h3>快速檢核</h3>
         <div class="q">TD3 哪個技巧最直接對抗 Q 高估？</div>
         <div class="quiz-options">

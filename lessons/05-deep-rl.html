@@ -53,7 +53,7 @@
         <li><strong>資料太黏</strong>：連續幾步幾乎長一樣，網路容易只記得最近這一小段。</li>
         <li><strong>目標一直在動</strong>：你用網路自己算「下一格價值」，而權重每步都在改——像追一個一直跑走的靶子。</li>
       </ul>
-      <div class="quiz challenge" data-answer="1" data-ok="對——答案一直變，學生會愈學愈亂；DQN 用目標網路把學習目標暫時凍結。" data=no="目標若來自自己且不斷變動 → 不穩。解法不是換信仰，而是凍結目標網路。">
+      <div class="quiz challenge" data-answer="1" data-ok="對——答案一直變，學生會愈學愈亂；DQN 用目標網路把學習目標暫時凍結。" data-no="目標若來自自己且不斷變動 → 不穩。解法不是換信仰，而是凍結目標網路。">
         <div class="think-label">先想一想 · 點選答案</div>
         <p class="q">若老師改考卷的「標準答案」每秒都在變（來自學生自己的草稿），會怎樣？</p>
         <div class="quiz-options">
@@ -223,7 +223,7 @@ def train_step():
         </ul>
       </div>
 
-      <div class="quiz" data-answer="1" data-ok="對——目標網路凍結一份舊參數，讓學習目標暫時穩定。" data=no="回放負責資料別太黏；目標網路負責靶別亂跑。">
+      <div class="quiz" data-answer="1" data-ok="對——目標網路凍結一份舊參數，讓學習目標暫時穩定。" data-no="回放負責資料別太黏；目標網路負責靶別亂跑。">
         <h3>快速檢核</h3>
         <div class="q">目標網路的主要作用？</div>
         <div class="quiz-options">
